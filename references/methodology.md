@@ -239,7 +239,7 @@ reddit.com, twitter.com, x.com, linkedin.com, medium.com
 → Admiralty reliability **D–F**. Never cite as primary. Only admissible as social-signal pointers toward Tier 1/2 sources, in a clearly-labeled "Signals" subsection.
 
 ### Automatic blocklist
-SEO-farm heuristic: reject any result with `score < 0.3` plus unknown domain. Supplement with NewsGuard / MBFC ratings if integrated.
+SEO-farm heuristic (defense-in-depth below the main `score > 0.7` gate at `references/quality-gate.md` §Phase-2): if the 0.7 gate is ever relaxed for a known-scarce topic, reject any result with `score < 0.3` plus unknown domain. Under the default 0.7 gate this rule is subsumed. Supplement with NewsGuard / MBFC ratings if integrated.
 
 ---
 
