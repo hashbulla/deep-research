@@ -7,17 +7,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Claude_Code-Skill-7C3AED?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6Ii8+PHBhdGggZD0iTTIgMTdsMTAgNSAxMC01Ii8+PHBhdGggZD0iTTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Claude Code Skill">
-  <img src="https://img.shields.io/badge/Phases-7_+_Human_Gate-E04E2A?style=for-the-badge" alt="7 Phases">
-  <img src="https://img.shields.io/badge/Grading-Admiralty_A--F_×_1--6-0891B2?style=for-the-badge" alt="Admiralty">
-  <img src="https://img.shields.io/badge/Target-100%2B_Sources-059669?style=for-the-badge" alt="100+ Sources">
-  <img src="https://img.shields.io/badge/Retrieval-Tavily_MCP-1F2328?style=for-the-badge" alt="Tavily MCP">
-</p>
-
-<p align="center">
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License">
   <img src="https://img.shields.io/badge/Runtime-2--15_min-blue?style=flat-square" alt="Runtime">
-  <img src="https://img.shields.io/badge/Languages-Any-orange?style=flat-square" alt="Any Language">
+  <img src="https://img.shields.io/badge/Retrieval-Tavily_MCP_required-1F2328?style=flat-square" alt="Tavily MCP required">
 </p>
 
 ---
