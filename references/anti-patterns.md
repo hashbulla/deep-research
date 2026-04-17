@@ -32,7 +32,7 @@ Early agents preferred SEO content over academic PDFs. Defend by (a) keeping Tie
 Do not send every decomposed query simultaneously and then synthesize. The Perplexity loop is iterative: Phase-1 wide, Phase-3 rerank, Phase-4 narrow, Phase-5 CRAG refinement. Use the iteration; do not short-circuit to "one big search".
 
 ### B3. Naive domain-matching [R§2.2, R§11]
-Unicode homograph attacks (`аrxiv.org` with Cyrillic `а`) defeat substring domain matches. Every domain comparison normalizes to punycode first. Reject any URL whose normalized host does not exactly match an entry in `include_domains`.
+Unicode homograph attacks (`аrxiv.org` with Cyrillic `а`) defeat substring domain matches. Every domain comparison normalizes to punycode first. Reject any URL whose normalized host does not exactly match an entry in `include_domains`. Wildcard entries in `include_domains` (e.g., `*.gov`, `*.europa.eu`) match by suffix after punycode normalization; the suffix must be an exact label-aligned match (`data.gov` matches `*.gov`; `gov.example.com` does not).
 
 ### B4. The confidence trap [R§4.3 step 4]
 LLM fluency and self-reported confidence do **not** correlate with accuracy. Never upgrade a claim's Admiralty credibility based on synthesis confidence; only corroborating sources can upgrade credibility. Downgrade aggressively when a source is borderline.
