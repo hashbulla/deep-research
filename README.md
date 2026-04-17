@@ -329,6 +329,7 @@ graph LR
 
 ```
 ~/.claude/skills/deep-research/
+├── .claude/CLAUDE.md                      # Maintainer spec anchor — invariants, gotchas, conventions
 ├── SKILL.md                               # Orchestrator — 7 phases, human gate, provenance block
 ├── deep-research-report.md                # Methodology source of truth (cited below)
 └── references/
@@ -457,17 +458,26 @@ A curated domain tier registry (≈ 60 Tier 1 domains + ≈ 40 Tier 2) is embedd
 
 ```
 deep-research/
+├── .claude/CLAUDE.md                      # maintainer spec anchor
 ├── README.md                              # this file
 ├── LICENSE                                # MIT
 ├── SKILL.md                               # skill entry point
 ├── deep-research-report.md                # methodology source of truth
-└── references/
-    ├── methodology.md
-    ├── tool-routing.md
-    ├── report-structure.md
-    ├── quality-gate.md
-    ├── anti-patterns.md
-    └── research-plan-template.md
+├── references/
+│   ├── methodology.md
+│   ├── tool-routing.md
+│   ├── report-structure.md
+│   ├── quality-gate.md
+│   ├── anti-patterns.md
+│   └── research-plan-template.md
+├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts)
+├── tests/                                 # cross-reference / provenance / schema checks
+│   ├── check-cross-references.sh
+│   ├── check-provenance.sh
+│   ├── check-schema.sh
+│   ├── schema/{research-sources,research-evidence}.schema.json
+│   └── fixtures/ → examples/eu-ai-act-2026/*.json
+└── .github/workflows/validate.yml         # CI — runs the three checks on push
 ```
 
 ### Sync model
