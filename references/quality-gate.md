@@ -1,6 +1,6 @@
 # Quality gates — deterministic thresholds
 
-Applied at the end of Phase 4 (pre-synthesis check) and Phase 5 (post-synthesis grounding). Every gate is a hard threshold; falling below triggers a specific action. Do not relax these silently. If a gate cannot be met after max CRAG iterations, explicitly document the failure in the Methodology note and move affected claims to "Needs Verification".
+Applied at the end of Phase 4 (Synthesis) and Phase 5 (Grounding Validation). Every gate is a hard threshold; falling below triggers a specific action. Do not relax these silently. If a gate cannot be met after max CRAG iterations, explicitly document the failure in the Methodology note and move affected claims to "Needs Verification".
 
 ## Phase-2 filter gates (per individual source)
 
