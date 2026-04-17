@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hashbulla/deep-research/tests/schema/research-sources.schema.json",
+  "title": "research-sources.json",
+  "description": "Array of source records emitted by the deep-research skill. Derived from references/report-structure.md §3.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "url",
+      "url_canonical",
+      "url_punycode",
+      "title",
+      "publisher",
+      "author",
+      "published_date",
+      "accessed_date",
+      "domain_tier",
+      "admiralty_reliability",
+      "tavily_score",
+      "retrieval_tool",
+      "retrieval_query",
+      "sub_questions",
+      "primary_source",
+      "notes"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^S[0-9]{3,}$"
+      },
+      "url": {
+        "type": "string",
+        "format": "uri"
+      },
+      "url_canonical": {
+        "type": "string"
+      },
+      "url_punycode": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1
+      },
+      "publisher": {
+        "type": "string"
+      },
+      "author": {
+        "type": ["string", "null"]
+      },
+      "published_date": {
+        "type": ["string", "null"],
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      },
+      "accessed_date": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      },
+      "domain_tier": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "admiralty_reliability": {
+        "type": "string",
+        "enum": ["A", "B", "C", "D", "E", "F"]
+      },
+      "tavily_score": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "retrieval_tool": {
+        "type": "string",
+        "enum": [
+          "tavily_search",
+          "tavily_research",
+          "tavily_extract",
+          "tavily_map",
+          "tavily_crawl",
+          "WebSearch"
+        ]
+      },
+      "retrieval_query": {
+        "type": "string"
+      },
+      "sub_questions": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1
+      },
+      "primary_source": {
+        "type": "boolean"
+      },
+      "notes": {
+        "type": "string"
+      }
+    }
+  }
+}

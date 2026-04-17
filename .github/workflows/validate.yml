@@ -1,0 +1,28 @@
+name: validate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (for ajv-cli via npx)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check cross-references
+        run: bash tests/check-cross-references.sh
+
+      - name: Check provenance (SHA-256 of deep-research-report.md)
+        run: bash tests/check-provenance.sh
+
+      - name: Check JSON artifact schemas
+        run: bash tests/check-schema.sh tests/fixtures/research-sources.json tests/fixtures/research-evidence.json
