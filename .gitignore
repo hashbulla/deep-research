@@ -1,0 +1,24 @@
+# Claude Code local settings
+.claude/settings.local.json
+
+# Runtime artifacts produced by the skill
+research-plan.md
+research-report.md
+research-sources.json
+research-evidence.json
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Python / virtualenv (defensive)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node (defensive)
+node_modules/
