@@ -124,7 +124,13 @@ Claude Code discovers the skill automatically. No restart needed.
 | ![Tavily MCP](https://img.shields.io/badge/Tavily_MCP-required-1F2328?style=flat-square) | Every retrieval call. `WebSearch` is fallback only. | Visible in `/mcp` |
 | ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Only for installing from this repo | `gh auth status` |
 
-> No Tavily? The skill halts at Phase 0 with an explicit error. Register the Tavily MCP server (user scope) before re-running.
+> **Verify Tavily is registered before invoking:**
+>
+> ```bash
+> claude mcp list | grep tavily
+> ```
+>
+> If the grep returns no match, register the Tavily remote MCP server at user scope (see [Troubleshooting](#troubleshooting)). The skill halts at Phase 0 with an explicit error if `mcp__tavily__*` tools are not visible.
 
 ### Invocation flags
 
