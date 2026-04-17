@@ -480,7 +480,7 @@ deep-research/
 
 ### Sync model
 
-The canonical copy is this repository. `~/.claude/skills/deep-research` is a symlink to the local clone — editing here propagates to Claude Code immediately, no copy step required. If you prefer a real clone instead of a symlink, run `gh repo clone hashbulla/deep-research ~/.claude/skills/deep-research` and commit upstream from that directory.
+The canonical copy is this repository. If you symlink instead of clone (e.g., `ln -s "$PWD" ~/.claude/skills/deep-research` from a working directory that holds the repo), edits propagate to Claude Code immediately. The default `gh repo clone hashbulla/deep-research ~/.claude/skills/deep-research` install creates a regular clone — commit upstream from that directory to publish changes.
 
 ---
 
