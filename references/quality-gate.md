@@ -52,7 +52,9 @@ Applied at the end of Phase 4 (Synthesis) and Phase 5 (Grounding Validation). Ev
 
 ## Confidence-tag assignment rules (Phase 6)
 
-Applied deterministically to every claim:
+Applied deterministically to every claim.
+
+**Derivation of the counters below.** The three counters are computed at assignment time; they are **not** stored fields of `research-evidence.json`. For a given claim record, join its `supporting_source_ids` and `contradicting_source_ids` arrays against `research-sources.json` by `id` to resolve each referenced source's `domain_tier`. Then: `supporting_Tier12` counts distinct supporting source IDs whose joined `domain_tier ∈ {1, 2}`; `supporting_Tier1` counts those with `domain_tier = 1`; `contradicting` counts distinct contradicting source IDs with `domain_tier ∈ {1, 2}`. The persisted fields in `research-evidence.json` — `corroboration_count`, `independent_tier12_count`, `primary_source_present` — are described in `references/report-structure.md §4`.
 
 ```
 supporting_Tier12 = count of distinct supporting sources with domain_tier ∈ {1, 2}
