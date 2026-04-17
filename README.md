@@ -8,7 +8,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-Skill-7C3AED?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6Ii8+PHBhdGggZD0iTTIgMTdsMTAgNSAxMC01Ii8+PHBhdGggZD0iTTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Claude Code Skill">
-  <img src="https://img.shields.io/badge/Phases-6_+_Human_Gate-E04E2A?style=for-the-badge" alt="6 Phases">
+  <img src="https://img.shields.io/badge/Phases-7_+_Human_Gate-E04E2A?style=for-the-badge" alt="7 Phases">
   <img src="https://img.shields.io/badge/Grading-Admiralty_A--F_×_1--6-0891B2?style=for-the-badge" alt="Admiralty">
   <img src="https://img.shields.io/badge/Target-100%2B_Sources-059669?style=for-the-badge" alt="100+ Sources">
   <img src="https://img.shields.io/badge/Retrieval-Tavily_MCP-1F2328?style=for-the-badge" alt="Tavily MCP">
@@ -24,7 +24,7 @@
 
 Point it at a research question. It decomposes the question into orthogonal sub-questions, retrieves across a tiered domain registry with Tavily, grades every source on the NATO Admiralty 2×6 matrix, and hands you a report where every claim traces to a URL and an explicit confidence label. Exhaustive runs reach **100+ sources**, calibrated to Perplexity Deep Research output.
 
-> **Why does this exist?** LLM research agents confidently synthesize from SEO farms unless you force source discipline. Anthropic's own internal research system found that *"early agents consistently chose SEO-optimized content farms over academic PDFs, even when authoritative sources were retrievable."* The fix is not better prompting alone. It is a **source-grading harness that runs before the synthesis step** — tier registry, score threshold, Admiralty reliability, CRAAP authority check, LLM-as-judge rerank, CRAG grounding loop. This skill bakes all of that into a 6-phase pipeline with **one human gate** before any retrieval call fires.
+> **Why does this exist?** LLM research agents confidently synthesize from SEO farms unless you force source discipline. Anthropic's own internal research system found that *"early agents consistently chose SEO-optimized content farms over academic PDFs, even when authoritative sources were retrievable."* The fix is not better prompting alone. It is a **source-grading harness that runs before the synthesis step** — tier registry, score threshold, Admiralty reliability, CRAAP authority check, LLM-as-judge rerank, CRAG grounding loop. This skill bakes all of that into a 7-phase pipeline with **one human gate** before any retrieval call fires.
 
 ---
 
@@ -313,7 +313,7 @@ Six-phase orchestrator, single `SKILL.md` entry point, methodology externalized 
 
 ```mermaid
 graph LR
-    O["SKILL.md<br><i>Orchestrator (6 phases)</i>"]
+    O["SKILL.md<br><i>Orchestrator (7 phases)</i>"]
 
     O -. Phase 0 reads .-> M["references/methodology.md<br><i>Operational spec (report distillation)</i>"]
     O -. Phase 0 reads .-> T["references/tool-routing.md<br><i>Tavily binding table</i>"]
@@ -337,7 +337,7 @@ graph LR
 
 ```
 ~/.claude/skills/deep-research/
-├── SKILL.md                               # Orchestrator — 6 phases, human gate, provenance block
+├── SKILL.md                               # Orchestrator — 7 phases, human gate, provenance block
 ├── deep-research-report.md                # Methodology source of truth (cited below)
 └── references/
     ├── methodology.md                     # Full distillation — tier registry, Admiralty, CRAAP, CRAG
@@ -423,7 +423,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 
 | Status | Feature |
 |:------:|:--------|
-| ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 6-phase pipeline with human gate |
+| ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 7-phase pipeline with human gate |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | NATO Admiralty 2×6 grading with deterministic credibility assignment |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | CRAG grounding loop (2 iterations max, graceful Needs-Verification fallback) |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | Unicode homograph defense (punycode normalization of every domain) |

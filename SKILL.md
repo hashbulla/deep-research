@@ -20,7 +20,7 @@ description: Agentic multi-source deep research via Tavily MCP, calibrated to Pe
 
 ## Overview
 
-This skill runs intelligence-grade, multi-source research against the open web using the Tavily MCP suite. It implements the 6-phase architecture defined in `references/methodology.md` (derived from report §9): Query Architect → Broad Retrieval → Source Grading → Precision Rerank → Synthesis + Grounding → Confidence Annotation. Sources are graded on the NATO Admiralty A–F × 1–6 scale (report §4.1); claims without ≥2 independent Tier 1/2 corroborators are isolated in a "Needs Verification" section. The skill halts after Phase 0 for user approval before any Tavily call fires.
+This skill runs intelligence-grade, multi-source research against the open web using the Tavily MCP suite. It implements the 7-phase architecture defined in `references/methodology.md` (derived from report §9): Query Architect → Broad Retrieval → Source Grading → Precision Rerank → Deep Extract & Synthesis → Grounding Validation → Confidence Annotation. Sources are graded on the NATO Admiralty A–F × 1–6 scale (report §4.1); claims without ≥2 independent Tier 1/2 corroborators are isolated in a "Needs Verification" section. The skill halts after Phase 0 for user approval before any Tavily call fires.
 
 ## Trigger
 
