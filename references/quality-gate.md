@@ -7,7 +7,7 @@ Applied at the end of Phase 4 (Synthesis) and Phase 5 (Grounding Validation). Ev
 | Gate | Threshold | Action on failure |
 |---|---|---|
 | Tavily `score` | `> 0.7` | Drop source |
-| Domain tier | `≥ Tier 3` (factual use) / `≥ Tier 2` (primary claim support) | Drop for factual use, keep only as "Signals" for Tier 4 |
+| Domain tier | `≥ Tier 2` (factual use, primary claim support); Tier 3 admissible only when a corroborating Tier 1/2 source exists; Tier 4 → Signals subsection only | Drop if no corroborating Tier 1/2 source; Tier 4 kept only as "Signals" |
 | CRAAP Currency | Publication date within `--since` window (or within 3 years if not set) for time-sensitive sub-questions | Drop for time-sensitive sub-questions; keep for background |
 | CRAAP Authority | Domain tier identifiable AND publisher metadata present | Drop if both absent |
 | Duplicate canonical URL | `url_canonical` not already in working set | Drop duplicate, merge `sub_questions` array |
