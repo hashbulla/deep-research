@@ -33,7 +33,7 @@
       },
       "url": {
         "type": "string",
-        "format": "uri"
+        "pattern": "^https?://"
       },
       "url_canonical": {
         "type": "string"
