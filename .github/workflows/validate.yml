@@ -33,5 +33,10 @@ jobs:
       - name: Lint runtime scripts
         run: python3 -m py_compile scripts/*.py
 
-      - name: Run deterministic gates on the example
+      - name: Run deterministic gates on the example (harness layer 1)
         run: python3 scripts/verify_gates.py check-artifacts --sources examples/eu-ai-act-2026/research-sources.json --evidence examples/eu-ai-act-2026/research-evidence.json --length short
+
+      - name: Run LLM judge layers (harness layers 2+, maintainer secret only — skips gracefully)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bash scripts/eval_harness/run_ci_judges.sh

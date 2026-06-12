@@ -46,5 +46,5 @@ Review each asset on its cadence; log the re-validation (or the drift found) as 
 | Tier registry (`references/methodology.md §6`) | Quarterly | 2026-04-17 | Domains rot: acquisitions, paywall changes, editorial collapse. |
 | `examples/eu-ai-act-2026/` fixture | Re-validate when gates change | 2026-04-17 | CI catches drift automatically since 0.2.0. |
 | MBFC static dataset (`~/.claude/deep-research/mbfc-overlay.json`, user-scope) | 4-weekly | 2026-06-12 (format + rules; dataset seeded at first use) | User-scope, not in the repo: bulk MBFC redistribution in a public repo is a licensing risk. Rules in methodology §6 "Credibility overlay". |
-| Perplexity benchmark test-set (planned, AI-124) | 4-weekly | — | The comparator itself drifts; a frozen test-set ages. |
+| Perplexity benchmark test-set (`evals/benchmark-testset.jsonl`) | 4-weekly | 2026-06-12 (v1, 5 questions, date-pinned) | The comparator itself drifts; a frozen test-set ages. Protocol in `scripts/eval_harness/README.md`. |
 | `experts.yaml` seed (user-scope, planned, AI-121) | Quarterly | — | Lives outside the repo (PII); renormalization rule documented in github-research.md when created. |

@@ -29,6 +29,8 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `references/github-research.md` | GitHub SOTA-repo discovery pipeline (sharding, expert prior, ecosyste.ms, measurement protocol) | Conditional GitHub source |
 | `references/academic-research.md` | Scholarly pipeline (OpenAlex ‖ arXiv → S2 → expansion → legal-OA), dual-track ranking, Exa/Valyu decision | Conditional academic source |
 | `scripts/academic_graph.py` | Dual-track paper ranking + BibTeX/RIS export (scoring only, zero network) | Academic reading-list ranking |
+| `scripts/eval_harness/` | Five-layer verification harness: layer-1 = verify_gates.py; versioned judge prompts (entailment/adversarial/completeness); `run_ci_judges.sh` (maintainer-secret-gated, skips gracefully) | AI-124 permanent verification; per-run vs CI mapping per rigor profile |
+| `evals/sycophancy-probes.jsonl` + `evals/benchmark-testset.jsonl` | Versioned false-premise probes + frozen Perplexity-benchmark questions (4-weekly cadence) | Harness layers 5 + benchmark |
 | `references/model-tiers.md` | Model-tier policy + subagent override mechanics (D-4) | Tier selection |
 | `tests/check-cross-references.sh` | Walks markdown links + `[R§n]`/`[R§n.m]` back-refs (methodology, anti-patterns, SKILL.md prose), exits non-zero on miss | Link integrity |
 | `tests/check-example-invariants.sh` | jq cross-file validation of the example sources/evidence pair (IDs, cascade, routing, counts) | Example conformance to the skill's own gates |
