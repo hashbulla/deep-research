@@ -352,7 +352,8 @@ graph LR
 ├── deep-research-report.md                # Methodology source of truth (cited below)
 ├── scripts/
 │   ├── verify_gates.py                    # Deterministic gate verification (stdlib-only, zero network)
-│   └── github_rank.py                     # Composite GitHub-repo ranking (scoring only, zero network)
+│   ├── github_rank.py                     # Composite GitHub-repo ranking (scoring only, zero network)
+│   └── academic_graph.py                  # Dual-track paper ranking + BibTeX/RIS export (zero network)
 └── references/
     ├── methodology.md                     # Full distillation — tier registry, Admiralty, CRAAP, CRAG
     ├── tool-routing.md                    # Tavily MCP tool selection per intent
@@ -362,6 +363,7 @@ graph LR
     ├── research-plan-template.md          # Phase 0 scaffold
     ├── model-tiers.md                     # Model-tier policy (opus default, fable opt-in)
     ├── github-research.md                 # GitHub SOTA-repo discovery (sharding, expert prior, fake-star gate)
+    ├── academic-research.md               # Scholarly pipeline (open graph, dual-track, OA-only ingestion)
     └── examples.md                        # Worked examples (read on demand)
 ```
 
@@ -490,7 +492,8 @@ deep-research/
 ├── deep-research-report.md                # methodology source of truth
 ├── scripts/
 │   ├── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
-│   └── github_rank.py                     # composite GitHub-repo ranking (scoring only, zero network)
+│   ├── github_rank.py                     # composite GitHub-repo ranking (scoring only, zero network)
+│   └── academic_graph.py                  # dual-track paper ranking + BibTeX/RIS export (zero network)
 ├── experts.yaml.example                   # anonymous template — the real seed lives user-scope, outside the repo
 ├── references/
 │   ├── methodology.md
