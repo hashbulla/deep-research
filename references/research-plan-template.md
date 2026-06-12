@@ -55,6 +55,10 @@ Written to `research-plan.md` at the end of Phase 0. **User must approve before 
 - <N> parallel `tavily_search` calls (advanced depth)
 - <M> `tavily_map` calls (if any sub-question needs domain-structure discovery)
 
+**Conditional sources (declared here, or "none"):**
+- Context7: <library_id@version per gated sub-question, e.g. "/vercel/next.js@15 (sq3)" — only when the technical-profile + named-dependency + integrate/configure/debug/migrate/understand gating passes; availability status; or "not applicable">
+- <other optional sources, with availability status and Tavily degradation noted if unavailable>
+
 **Phase 4 (deep extract & synthesis):**
 - <K> `tavily_research model=mini|pro` calls
 - <L> `tavily_extract extract_depth=advanced` calls on key URLs
