@@ -53,7 +53,46 @@
   },
   {
     "claim_id": "C005",
-    "claim_text": "Article 2(5g) exempts free and open-source GPAI models from transparency requirements of Articles 53(1)(a) and (b) only when parameters, architecture details, and usage information are publicly available; exemption is void above the systemic-risk threshold.",
+    "claim_text": "The GPAI provisions apply to any general-purpose AI model placed on the EU market, regardless of where the provider is established.",
+    "section": "1. GPAI provisions in force in 2026",
+    "supporting_source_ids": ["S001", "S010"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
+    "corroboration_count": 2,
+    "independent_tier12_count": 2,
+    "primary_source_present": true,
+    "notes": ""
+  },
+  {
+    "claim_id": "C006",
+    "claim_text": "The AI Office issued its first GPAI guidance letters in Q1 2026, opening the enforcement phase for the transparency obligations.",
+    "section": "1. GPAI provisions in force in 2026",
+    "supporting_source_ids": ["S013", "S015"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
+    "corroboration_count": 2,
+    "independent_tier12_count": 2,
+    "primary_source_present": true,
+    "notes": ""
+  },
+  {
+    "claim_id": "C007",
+    "claim_text": "The European Parliament's research service expects the Commission to open formal proceedings against at least one GPAI provider before the end of 2026.",
+    "section": "1. GPAI provisions in force in 2026",
+    "supporting_source_ids": ["S013"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 2,
+    "label": "PROBABLY TRUE",
+    "corroboration_count": 1,
+    "independent_tier12_count": 1,
+    "primary_source_present": true,
+    "notes": "Single Tier 1 source, uncorroborated — credibility 2 per the §4.1 cascade (supporting_Tier1 ≥ 1, no contradictor). Inline-tagged in the main body; excluded from the executive summary."
+  },
+  {
+    "claim_id": "C008",
+    "claim_text": "Article 2(5g) exempts free and open-source GPAI models from transparency requirements of Articles 53(1)(a) and (b) only when parameters, architecture details, and usage information are publicly available.",
     "section": "2. The open-source exemption (Article 2(5g))",
     "supporting_source_ids": ["S001", "S003"],
     "contradicting_source_ids": [],
@@ -65,33 +104,85 @@
     "notes": ""
   },
   {
-    "claim_id": "C006",
+    "claim_id": "C009",
+    "claim_text": "The Article 2(5g) exemption is void for any model meeting the systemic-risk threshold of 10^25 FLOPs; those models remain subject to the full Article 55 obligations regardless of licensing.",
+    "section": "2. The open-source exemption (Article 2(5g))",
+    "supporting_source_ids": ["S001", "S002", "S010"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
+    "corroboration_count": 3,
+    "independent_tier12_count": 3,
+    "primary_source_present": true,
+    "notes": ""
+  },
+  {
+    "claim_id": "C010",
+    "claim_text": "Comparative analysis finds the EU's open-source carve-out narrower than the regulatory treatment of open models in the US and UK frameworks.",
+    "section": "2. The open-source exemption (Article 2(5g))",
+    "supporting_source_ids": ["S014", "S016"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
+    "corroboration_count": 2,
+    "independent_tier12_count": 2,
+    "primary_source_present": false,
+    "notes": ""
+  },
+  {
+    "claim_id": "C011",
     "claim_text": "Meta has positioned Llama as compliant under Article 2(5g), Mistral has issued a European regulatory alignment statement, and HuggingFace released model-card templates aligned to the Code of Practice.",
     "section": "3. Provider responses",
     "supporting_source_ids": ["S006", "S007", "S008"],
     "contradicting_source_ids": [],
-    "admiralty_credibility": 2,
-    "label": "PROBABLY TRUE",
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
     "corroboration_count": 3,
     "independent_tier12_count": 3,
     "primary_source_present": false,
-    "notes": "Three independent Tier 2 provider statements; no contradiction."
+    "notes": "Three independent Tier 2 provider statements, no contradictor — credibility 1 per the §4.1 cascade (supporting_Tier12 ≥ 2)."
   },
   {
-    "claim_id": "C007",
+    "claim_id": "C012",
+    "claim_text": "Press coverage of the first enforcement letters reported no immediate sanctions against open-source providers.",
+    "section": "3. Provider responses",
+    "supporting_source_ids": ["S013", "S015"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
+    "corroboration_count": 2,
+    "independent_tier12_count": 2,
+    "primary_source_present": true,
+    "notes": ""
+  },
+  {
+    "claim_id": "C013",
+    "claim_text": "Mistral's alignment statement commits to publishing training-data summaries beyond the exemption's minimum requirements.",
+    "section": "3. Provider responses",
+    "supporting_source_ids": ["S008"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 3,
+    "label": "POSSIBLY TRUE",
+    "corroboration_count": 1,
+    "independent_tier12_count": 1,
+    "primary_source_present": false,
+    "notes": "Single Tier 2 source, uncorroborated — credibility 3 per the §4.1 cascade (supporting_Tier12 = 1, no contradictor). Inline-tagged in the main body."
+  },
+  {
+    "claim_id": "C014",
     "claim_text": "The scope of \"sufficiently detailed summary\" of training data under Article 53(1)(d) remains disputed: the Commission's July 2025 template is read by Meta as compatible with existing Llama disclosures, and by Mozilla as requiring substantially more granular dataset provenance than any current open-source release provides.",
     "section": "Contradictions & open debates",
     "supporting_source_ids": ["S005", "S006", "S009"],
     "contradicting_source_ids": [],
-    "admiralty_credibility": 3,
-    "label": "POSSIBLY TRUE",
+    "admiralty_credibility": 1,
+    "label": "CONFIRMED",
     "corroboration_count": 3,
     "independent_tier12_count": 3,
     "primary_source_present": true,
-    "notes": "Readings differ; axis expected to resolve after Q3 2026 Code of Practice clarifications (S011)."
+    "notes": "Meta-claim about the existence and shape of the dispute — confirmed by all three sources. The competing readings themselves are presented side by side, unresolved; expected to resolve after the Q3 2026 Code of Practice clarifications (S011)."
   },
   {
-    "claim_id": "C008",
+    "claim_id": "C015",
     "claim_text": "Compliance costs exceed €1M for small open-source GPAI providers.",
     "section": "Needs Verification",
     "supporting_source_ids": ["S012"],
@@ -101,6 +192,6 @@
     "corroboration_count": 1,
     "independent_tier12_count": 0,
     "primary_source_present": false,
-    "notes": "Single Tier 3 trade-press source; no regulatory or independent analyst corroboration. Follow-up required from Gartner/McKinsey or Commission impact assessment."
+    "notes": "Only Tier 3 support — credibility 6 per the §4.1 cascade. Follow-up required from Gartner/McKinsey or Commission impact assessment."
   }
 ]

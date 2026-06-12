@@ -44,8 +44,8 @@ research-evidence.json   # claim → source mapping, credibility 1–6
 ```markdown
 # Impact of the EU AI Act on open-source model providers in 2026
 
-> Research date: 2026-04-17 · Length: standard
-> Source count: 42/71 · Tier 1/2 share: 86% · Median date: 2025-09-14
+> Research date: 2026-04-17 · Length: short
+> Source count: 16/28 · Tier 1/2 share: 94% · Median date: 2025-09-08
 
 ## Executive summary
 
@@ -131,6 +131,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | ![Opus](https://img.shields.io/badge/Opus/Sonnet_4.6%2B-recommended-E04E2A?style=flat-square) | Synthesis quality and Admiralty discipline benefit from top-tier reasoning | `/model opus` |
 | ![Tavily MCP](https://img.shields.io/badge/Tavily_MCP-required-1F2328?style=flat-square) | Every retrieval call. `WebSearch` is fallback only. | Visible in `/mcp` |
 | ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Only for installing from this repo | `gh auth status` |
+| ![python3](https://img.shields.io/badge/Python_3.10%2B-required-3776AB?style=flat-square) | Runs `scripts/verify_gates.py` (stdlib-only, zero network) for deterministic gate verification | `python3 --version` |
 
 > **Verify Tavily is registered before invoking:**
 >
@@ -284,16 +285,16 @@ flowchart LR
     style Label fill:#059669,stroke:#059669,color:#fff
 ```
 
-Credibility rules are deterministic — no LLM fluency-weighted guessing:
+Credibility rules are deterministic — no LLM fluency-weighted guessing. The table renders the normative precedence cascade in [`references/methodology.md §4.1`](references/methodology.md) (first matching row wins; the cascade wins on any divergence):
 
-| Credibility | Condition | Label |
+| Credibility | Condition (first match wins) | Label |
 |:-----------:|:----------|:------|
-| 1 | ≥2 independent Tier 1/2 sources agree, no contradiction | **CONFIRMED** |
-| 2 | 1 Tier 1 source, or ≥2 Tier 2 sources agree | **PROBABLY TRUE** |
-| 3 | Single Tier 1/2 source, or Tier 2+3 agree | **POSSIBLY TRUE** |
-| 4 | Contradicted by ≥1 equally authoritative source | **DOUBTFUL** |
+| 1 | ≥2 independent Tier 1/2 sources agree, no Tier 1/2 contradictor | **CONFIRMED** |
+| 2 | ≥1 Tier 1 source and no contradictor; or ≥2 Tier 1/2 with exactly 1 contradictor | **PROBABLY TRUE** |
+| 3 | Single Tier 1/2 source, no contradictor (Tier 3 corroboration does not upgrade) | **POSSIBLY TRUE** |
+| 4 | ≥1 Tier 1/2 support and ≥1 equally authoritative contradictor | **DOUBTFUL** |
 | 5 | Contradicted by ≥2 Tier 1/2 sources | **IMPROBABLE** |
-| 6 | Single Tier 3/4 source, no corroboration | **UNVERIFIED** |
+| 6 | Only Tier 3/4 support, or zero supporting sources | **UNVERIFIED** |
 
 Labels 4/5/6 cannot appear in the main report body — they route to the **Needs Verification** section with an explicit reason.
 
@@ -315,7 +316,7 @@ Full thresholds in [`references/quality-gate.md`](references/quality-gate.md).
 
 ## Architecture
 
-Six-phase orchestrator, single `SKILL.md` entry point, methodology externalized into reference files loaded on demand.
+Seven-phase orchestrator, single `SKILL.md` entry point, methodology externalized into reference files loaded on demand.
 
 ```mermaid
 graph LR
@@ -346,13 +347,16 @@ graph LR
 ├── .claude/CLAUDE.md                      # Maintainer spec anchor — invariants, gotchas, conventions
 ├── SKILL.md                               # Orchestrator — 7 phases, human gate, provenance block
 ├── deep-research-report.md                # Methodology source of truth (cited below)
+├── scripts/
+│   └── verify_gates.py                    # Deterministic gate verification (stdlib-only, zero network)
 └── references/
     ├── methodology.md                     # Full distillation — tier registry, Admiralty, CRAAP, CRAG
     ├── tool-routing.md                    # Tavily MCP tool selection per intent
     ├── report-structure.md                # research-report.md structure + JSON schemas
     ├── quality-gate.md                    # Deterministic thresholds, CRAG triggers
     ├── anti-patterns.md                   # Non-negotiables (no fabricated URLs, no WebSearch, etc.)
-    └── research-plan-template.md          # Phase 0 scaffold
+    ├── research-plan-template.md          # Phase 0 scaffold
+    └── examples.md                        # Worked examples (read on demand)
 ```
 
 ### Design decisions
@@ -365,6 +369,7 @@ graph LR
 | Pre-context filtering | Inline Claude reasoning on Tavily results | Anthropic's Dynamic Filtering is API-side only; inline filtering achieves equivalent discipline |
 | Source grading | NATO Admiralty 2×6 | Intelligence-grade provenance, usable by humans, deterministic |
 | Contradiction handling | Dedicated report section | Report §1 stage 4 — never silent, never auto-resolve between equally authoritative sources |
+| Gate verification | `scripts/verify_gates.py` (stdlib-only, zero network) | Counts, ratios, medians, cascade conformance, and the CWD-report SHA-256 are script-verified at runtime — LLM-self-reported metrics are not gates |
 
 ---
 
@@ -391,13 +396,13 @@ Research endpoint is capped at 20 req/min. The skill backs off at 30s → 60s �
 <details>
 <summary><strong>Exhaustive run came back with &lt; 100 sources</strong></summary>
 
-The skill expands the allowlist to the Tier 1+2 union and adds 2–4 contextual/recency sub-questions automatically before proceeding to Phase 4. If it still falls short, the Methodology note documents why (e.g., narrow topic, paywall-dominant domain). The 100+ target is a quality calibration, not a hard contract.
+The skill runs a single expansion round — allowlist broadened to the Tier 1+2 union, 2–4 contextual/recency sub-questions added — before proceeding to Phase 4. If it still falls short after that round, it proceeds anyway and the Methodology note documents why (e.g., narrow topic, paywall-dominant domain). The 100+ target is a quality calibration, not a hard contract.
 </details>
 
 <details>
 <summary><strong>A claim I expected to see ended up in Needs Verification</strong></summary>
 
-The corroboration threshold is `--min-corroboration 2` by default. A single Tier 1 source with no second independent corroborator yields credibility 3, which is still in the main body. Credibility 4–6 (contradicted, single Tier 3/4, etc.) routes to Needs Verification. Raise `--min-corroboration 3` for stricter runs, or examine `research-evidence.json` for the exact support graph.
+The corroboration threshold is `--min-corroboration 2` by default. A single Tier 1 source with no second independent corroborator yields credibility 2 (PROBABLY TRUE); a single Tier 2 source yields credibility 3 — both still in the main body with inline tags. Credibility 4–6 (contradicted, only Tier 3/4 support, etc.) routes to Needs Verification. Raise `--min-corroboration 3` for stricter runs, or examine `research-evidence.json` for the exact support graph.
 </details>
 
 <details>
@@ -420,7 +425,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 |:-----|:----|
 | **Tune the tier registry** | Edit [`references/methodology.md §6`](references/methodology.md). Add domains to Tier 1/2; rebuild the include_domains preview at the top of the plan template. |
 | **Adjust quality gates** | Edit [`references/quality-gate.md`](references/quality-gate.md). Thresholds are deterministic; raising groundedness to 0.98 simply triggers more CRAG iterations. |
-| **Add a sub-question category** | Edit `SKILL.md` Phase 0 step 3 and mirror in [`references/research-plan-template.md`](references/research-plan-template.md). |
+| **Add a sub-question category** | Edit `SKILL.md` Phase 0 step 4 and mirror in [`references/research-plan-template.md`](references/research-plan-template.md). |
 | **Change default length calibration** | Edit the "Length calibration" table in [`references/methodology.md`](references/methodology.md). |
 | **Swap Tavily for another MCP** | Edit [`references/tool-routing.md`](references/tool-routing.md) and the Phase 1 / Phase 4 call templates in `SKILL.md`. Keep the grading phases intact — they are MCP-agnostic. |
 
@@ -477,6 +482,8 @@ deep-research/
 ├── LICENSE                                # MIT
 ├── SKILL.md                               # skill entry point
 ├── deep-research-report.md                # methodology source of truth
+├── scripts/
+│   └── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
 ├── references/
 │   ├── methodology.md
 │   ├── tool-routing.md
@@ -484,11 +491,15 @@ deep-research/
 │   ├── quality-gate.md
 │   ├── anti-patterns.md
 │   └── research-plan-template.md
-├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts)
-├── tests/                                 # cross-reference / provenance / schema checks
+├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts, gate-conformant)
+├── evals/                                 # loading / progressive / e2e fixtures + rubric
+├── CHANGELOG.md                           # semver release history (append-only)
+├── gotchas-log.md                         # maintainer traps + perishable-asset cadences
+├── tests/                                 # cross-reference / provenance / schema / invariant checks
 │   ├── check-cross-references.sh
 │   ├── check-provenance.sh
 │   ├── check-schema.sh
+│   ├── check-example-invariants.sh
 │   ├── schema/{research-sources,research-evidence}.schema.json
 │   └── fixtures/ → examples/eu-ai-act-2026/*.json
 └── .github/workflows/validate.yml         # CI — runs the three checks on push

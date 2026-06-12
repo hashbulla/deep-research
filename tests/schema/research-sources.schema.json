@@ -69,9 +69,10 @@
         "enum": ["A", "B", "C", "D", "E", "F"]
       },
       "tavily_score": {
-        "type": "number",
+        "type": ["number", "null"],
         "minimum": 0,
-        "maximum": 1
+        "maximum": 1,
+        "description": "Relevance score from tavily_search. Null when the retrieval tool does not return a score (tavily_extract, tavily_map, tavily_crawl, WebSearch fallback) — never fabricate one."
       },
       "retrieval_tool": {
         "type": "string",

@@ -8,7 +8,7 @@
 
 **Classification:** mixed (regulatory / technical / current-affairs)
 **Tier profile:** current-affairs + technical — Tier 1 gov + Tier 2 tech labs + Tier 2 press
-**Length:** standard
+**Length:** short
 **Output language:** en (inferred from question)
 **Recency window:** last 3 years (default — no `--since` provided)
 **Min corroboration:** 2 (default)
@@ -17,16 +17,15 @@
 
 | ID | Category | Sub-question | Tavily tool | include_domains (preview) | time_range / start_date | Target candidates |
 |---|---|---|---|---|---|---|
-| sq1 | factual | What GPAI provisions took effect in 2026 under the EU AI Act? | tavily_search | europa.eu, ec.europa.eu, eur-lex.europa.eu, digital-strategy.ec.europa.eu | — | 10 |
-| sq2 | factual | Which open-source exemptions exist and how are they defined (Article 2(5g))? | tavily_search | eur-lex.europa.eu, ec.europa.eu + aclanthology.org | — | 10 |
-| sq3 | contextual | How have major open-source model providers (Meta, Mistral, HuggingFace) responded? | tavily_search | ai.meta.com, mistral.ai, huggingface.co + reuters.com, ft.com | — | 10 |
-| sq4 | contextual | What compliance costs have been reported for open-source providers? | tavily_search | reuters.com, ft.com, gartner.com, mckinsey.com | — | 10 |
-| sq5 | contradictory | What critiques of the open-source exemption have been published? | tavily_search | mozilla.org, eff.org + Tier 2 press | — | 10 |
-| sq6 | recency | What enforcement actions or guidance documents were issued since 2026-01-01? | tavily_search | digital-strategy.ec.europa.eu, ec.europa.eu | time_range=year, start_date=2026-01-01 | 10 |
+| sq1 | factual | What GPAI provisions took effect under the EU AI Act and what do they require? | tavily_search | europa.eu, ec.europa.eu, eur-lex.europa.eu, digital-strategy.ec.europa.eu | — | 8 |
+| sq2 | factual | Which open-source exemptions exist and how are they defined (Article 2(5g))? | tavily_search | eur-lex.europa.eu, ec.europa.eu, oecd.org | — | 8 |
+| sq3 | contextual | How have major open-source model providers (Meta, Mistral, HuggingFace) responded? | tavily_search | ai.meta.com, mistral.ai, huggingface.co + reuters.com, apnews.com, ft.com | — | 8 |
+| sq4 | contradictory | What critiques and cost concerns about the open-source exemption have been published? | tavily_search | mozilla.org, oecd.org + Tier 2/3 press with corroboration | — | 8 |
+| sq5 | recency | What enforcement actions or guidance documents were issued since 2026-01-01? | tavily_search | digital-strategy.ec.europa.eu, ec.europa.eu, europarl.europa.eu | time_range=year, start_date=2026-01-01 | 8 |
 
 ## 3. Domain allowlist / blocklist
 
-**Baseline from tier profile:** eur-lex.europa.eu, europa.eu, ec.europa.eu, digital-strategy.ec.europa.eu, *.gov, ai.meta.com, mistral.ai, huggingface.co, anthropic.com, reuters.com, apnews.com, ft.com, theguardian.com, lemonde.fr, gartner.com, mckinsey.com, mozilla.org, eff.org …+12 more.
+**Baseline from tier profile:** eur-lex.europa.eu, europa.eu, ec.europa.eu, digital-strategy.ec.europa.eu, europarl.europa.eu, oecd.org, *.gov, ai.meta.com, mistral.ai, huggingface.co, anthropic.com, reuters.com, apnews.com, ft.com, economist.com, theguardian.com, lemonde.fr, gartner.com, mckinsey.com, mozilla.org …+10 more.
 
 **User `--domains` additions:** none
 **User `--exclude` additions:** none
@@ -36,16 +35,16 @@
 ## 4. Retrieval plan
 
 **Phase 1 (broad recall):**
-- 6 parallel `tavily_search` calls (advanced depth, include_raw_content=true, max_results=10)
+- 5 parallel `tavily_search` calls (advanced depth, include_raw_content=true, max_results=8)
 - 0 `tavily_map` calls (not required for this question)
 
 **Phase 4 (deep extract & synthesis):**
-- 6 `tavily_research model=mini` calls (one per sub-question for narrow synthesis)
-- 12 `tavily_extract extract_depth=advanced` calls on high-value URLs surfaced during rerank (OJ regulation text, Code of Practice, Article 2(5g) scholarly commentary, key press analyses)
+- 3 `tavily_research model=mini` calls (narrow synthesis on sq1, sq4, sq5)
+- 6 `tavily_extract extract_depth=advanced` calls on high-value URLs surfaced during rerank (OJ regulation text, Code of Practice, EPRS enforcement briefing, OECD comparative note, key press analyses)
 
-**Estimated total Tavily calls:** 24 (6 search + 6 research-mini + 12 extract)
-**Estimated runtime:** 2 minutes
-**Rate-limit headroom:** peak 12 calls/min; well under 20 req/min research-endpoint ceiling
+**Estimated total Tavily calls:** 14 (5 search + 3 research-mini + 6 extract)
+**Estimated runtime:** ~90 seconds
+**Rate-limit headroom:** peak 8 calls/min; well under 20 req/min research-endpoint ceiling
 
 ## 5. Expected contradiction axes
 
@@ -60,7 +59,7 @@ Successful completion requires **all** of:
 - [ ] Source quality ≥ 0.80 Tier 1/2
 - [ ] Coverage ≥ 0.90 of sub-questions
 - [ ] Corroboration rate ≥ 0.80
-- [ ] Source-count floor: 35 (standard length)
+- [ ] Source-count floor: 15 (short length)
 - [ ] Zero pending CRAG iterations
 
 Failure to meet any gate routes affected claims to "Needs Verification" and documents the gap in the Methodology note.

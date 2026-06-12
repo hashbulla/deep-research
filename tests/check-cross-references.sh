@@ -65,23 +65,50 @@ for f in "${MD_FILES[@]}"; do
   done < <(grep -oE '\]\([^)]+\)' "$f" | sed -E 's/^\]\(//; s/\)$//')
 done
 
-# --- Pass 2: [R§n] and [R§n.m] back-references in references/methodology.md ---
+# --- Pass 2: [R§n] / [R§n.m] back-references, resolved at full depth ---
+# Sources scanned: references/methodology.md AND references/anti-patterns.md.
+# Top-level refs (§n) must match a "## n" heading; sub-section refs (§n.m)
+# must match a "### n.m" heading in deep-research-report.md.
 
-METH="references/methodology.md"
 REPORT="deep-research-report.md"
 
-if [ -f "$METH" ] && [ -f "$REPORT" ]; then
-  # Collect distinct top-level section numbers referenced, e.g. §1, §2 ... §11.
-  while IFS= read -r ref; do
-    # ref looks like "R§3" or "R§3.1"; extract the top-level number.
-    top="$(echo "$ref" | sed -E 's/^R§([0-9]+).*$/\1/')"
-    check_count=$((check_count + 1))
-    # Report headings follow "## <n>" or "## <n>." convention.
-    if ! grep -qE "^##[[:space:]]+${top}([.[:space:]]|$)" "$REPORT"; then
-      echo "BROKEN BACKREF: references/methodology.md cites [R§${top}] but no '## ${top}' section exists in ${REPORT}" >&2
+check_section_ref() {
+  local source_file="$1"
+  local ref="$2"   # e.g. "3" or "3.1"
+  check_count=$((check_count + 1))
+  if [[ "$ref" == *.* ]]; then
+    local top="${ref%%.*}"
+    if ! grep -qE "^###[[:space:]]+${ref//./\\.}([.[:space:]]|$)" "$REPORT"; then
+      echo "BROKEN BACKREF: $source_file cites [R§${ref}] but no '### ${ref}' sub-section exists in ${REPORT}" >&2
+      fail_count=$((fail_count + 1))
+    elif ! grep -qE "^##[[:space:]]+${top}([.[:space:]]|$)" "$REPORT"; then
+      echo "BROKEN BACKREF: $source_file cites [R§${ref}] but parent '## ${top}' section is missing in ${REPORT}" >&2
       fail_count=$((fail_count + 1))
     fi
-  done < <(grep -oE '\[R§[0-9]+(\.[0-9]+)?\]' "$METH" | sed -E 's/^\[//; s/\]$//' | sort -u)
+  else
+    if ! grep -qE "^##[[:space:]]+${ref}([.[:space:]]|$)" "$REPORT"; then
+      echo "BROKEN BACKREF: $source_file cites [R§${ref}] but no '## ${ref}' section exists in ${REPORT}" >&2
+      fail_count=$((fail_count + 1))
+    fi
+  fi
+}
+
+if [ -f "$REPORT" ]; then
+  for src in references/methodology.md references/anti-patterns.md; do
+    [ -f "$src" ] || continue
+    while IFS= read -r ref; do
+      check_section_ref "$src" "$ref"
+    done < <(grep -oE '\[R§[0-9]+(\.[0-9]+)?(,[[:space:]]*R§[0-9]+(\.[0-9]+)?)*\]' "$src" \
+             | grep -oE 'R§[0-9]+(\.[0-9]+)?' | sed -E 's/^R§//' | sort -u)
+  done
+
+  # SKILL.md prose references: "report §n", "report §n.m", incl. "and §k" chains.
+  if [ -f "SKILL.md" ]; then
+    while IFS= read -r ref; do
+      check_section_ref "SKILL.md" "$ref"
+    done < <(grep -oE 'report §[0-9]+(\.[0-9]+)?([[:space:]]+and[[:space:]]+§[0-9]+(\.[0-9]+)?)*' SKILL.md \
+             | grep -oE '§[0-9]+(\.[0-9]+)?' | sed -E 's/^§//' | sort -u)
+  fi
 fi
 
 echo "Checked ${check_count} references. Failures: ${fail_count}."

@@ -93,7 +93,7 @@ Array of source records. One record per cited URL.
 - `accessed_date` — ISO 8601 (today).
 - `domain_tier` — integer 1–4.
 - `admiralty_reliability` — one of `A`, `B`, `C`, `D`, `E`, `F`.
-- `tavily_score` — float 0–1.
+- `tavily_score` — float 0–1, or `null` when the retrieval tool does not return a score (`tavily_extract`, `tavily_map`, `tavily_crawl`, `WebSearch` fallback). Never fabricate a score; a null-score source documents its admission path in `notes`.
 - `retrieval_tool` — which `mcp__tavily__*` surfaced this result (or `WebSearch` on fallback).
 - `retrieval_query` — exact query string used.
 - `sub_questions` — array of sub-question IDs referenced in the plan.
@@ -142,4 +142,4 @@ Array of claim records. One record per distinct factual claim in `research-repor
 - No `research-evidence.json` claim with `admiralty_credibility ≤ 3` is absent from the main report body (should appear in its sub-question section).
 - No `research-evidence.json` claim with `admiralty_credibility ≥ 4` appears in the main body — all must be under "Needs Verification".
 - Median `published_date` of cited sources is within `--since` (if set) or within the last 3 years (if not set).
-- `research-sources.json` contains no record with `tavily_score < 0.7` (unless the record is tagged in `notes` as a recency-critical Tier 1 source manually retained).
+- `research-sources.json` contains no record with a non-null `tavily_score < 0.7` (unless the record is tagged in `notes` as a recency-critical Tier 1 source manually retained). Null-score records (score-less retrieval tools) document their admission path in `notes`.

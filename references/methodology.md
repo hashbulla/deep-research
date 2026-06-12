@@ -78,10 +78,10 @@ results = tavily_search(query, search_depth="advanced", max_results=10)
 trusted = [r for r in results
            if r.score > 0.7
            and canonical(r.url) not in blocked_urls
-           and domain_tier(r.url) >= TIER_2]
+           and domain_tier(r.url) in (TIER_1, TIER_2)]
 ```
 
-Pair score filtering with the domain-tier function (§6). No result below Tier 2 enters Phase 3.
+Pair score filtering with the domain-tier function (§6). Only Tier 1/2 results enter Phase 3 as primary candidates; Tier 3 results are retained solely as potential secondary corroborators (§4.1 Tier 3 rule) and never as primary claim support.
 
 ---
 
@@ -100,18 +100,39 @@ Pair score filtering with the domain-tier function (§6). No result below Tier 2
 | E | Unreliable | Tier 4 anonymous content, known misinformation sites |
 | F | Cannot be judged | Unknown domain, no editorial signal |
 
-**Credibility (1–6), assigned by corroboration after synthesis:**
+**Credibility (1–6), assigned by corroboration after synthesis — NORMATIVE ALGORITHM.**
 
-| Grade | Meaning | Skill label |
+This cascade is the single source of truth for credibility assignment. `references/quality-gate.md` and `SKILL.md` Phase 6 reproduce it verbatim; `README.md` renders it as a table. Where any copy disagrees, this section wins (invariant I3).
+
+Counters are computed at assignment time by joining each claim's `supporting_source_ids` / `contradicting_source_ids` against `research-sources.json` by `id` to resolve `domain_tier`:
+
+```
+supporting_Tier12 = count of distinct supporting sources with domain_tier ∈ {1, 2}
+supporting_Tier1  = count of distinct supporting sources with domain_tier = 1
+contradicting     = count of distinct contradicting sources with domain_tier ∈ {1, 2}
+
+if   supporting_Tier12 ≥ 2 and contradicting = 0:               → 1 CONFIRMED
+elif supporting_Tier1  ≥ 1 and contradicting = 0:               → 2 PROBABLY TRUE
+elif supporting_Tier12 ≥ 2 and contradicting = 1:               → 2 PROBABLY TRUE
+elif supporting_Tier12 = 1 and contradicting = 0:               → 3 POSSIBLY TRUE
+elif supporting_Tier12 ≥ 1 and contradicting ≥ 1 (Tier-equal):  → 4 DOUBTFUL
+elif contradicting ≥ 2 (Tier 1/2):                              → 5 IMPROBABLE
+else (only Tier 3/4 support, or zero supporting):               → 6 UNVERIFIED
+```
+
+**Tier 3 rule (single, deterministic):** Tier 3 sources never change the credibility level. They are admissible as secondary corroborators only when ≥1 supporting Tier 1/2 source exists (Phase-2 admissibility gate); a claim supported only by Tier 3/4 sources is credibility 6.
+
+> Deviation from R§4.1, resolved 2026-06-12: the report's row-3 clause "single Tier 1 uncorroborated → 3" is unreachable under this precedence cascade — a single Tier 1 source matches the credibility-2 rule first. Rule precedence is the deterministic resolution; the report's prose table was internally ambiguous (single Tier 1 appeared in both rows 2 and 3).
+
+**Label → report-section routing (deterministic):**
+
+| Credibility | Label | Report section |
 |---|---|---|
-| 1 | Confirmed (≥2 independent Tier 1/2 sources agree) | CONFIRMED |
-| 2 | Probably true (1 Tier 1 source, or ≥2 Tier 2 agreeing) | PROBABLY TRUE |
-| 3 | Possibly true (Tier 2+3 agree, or single Tier 1 uncorroborated) | POSSIBLY TRUE |
-| 4 | Doubtful (contradicted by ≥1 equally authoritative source) | DOUBTFUL |
-| 5 | Improbable (contradicted by ≥2 Tier 1/2 sources) | IMPROBABLE |
-| 6 | Cannot be judged (single Tier 3/4 source, no corroboration) | UNVERIFIED |
+| 1 | CONFIRMED | Main body; only label admitted in the executive summary |
+| 2–3 | PROBABLY TRUE / POSSIBLY TRUE | Main body with inline tag; never the executive summary |
+| 4–6 | DOUBTFUL / IMPROBABLE / UNVERIFIED | "Needs Verification" section only |
 
-Actionable range: A1–B2. Anything ≥ credibility 4 must be isolated in a "Needs Verification" section.
+Actionable range: A1–B2.
 
 ### 4.2 CRAAP test [R§4.2]
 Automatable in pre-retrieval / early grading:
@@ -173,7 +194,7 @@ Synthesize → grade each claim for groundedness
   else: emit
 ```
 
-Max 2 CRAG iterations per sub-question. If still failing, move affected claims to "Needs Verification" with explicit reason.
+Max 2 CRAG iterations per failing sub-question AND ≤6 CRAG iterations total per run, prioritized by ascending groundedness. Every source retrieved during a CRAG iteration passes the full Phase-2 gate battery before citation. If still failing, move affected claims to "Needs Verification" with explicit reason.
 
 ---
 
@@ -246,6 +267,8 @@ SEO-farm heuristic (defense-in-depth below the main `score > 0.7` gate at `refer
 ## 7. Specialized APIs (reference only) [R§7]
 The report recommends a multi-API stack (Tavily + Exa `findSimilar` + Valyu + Firecrawl). Only the **Tavily MCP** is available in this environment. Known coverage gap: deep academic citation-chaining (Exa) and full-text academic search (Valyu). Mitigation: include full Tier 1 academic domain list in `include_domains`, plus `tavily_extract extract_depth=advanced` on any paper URL surfaced during rerank.
 
+**Optional-source rule.** Any retrieval source added beyond the Tavily MCP suite (additional MCP servers, CLIs, keyed APIs) is OPTIONAL by contract: when its credential, server, or endpoint is absent or persistently failing, the skill degrades to Tavily-only retrieval, records the degradation in the report's Methodology note, and declares the source's availability status in `research-plan.md` at the human gate. A missing optional source is never a run failure.
+
 ---
 
 ## 8. Prompt engineering [R§8]
@@ -277,7 +300,7 @@ resting on a single unverifiable source.
 
 ---
 
-## 9. Six-phase architecture [R§9] — this is the skill's execution spine
+## 9. Seven-phase architecture [R§9] — this is the skill's execution spine
 
 ```
 PHASE 0  Query Architect         (extended thinking, no tool calls)
@@ -321,6 +344,6 @@ Quality gates applied at Phase 5 (deterministic thresholds in `references/qualit
 |---|---|---|---|---|---|
 | short | 3–5 | 20–30 | 15–25 | 1 | 8–15 |
 | standard | 6–10 | 50–80 | 35–60 | 2 | 20–40 |
-| exhaustive | 12–20 | 150–250 | **100+** | 2 per failing sub-question | 40–80 |
+| exhaustive | 12–20 | 150–250 | **100+** | 2 per failing sub-question, ≤6 total | 40–80 |
 
 Pace all modes under Tavily's 20 req/min research-endpoint ceiling. For exhaustive, interleave `tavily_search` (cheap) with `tavily_research` (expensive) so research calls stay ≤15/min.
