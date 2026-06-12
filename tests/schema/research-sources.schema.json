@@ -112,6 +112,19 @@
       "primary_source": {
         "type": "boolean"
       },
+      "credibility_overlay": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Optional third-party editorial-credibility overlay (MBFC static dataset, user-scope). Only present when the overlay dataset rated this domain.",
+        "required": ["source", "action", "dataset_version"],
+        "properties": {
+          "source": { "type": "string", "enum": ["mbfc_static", "newsguard"] },
+          "factual_reporting": { "type": ["string", "null"] },
+          "bias": { "type": ["string", "null"] },
+          "action": { "type": "string", "enum": ["none", "flag", "downgrade"] },
+          "dataset_version": { "type": "string" }
+        }
+      },
       "notes": {
         "type": "string"
       }

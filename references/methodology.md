@@ -264,7 +264,23 @@ reddit.com, twitter.com, x.com, linkedin.com, medium.com
 → Admiralty reliability **D–F**. Never cite as primary. Only admissible as social-signal pointers toward Tier 1/2 sources, in a clearly-labeled "Signals" subsection.
 
 ### Automatic blocklist
-SEO-farm heuristic (defense-in-depth below the main `score > 0.7` gate at `references/quality-gate.md` §Phase-2): if the 0.7 gate is ever relaxed for a known-scarce topic, reject any result with `score < 0.3` plus unknown domain. Under the default 0.7 gate this rule is subsumed. Supplement with NewsGuard / MBFC ratings if integrated.
+SEO-farm heuristic (defense-in-depth below the main `score > 0.7` gate at `references/quality-gate.md` §Phase-2): if the 0.7 gate is ever relaxed for a known-scarce topic, reject any result with `score < 0.3` plus unknown domain. Under the default 0.7 gate this rule is subsumed.
+
+### Credibility overlay (MBFC static — AI-125)
+
+OPTIONAL per-domain editorial-credibility overlay on top of the tier registry — **re-rank/flag at the margin, never a replacement**, most relevant on the `current-affairs` profile. The dataset is a versioned MBFC-derived snapshot living **user-scope, outside this public repo** (`~/.claude/deep-research/mbfc-overlay.json` — bulk redistribution of MBFC ratings in a public repo is a licensing risk; NewsGuard was evaluated and not integrated: commercial license, no free tier — decision recorded in Linear AI-125). Absent file → overlay skipped, noted in the plan (optional-source rule, §7).
+
+Format: `{"dataset_version": "YYYY-MM-DD", "domains": {"<host>": {"factual_reporting": "very-high|high|mostly|mixed|low|very-low", "bias": "<label>"}}}`. Refresh cadence: 4-weekly (gotchas-log).
+
+Deterministic overlay rules, applied at Phase 2 after tier classification:
+
+| `factual_reporting` | Action | Effect |
+|---|---|---|
+| very-high / high / mostly | none | — |
+| mixed | **flag** | `credibility_overlay.action: "flag"`; bias + rating recorded in the source record; visible at the human gate for allowlisted domains |
+| low / very-low | **downgrade** | Domain tier worsened by one (2→3, 3→4; never upgrades, never below 4) + flag; a downgraded source follows the rules of its new tier |
+
+The overlay can only worsen or annotate — a good overlay rating never upgrades a tier (the registry stays the prior; the overlay is posterior evidence against, not for).
 
 ---
 
