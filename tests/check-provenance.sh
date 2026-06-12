@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # check-provenance.sh
 # Re-computes SHA-256 of deep-research-report.md and verifies it starts with
-# the hash prefix declared on SKILL.md line 8. Defends invariant I1 from
-# .claude/CLAUDE.md.
+# the hash prefix declared on the 'Hash at generation time:' line of SKILL.md.
+# Defends invariant I1 from .claude/CLAUDE.md.
 #
 # Exits 0 on match, 1 on mismatch with a remediation message.
 
@@ -27,14 +27,13 @@ else
   exit 1
 fi
 
-# Extract declared prefix from SKILL.md line 8. Example string:
+# Extract declared prefix from the 'Hash at generation time:' marker line in
+# SKILL.md §Provenance (marker-anchored, robust to frontmatter growth):
 #   Hash at generation time: `cb2fe20dced3c4bb…` (sha256, April 2026 version).
-DECLARED_PREFIX="$(sed -n '8p' "$SKILL" | grep -oE '`[0-9a-f]{8,}' | head -n1 | tr -d '`' || true)"
+DECLARED_PREFIX="$(grep -m1 'Hash at generation time:' "$SKILL" | grep -oE '`[0-9a-f]{8,}' | head -n1 | tr -d '`' || true)"
 
 if [ -z "$DECLARED_PREFIX" ]; then
-  echo "FAIL: could not extract SHA-256 prefix from $SKILL line 8" >&2
-  echo "Line 8 content:" >&2
-  sed -n '8p' "$SKILL" >&2
+  echo "FAIL: could not extract SHA-256 prefix from the 'Hash at generation time:' line of $SKILL" >&2
   exit 1
 fi
 
@@ -45,7 +44,7 @@ case "$ACTUAL_FULL" in
     ;;
   *)
     echo "FAIL: SHA-256 mismatch for $REPORT" >&2
-    echo "  declared prefix on $SKILL line 8: $DECLARED_PREFIX" >&2
+    echo "  declared prefix in $SKILL: $DECLARED_PREFIX" >&2
     echo "  actual SHA-256:                    $ACTUAL_FULL" >&2
     echo "" >&2
     echo "Remediation: update $SKILL line 8 to reference the new hash:" >&2

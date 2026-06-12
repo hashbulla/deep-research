@@ -355,7 +355,8 @@ graph LR
     ├── report-structure.md                # research-report.md structure + JSON schemas
     ├── quality-gate.md                    # Deterministic thresholds, CRAG triggers
     ├── anti-patterns.md                   # Non-negotiables (no fabricated URLs, no WebSearch, etc.)
-    └── research-plan-template.md          # Phase 0 scaffold
+    ├── research-plan-template.md          # Phase 0 scaffold
+    └── examples.md                        # Worked examples (read on demand)
 ```
 
 ### Design decisions
@@ -490,7 +491,10 @@ deep-research/
 │   ├── quality-gate.md
 │   ├── anti-patterns.md
 │   └── research-plan-template.md
-├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts)
+├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts, gate-conformant)
+├── evals/                                 # loading / progressive / e2e fixtures + rubric
+├── CHANGELOG.md                           # semver release history (append-only)
+├── gotchas-log.md                         # maintainer traps + perishable-asset cadences
 ├── tests/                                 # cross-reference / provenance / schema / invariant checks
 │   ├── check-cross-references.sh
 │   ├── check-provenance.sh

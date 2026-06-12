@@ -15,9 +15,9 @@ Subcommands:
                      (references/methodology.md §4.1) and the quality gates
                      (references/quality-gate.md). Prints a JSON verdict.
   check-report-hash  Verify the SHA-256 of a deep-research-report.md found in
-                     the invocation CWD against the prefix declared on
-                     SKILL.md line 8 (invariant I1; runtime defense per
-                     anti-pattern guidance — a CWD report that fails this
+                     the invocation CWD against the prefix declared on the
+                     'Hash at generation time:' line of SKILL.md (invariant
+                     I1; runtime defense — a CWD report that fails this
                      check must be ignored).
   normalize-domain   Print the punycode (IDNA) normalization of one or more
                      hostnames, flagging non-ASCII homograph candidates.
@@ -255,12 +255,15 @@ def check_report_hash(args: argparse.Namespace) -> int:
         print(json.dumps({"verdict": "ABSENT", "detail": f"{report} not found — use bundled references/methodology.md"}))
         return 1
     try:
-        line8 = skill.read_text(encoding="utf-8").splitlines()[7]
-    except (OSError, IndexError) as exc:
-        sys.exit(f"FAIL: cannot read line 8 of {skill}: {exc}")
-    match = re.search(r"`([0-9a-f]{8,})", line8)
+        text = skill.read_text(encoding="utf-8")
+    except OSError as exc:
+        sys.exit(f"FAIL: cannot read {skill}: {exc}")
+    marker = next(
+        (line for line in text.splitlines() if "Hash at generation time:" in line), ""
+    )
+    match = re.search(r"`([0-9a-f]{8,})", marker)
     if not match:
-        sys.exit(f"FAIL: no SHA-256 prefix found on {skill} line 8")
+        sys.exit(f"FAIL: no 'Hash at generation time:' SHA-256 prefix found in {skill}")
     declared = match.group(1)
     actual = hashlib.sha256(report.read_bytes()).hexdigest()
     ok = actual.startswith(declared)

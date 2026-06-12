@@ -20,10 +20,14 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `references/quality-gate.md` | Deterministic thresholds + CRAG trigger rules | Phase 5 gates, confidence-tag assignment |
 | `references/anti-patterns.md` | Forbidden behaviors (skill non-negotiables + report anti-patterns) | Guardrails |
 | `references/research-plan-template.md` | Phase 0 plan scaffold | Approval artifact shape |
+| `references/examples.md` | Worked examples moved out of SKILL.md (token budget) | Illustrative plan/report excerpts |
+| `evals/` | Loading (≥12+12 incl. territorial negatives), progressive (≥8), e2e (≥3) fixtures + `rubric.md` | Activation + disclosure + mechanical e2e checks |
+| `CHANGELOG.md` | Semver release history, append-only | Release notes, waivers |
+| `gotchas-log.md` | Maintainer traps (trigger/gotcha/resolution/guard) + perishable-asset maintenance cadences | Operational memory |
 | `scripts/verify_gates.py` | Deterministic gate verification (stdlib-only, zero network): artifact counts/ratios/medians, §4.1 cascade conformance, punycode, CWD-report hash | Runtime quality gates (Phase 0 hash check, Phase 6 artifact check) |
 | `tests/check-cross-references.sh` | Walks markdown links + `[R§n]`/`[R§n.m]` back-refs (methodology, anti-patterns, SKILL.md prose), exits non-zero on miss | Link integrity |
 | `tests/check-example-invariants.sh` | jq cross-file validation of the example sources/evidence pair (IDs, cascade, routing, counts) | Example conformance to the skill's own gates |
-| `tests/check-provenance.sh` | Re-computes SHA-256 of `deep-research-report.md` vs SKILL.md line 8 | Provenance invariant |
+| `tests/check-provenance.sh` | Re-computes SHA-256 of `deep-research-report.md` vs the `Hash at generation time:` line in SKILL.md | Provenance invariant |
 | `tests/check-schema.sh` | Validates JSON artifacts against `tests/schema/*.schema.json` via `npx ajv-cli` | Artifact conformance |
 | `tests/schema/research-sources.schema.json` | JSON Schema for source records (draft-07) | Sources artifact shape |
 | `tests/schema/research-evidence.schema.json` | JSON Schema for claim records (draft-07) | Evidence artifact shape |
@@ -36,11 +40,11 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 
 ### I1. SHA-256 provenance
 
-The hash prefix declared on `SKILL.md` line 8 (`cb2fe20dced3c4bb…`) **must match** the actual SHA-256 of `deep-research-report.md`. After any edit to the report, re-compute and update the line 8 prefix **in the same commit**:
+The hash prefix declared on the `Hash at generation time:` line of `SKILL.md` §Provenance (`cb2fe20dced3c4bb…`) **must match** the actual SHA-256 of `deep-research-report.md`. After any edit to the report, re-compute and update the prefix **in the same commit**:
 
 ```bash
 sha256sum deep-research-report.md
-# then update SKILL.md line 8 with the new full/prefix hash
+# then update the 'Hash at generation time:' line in SKILL.md with the new prefix
 ```
 
 Guarded by `tests/check-provenance.sh`. A failing provenance check blocks the CI workflow.
@@ -107,4 +111,4 @@ User-facing extension points are documented in `README.md` under "Extending". Fo
 - **No emoji** in `SKILL.md`, `references/*`, or produced artifacts. README status badges are the exception.
 - **Deterministic rules over hedging.** Thresholds are numbers, not adjectives.
 - **Absolute paths in tool routing / scripts; relative paths in markdown cross-references.**
-- **Line-level stability.** SKILL.md line 8 (SHA-256 prefix) and `references/methodology.md §9` heading numbers are referenced by tests and cited in issue tracking — do not reorder sections casually.
+- **Anchor stability.** The `Hash at generation time:` marker line in SKILL.md §Provenance (SHA-256 prefix — marker-anchored since 0.2.0, robust to frontmatter growth) and `references/methodology.md §9` heading numbers are referenced by tests and cited in issue tracking — do not rename or reorder them casually.

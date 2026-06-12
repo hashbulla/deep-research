@@ -1,0 +1,26 @@
+{"id": "pos-01", "prompt": "/deep-research impact of EU AI Act on open-source model providers in 2026", "expect": "load", "boundary": "slash invocation"}
+{"id": "pos-02", "prompt": "deep research on the current state of solid-state battery manufacturing", "expect": "load", "boundary": "EN trigger phrase"}
+{"id": "pos-03", "prompt": "recherche approfondie sur les architectures multi-agents en production", "expect": "load", "boundary": "FR trigger phrase"}
+{"id": "pos-04", "prompt": "analyse multi-sources : RAG vs long-context pour les gros corpus documentaires", "expect": "load", "boundary": "FR multi-source analysis"}
+{"id": "pos-05", "prompt": "comparative analysis of LangGraph vs CrewAI vs AutoGen with sources", "expect": "load", "boundary": "comparative with sources"}
+{"id": "pos-06", "prompt": "benchmark Postgres vs DuckDB for analytics workloads with citations", "expect": "load", "boundary": "benchmark with citations"}
+{"id": "pos-07", "prompt": "I need a fully sourced report on EU medical-device AI regulation", "expect": "load", "boundary": "sourced report intent"}
+{"id": "pos-08", "prompt": "deep research: what is the state of the art for entity resolution at scale?", "expect": "load", "boundary": "SOTA survey intent"}
+{"id": "pos-09", "prompt": "fais une recherche approfondie sur l'état de l'art du fine-tuning LoRA", "expect": "load", "boundary": "FR imperative trigger"}
+{"id": "pos-10", "prompt": "/deep-research --length exhaustive --lang fr comparaison des vector stores managés", "expect": "load", "boundary": "slash with flags"}
+{"id": "pos-11", "prompt": "research the competitive landscape of GPU cloud providers — I want graded, citable sources", "expect": "load", "boundary": "graded-sources intent"}
+{"id": "pos-12", "prompt": "multi-source analysis of zero-trust adoption in European banks, with confidence labels per claim", "expect": "load", "boundary": "confidence-label intent"}
+{"id": "pos-13", "prompt": "before we architect this ingestion pipeline, run a deep research pass on current best practices", "expect": "load", "boundary": "pre-architecture research (north-star use case)"}
+{"id": "neg-01", "prompt": "what year was the EU AI Act adopted?", "expect": "skip", "boundary": "single-fact lookup → tavily_search direct"}
+{"id": "neg-02", "prompt": "extract the content of https://eur-lex.europa.eu/eli/reg/2024/1689/oj", "expect": "skip", "boundary": "known-URL extraction → tavily_extract"}
+{"id": "neg-03", "prompt": "how do I configure Next.js 15 middleware?", "expect": "skip", "boundary": "library docs → tavily_skill / context7"}
+{"id": "neg-04", "prompt": "map the URL structure of docs.tavily.com", "expect": "skip", "boundary": "sitemap discovery → tavily_map"}
+{"id": "neg-05", "prompt": "scrape the product prices from this e-commerce site", "expect": "skip", "boundary": "scraping → /scrape"}
+{"id": "neg-06", "prompt": "quick search: what did Anthropic release this week?", "expect": "skip", "boundary": "quick time-sensitive search → tavily_search"}
+{"id": "neg-07", "prompt": "/research koyeb custom domain peering", "expect": "skip", "boundary": "user-scope /research command (territorial)"}
+{"id": "neg-08", "prompt": "fan out a bunch of research agents on this topic and just give me the gist, no plan needed", "expect": "skip", "boundary": "plugin-namespaced deep-research sibling — ungated fan-out (territorial)"}
+{"id": "neg-09", "prompt": "summarize this PDF I just downloaded", "expect": "skip", "boundary": "local document task"}
+{"id": "neg-10", "prompt": "write a LinkedIn post about deep research best practices", "expect": "skip", "boundary": "content generation → linkedin-post"}
+{"id": "neg-11", "prompt": "debug why my Tavily MCP returns 429 on every call", "expect": "skip", "boundary": "tooling debug, not research"}
+{"id": "neg-12", "prompt": "génère un deck sur l'état de l'art du RAG", "expect": "skip", "boundary": "deck generation → deck-generator"}
+{"id": "neg-13", "prompt": "what's trending on HuggingFace papers today?", "expect": "skip", "boundary": "single recency lookup → tavily_search time_range"}
