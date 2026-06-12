@@ -20,7 +20,7 @@ description: Agentic multi-source deep research via Tavily MCP, calibrated to Pe
 
 ## Overview
 
-This skill runs intelligence-grade, multi-source research against the open web using the Tavily MCP suite. It implements the 7-phase architecture defined in `references/methodology.md` (derived from report §9): Query Architect → Broad Retrieval → Source Grading → Precision Rerank → Deep Extract & Synthesis → Grounding Validation → Confidence Annotation. Sources are graded on the NATO Admiralty A–F × 1–6 scale (report §4.1); claims without ≥2 independent Tier 1/2 corroborators are isolated in a "Needs Verification" section. The skill halts after Phase 0 for user approval before any Tavily call fires.
+This skill runs intelligence-grade, multi-source research against the open web using the Tavily MCP suite. It implements the 7-phase architecture defined in `references/methodology.md` (derived from report §9): Query Architect → Broad Retrieval → Source Grading → Precision Rerank → Deep Extract & Synthesis → Grounding Validation → Confidence Annotation. Sources are graded on the NATO Admiralty A–F × 1–6 scale (report §4.1); claims graded credibility 4–6 by the normative cascade (`references/methodology.md` §4.1) are isolated in a "Needs Verification" section, and credibility 2–3 claims carry inline tags in the main body (never the executive summary). The skill halts after Phase 0 for user approval before any Tavily call fires.
 
 ## Trigger
 
@@ -132,12 +132,20 @@ Apply grading rules from `references/methodology.md` §"Source grading" (distill
 
 ### Phase 6 — Confidence Annotation
 
-1. Tag every claim with Admiralty credibility 1–6:
-   - **1 (CONFIRMED):** ≥2 independent Tier 1/2 sources agree.
-   - **2 (PROBABLY TRUE):** 1 Tier 1 source, or ≥2 Tier 2 sources agree.
-   - **3 (POSSIBLY TRUE):** Tier 2+3 sources agree, or single Tier 1 source uncorroborated.
-   - **4–6 (DOUBTFUL / IMPROBABLE / UNVERIFIED):** contradictions, or single Tier 3 source — must be in "Needs Verification".
-2. Isolate all 4–6 claims into the "Needs Verification" section.
+1. Tag every claim with Admiralty credibility 1–6 by applying the normative cascade from `references/methodology.md` §4.1 (verbatim copy — methodology wins on divergence):
+
+   ```
+   if   supporting_Tier12 ≥ 2 and contradicting = 0:               → 1 CONFIRMED
+   elif supporting_Tier1  ≥ 1 and contradicting = 0:               → 2 PROBABLY TRUE
+   elif supporting_Tier12 ≥ 2 and contradicting = 1:               → 2 PROBABLY TRUE
+   elif supporting_Tier12 = 1 and contradicting = 0:               → 3 POSSIBLY TRUE
+   elif supporting_Tier12 ≥ 1 and contradicting ≥ 1 (Tier-equal):  → 4 DOUBTFUL
+   elif contradicting ≥ 2 (Tier 1/2):                              → 5 IMPROBABLE
+   else (only Tier 3/4 support, or zero supporting):               → 6 UNVERIFIED
+   ```
+
+   Tier 3 sources never change the level (secondary corroborators only, alongside ≥1 Tier 1/2 source).
+2. Route by label: credibility 1 may appear anywhere including the executive summary; 2–3 in the main body with inline tags; isolate all 4–6 claims into the "Needs Verification" section.
 3. Final artifacts:
    - `research-plan.md` (Phase 0, already approved)
    - `research-report.md` (final synthesis)

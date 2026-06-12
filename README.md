@@ -284,16 +284,16 @@ flowchart LR
     style Label fill:#059669,stroke:#059669,color:#fff
 ```
 
-Credibility rules are deterministic — no LLM fluency-weighted guessing:
+Credibility rules are deterministic — no LLM fluency-weighted guessing. The table renders the normative precedence cascade in [`references/methodology.md §4.1`](references/methodology.md) (first matching row wins; the cascade wins on any divergence):
 
-| Credibility | Condition | Label |
+| Credibility | Condition (first match wins) | Label |
 |:-----------:|:----------|:------|
-| 1 | ≥2 independent Tier 1/2 sources agree, no contradiction | **CONFIRMED** |
-| 2 | 1 Tier 1 source, or ≥2 Tier 2 sources agree | **PROBABLY TRUE** |
-| 3 | Single Tier 1/2 source, or Tier 2+3 agree | **POSSIBLY TRUE** |
-| 4 | Contradicted by ≥1 equally authoritative source | **DOUBTFUL** |
+| 1 | ≥2 independent Tier 1/2 sources agree, no Tier 1/2 contradictor | **CONFIRMED** |
+| 2 | ≥1 Tier 1 source and no contradictor; or ≥2 Tier 1/2 with exactly 1 contradictor | **PROBABLY TRUE** |
+| 3 | Single Tier 1/2 source, no contradictor (Tier 3 corroboration does not upgrade) | **POSSIBLY TRUE** |
+| 4 | ≥1 Tier 1/2 support and ≥1 equally authoritative contradictor | **DOUBTFUL** |
 | 5 | Contradicted by ≥2 Tier 1/2 sources | **IMPROBABLE** |
-| 6 | Single Tier 3/4 source, no corroboration | **UNVERIFIED** |
+| 6 | Only Tier 3/4 support, or zero supporting sources | **UNVERIFIED** |
 
 Labels 4/5/6 cannot appear in the main report body — they route to the **Needs Verification** section with an explicit reason.
 
@@ -397,7 +397,7 @@ The skill expands the allowlist to the Tier 1+2 union and adds 2–4 contextual/
 <details>
 <summary><strong>A claim I expected to see ended up in Needs Verification</strong></summary>
 
-The corroboration threshold is `--min-corroboration 2` by default. A single Tier 1 source with no second independent corroborator yields credibility 3, which is still in the main body. Credibility 4–6 (contradicted, single Tier 3/4, etc.) routes to Needs Verification. Raise `--min-corroboration 3` for stricter runs, or examine `research-evidence.json` for the exact support graph.
+The corroboration threshold is `--min-corroboration 2` by default. A single Tier 1 source with no second independent corroborator yields credibility 2 (PROBABLY TRUE); a single Tier 2 source yields credibility 3 — both still in the main body with inline tags. Credibility 4–6 (contradicted, only Tier 3/4 support, etc.) routes to Needs Verification. Raise `--min-corroboration 3` for stricter runs, or examine `research-evidence.json` for the exact support graph.
 </details>
 
 <details>

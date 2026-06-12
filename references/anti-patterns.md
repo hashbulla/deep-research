@@ -15,10 +15,10 @@ Every `[^n]` footnote in `research-report.md` resolves to a `research-sources.js
 
 ### A4. No silent single-source claims
 Any claim in `research-report.md`'s main body must either:
-- have ≥ `--min-corroboration` (default 2) independent Tier 1/2 sources, **or**
-- carry an explicit `[POSSIBLY TRUE]` tag and appear in a labeled subsection (not in the executive summary).
+- be credibility 1 (CONFIRMED) under the normative cascade (`references/methodology.md` §4.1), **or**
+- carry its explicit inline tag (`[PROBABLY TRUE]` for credibility 2, `[POSSIBLY TRUE]` for credibility 3) and stay out of the executive summary (CONFIRMED only there).
 
-A claim with a single Tier 3 source or zero Tier 1/2 sources belongs in "Needs Verification", never the main body.
+A claim graded credibility 4–6 (contradicted, or supported only by Tier 3/4 sources) belongs in "Needs Verification", never the main body.
 
 ### A5. No raw extract dumps in the report
 `tavily_extract` returns full page content. That content is for internal grading and surgical quote selection. Quotes in `research-report.md` are ≤ 3 sentences, attributed inline, and never concatenated into paragraphs of extracted text. If a section reads like a copy-paste, it is a copy-paste — rewrite.
@@ -74,7 +74,7 @@ The skill answers the user's research question. It does **not**:
 
 ## D. When in doubt
 
-- If uncertain whether a claim is corroborated: downgrade to `[POSSIBLY TRUE]` and move to Needs Verification.
+- If uncertain whether a claim is corroborated: downgrade one credibility level and route per the cascade (`references/methodology.md` §4.1) — if uncertain between 3 and 4, treat as 4 (Needs Verification).
 - If uncertain whether a source is Tier 2 or Tier 3: treat as Tier 3 (requires corroboration).
 - If uncertain whether a URL is Tier 4: treat as Tier 4 (social signal only).
 - If uncertain whether to proceed after a gate failure: halt, report to user, ask.

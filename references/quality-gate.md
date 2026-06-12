@@ -52,25 +52,27 @@ Applied at the end of Phase 4 (Synthesis) and Phase 5 (Grounding Validation). Ev
 
 ## Confidence-tag assignment rules (Phase 6)
 
-Applied deterministically to every claim.
+Applied deterministically to every claim. **The normative algorithm lives in `references/methodology.md §4.1`; the block below is a verbatim copy — methodology wins on any divergence (invariant I3).**
 
-**Derivation of the counters below.** The three counters are computed at assignment time; they are **not** stored fields of `research-evidence.json`. For a given claim record, join its `supporting_source_ids` and `contradicting_source_ids` arrays against `research-sources.json` by `id` to resolve each referenced source's `domain_tier`. Then: `supporting_Tier12` counts distinct supporting source IDs whose joined `domain_tier ∈ {1, 2}`; `supporting_Tier1` counts those with `domain_tier = 1`; `contradicting` counts distinct contradicting source IDs with `domain_tier ∈ {1, 2}`. The persisted fields in `research-evidence.json` — `corroboration_count`, `independent_tier12_count`, `primary_source_present` — are described in `references/report-structure.md §4`.
+**Derivation of the counters below.** The three counters are computed at assignment time; they are **not** stored fields of `research-evidence.json`. For a given claim record, join its `supporting_source_ids` and `contradicting_source_ids` arrays against `research-sources.json` by `id` to resolve each referenced source's `domain_tier`. The persisted fields in `research-evidence.json` — `corroboration_count`, `independent_tier12_count`, `primary_source_present` — are described in `references/report-structure.md §4`.
 
 ```
 supporting_Tier12 = count of distinct supporting sources with domain_tier ∈ {1, 2}
 supporting_Tier1  = count of distinct supporting sources with domain_tier = 1
-contradicting    = count of distinct contradicting sources with domain_tier ∈ {1, 2}
+contradicting     = count of distinct contradicting sources with domain_tier ∈ {1, 2}
 
-if supporting_Tier12 ≥ 2 and contradicting = 0:                → 1 CONFIRMED
-elif supporting_Tier1 ≥ 1 and contradicting = 0:                → 2 PROBABLY TRUE
-elif supporting_Tier12 ≥ 2 and contradicting = 1:                → 2 PROBABLY TRUE
-elif supporting_Tier12 = 1 and contradicting = 0:                → 3 POSSIBLY TRUE
+if   supporting_Tier12 ≥ 2 and contradicting = 0:               → 1 CONFIRMED
+elif supporting_Tier1  ≥ 1 and contradicting = 0:               → 2 PROBABLY TRUE
+elif supporting_Tier12 ≥ 2 and contradicting = 1:               → 2 PROBABLY TRUE
+elif supporting_Tier12 = 1 and contradicting = 0:               → 3 POSSIBLY TRUE
 elif supporting_Tier12 ≥ 1 and contradicting ≥ 1 (Tier-equal):  → 4 DOUBTFUL
-elif contradicting ≥ 2 (Tier 1/2):                                → 5 IMPROBABLE
-else (only Tier 3/4, or zero supporting):                        → 6 UNVERIFIED
+elif contradicting ≥ 2 (Tier 1/2):                              → 5 IMPROBABLE
+else (only Tier 3/4 support, or zero supporting):               → 6 UNVERIFIED
 ```
 
-Claims with labels 4, 5, 6 **must** be in the "Needs Verification" section. Claims with labels 1, 2, 3 may appear in the main body; labels 2 and 3 carry their Admiralty tag inline.
+**Tier 3 rule:** Tier 3 sources never change the credibility level; admissible as secondary corroborators only when ≥1 supporting Tier 1/2 source exists. A claim supported only by Tier 3/4 sources is credibility 6.
+
+**Routing:** claims with labels 4, 5, 6 **must** be in the "Needs Verification" section. Claims with labels 1, 2, 3 may appear in the main body; labels 2 and 3 carry their Admiralty tag inline and never appear in the executive summary (CONFIRMED only).
 
 ## Stop conditions (successful completion)
 
