@@ -131,6 +131,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | ![Opus](https://img.shields.io/badge/Opus/Sonnet_4.6%2B-recommended-E04E2A?style=flat-square) | Synthesis quality and Admiralty discipline benefit from top-tier reasoning | `/model opus` |
 | ![Tavily MCP](https://img.shields.io/badge/Tavily_MCP-required-1F2328?style=flat-square) | Every retrieval call. `WebSearch` is fallback only. | Visible in `/mcp` |
 | ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Only for installing from this repo | `gh auth status` |
+| ![python3](https://img.shields.io/badge/Python_3.10%2B-required-3776AB?style=flat-square) | Runs `scripts/verify_gates.py` (stdlib-only, zero network) for deterministic gate verification | `python3 --version` |
 
 > **Verify Tavily is registered before invoking:**
 >
@@ -346,6 +347,8 @@ graph LR
 ├── .claude/CLAUDE.md                      # Maintainer spec anchor — invariants, gotchas, conventions
 ├── SKILL.md                               # Orchestrator — 7 phases, human gate, provenance block
 ├── deep-research-report.md                # Methodology source of truth (cited below)
+├── scripts/
+│   └── verify_gates.py                    # Deterministic gate verification (stdlib-only, zero network)
 └── references/
     ├── methodology.md                     # Full distillation — tier registry, Admiralty, CRAAP, CRAG
     ├── tool-routing.md                    # Tavily MCP tool selection per intent
@@ -365,6 +368,7 @@ graph LR
 | Pre-context filtering | Inline Claude reasoning on Tavily results | Anthropic's Dynamic Filtering is API-side only; inline filtering achieves equivalent discipline |
 | Source grading | NATO Admiralty 2×6 | Intelligence-grade provenance, usable by humans, deterministic |
 | Contradiction handling | Dedicated report section | Report §1 stage 4 — never silent, never auto-resolve between equally authoritative sources |
+| Gate verification | `scripts/verify_gates.py` (stdlib-only, zero network) | Counts, ratios, medians, cascade conformance, and the CWD-report SHA-256 are script-verified at runtime — LLM-self-reported metrics are not gates |
 
 ---
 
@@ -420,7 +424,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 |:-----|:----|
 | **Tune the tier registry** | Edit [`references/methodology.md §6`](references/methodology.md). Add domains to Tier 1/2; rebuild the include_domains preview at the top of the plan template. |
 | **Adjust quality gates** | Edit [`references/quality-gate.md`](references/quality-gate.md). Thresholds are deterministic; raising groundedness to 0.98 simply triggers more CRAG iterations. |
-| **Add a sub-question category** | Edit `SKILL.md` Phase 0 step 3 and mirror in [`references/research-plan-template.md`](references/research-plan-template.md). |
+| **Add a sub-question category** | Edit `SKILL.md` Phase 0 step 4 and mirror in [`references/research-plan-template.md`](references/research-plan-template.md). |
 | **Change default length calibration** | Edit the "Length calibration" table in [`references/methodology.md`](references/methodology.md). |
 | **Swap Tavily for another MCP** | Edit [`references/tool-routing.md`](references/tool-routing.md) and the Phase 1 / Phase 4 call templates in `SKILL.md`. Keep the grading phases intact — they are MCP-agnostic. |
 
@@ -477,6 +481,8 @@ deep-research/
 ├── LICENSE                                # MIT
 ├── SKILL.md                               # skill entry point
 ├── deep-research-report.md                # methodology source of truth
+├── scripts/
+│   └── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
 ├── references/
 │   ├── methodology.md
 │   ├── tool-routing.md
@@ -485,10 +491,11 @@ deep-research/
 │   ├── anti-patterns.md
 │   └── research-plan-template.md
 ├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts)
-├── tests/                                 # cross-reference / provenance / schema checks
+├── tests/                                 # cross-reference / provenance / schema / invariant checks
 │   ├── check-cross-references.sh
 │   ├── check-provenance.sh
 │   ├── check-schema.sh
+│   ├── check-example-invariants.sh
 │   ├── schema/{research-sources,research-evidence}.schema.json
 │   └── fixtures/ → examples/eu-ai-act-2026/*.json
 └── .github/workflows/validate.yml         # CI — runs the three checks on push
