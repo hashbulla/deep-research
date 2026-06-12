@@ -104,7 +104,7 @@ Apply grading rules from `references/methodology.md` §"Source grading" (distill
 
 1. **Score threshold:** drop any result with Tavily `score < 0.7` (report §3.1 and §3.4).
 2. **Canonical URL dedupe:** collapse near-duplicates (same path ignoring tracking params, same title + same domain).
-3. **Domain tier classification:** map each result's domain to Tier 1 / 2 / 3 / 4 using `references/methodology.md` §6. Reject all Tier 4 sources for factual use (they remain usable only as social-signal pointers).
+3. **Domain tier classification:** map each result's domain to Tier 1 / 2 / 3 / 4 using `references/methodology.md` §6. Reject all Tier 4 sources for factual use (they remain usable only as social-signal pointers). If the user-scope MBFC overlay dataset exists, apply its deterministic flag/downgrade rules (§6 "Credibility overlay") and record `credibility_overlay` on affected source records.
 4. **Admiralty A–F reliability score** per domain tier (Tier 1 → A, Tier 2 → B, Tier 3 → C, Tier 4 → D–F).
 5. **CRAAP automated checks:** Currency (publication date vs `--since` and vs query recency need), Authority (tier + byline if available). Drop results failing ≥2 CRAAP dimensions.
 6. **Unicode domain normalization:** re-normalize any result URL whose host contains non-ASCII; reject mismatches against the allowlist.

@@ -99,6 +99,7 @@ Array of source records. One record per cited URL.
 - `retrieval_query` — exact query string used.
 - `sub_questions` — array of sub-question IDs referenced in the plan.
 - `primary_source` — boolean. True for original research / regulation / dataset; false for commentary or summary.
+- `credibility_overlay` — optional object, present only when the user-scope MBFC overlay dataset rated this domain: `{source, factual_reporting, bias, action: none|flag|downgrade, dataset_version}` (rules in `references/methodology.md` §6 "Credibility overlay"). A `downgrade` action means the record's `domain_tier` already reflects the worsened tier.
 - `notes` — free text. Always populated on `WebSearch` fallback or on any deviation (paywall, abstract-only, corroboration incomplete, etc.).
 
 ## 4. `research-evidence.json`

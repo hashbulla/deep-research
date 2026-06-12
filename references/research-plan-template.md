@@ -49,6 +49,8 @@ Written to `research-plan.md` at the end of Phase 0. **User must approve before 
 **Flagged user additions below Tier 2** (confirm before Phase 1):
 <list any --domains entries below Tier 2, or "none">
 
+**Credibility overlay (MBFC static, user-scope):** <"active, dataset_version YYYY-MM-DD — allowlisted domains flagged/downgraded by the overlay: <list, or none>" | "dataset absent — overlay skipped">
+
 ## 4. Retrieval plan
 
 **Phase 1 (broad recall):**
