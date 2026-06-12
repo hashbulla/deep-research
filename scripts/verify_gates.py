@@ -180,6 +180,19 @@ def check_artifacts(args: argparse.Namespace) -> int:
         if cred <= 3 and section == "Needs Verification":
             violations.append(f"{cid}: credibility {cred} must not sit in Needs Verification")
 
+        if args.rigor == "critical":
+            anchor = claim.get("anchor")
+            if not anchor:
+                violations.append(
+                    f"{cid}: missing anchor (critical rigor requires span-level grounding)"
+                )
+            elif anchor.get("anchor_type") == "snapshot_char_range" and not anchor.get("char_range"):
+                violations.append(f"{cid}: snapshot anchor without a char_range")
+            if not sup:
+                violations.append(
+                    f"{cid}: unsourced assertion (critical rigor: refuse-if-no-source)"
+                )
+
         if sup and all(r in tier for r in sup):
             grounded += 1
         if s12 >= args.min_corroboration:
@@ -299,6 +312,12 @@ def main() -> int:
     p_art.add_argument("--evidence", default="research-evidence.json")
     p_art.add_argument("--length", choices=SOURCE_FLOORS, default="standard")
     p_art.add_argument("--min-corroboration", type=int, default=2)
+    p_art.add_argument(
+        "--rigor",
+        choices=("standard", "critical"),
+        default="standard",
+        help="critical: every claim needs an anchor; unsourced assertions are violations",
+    )
     p_art.add_argument("--since", default=None, help="YYYY or YYYY-MM-DD freshness lower bound")
     p_art.set_defaults(func=check_artifacts)
 

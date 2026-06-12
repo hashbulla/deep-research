@@ -338,6 +338,26 @@ Quality gates applied at Phase 5 (deterministic thresholds in `references/qualit
 
 ---
 
+## Orchestration topology & context policy (skill-specific extension, AI-123)
+
+**Lead + isolated subagents — never a swarm.** One lead orchestrator (the session) owns the plan, the human gate, and the final synthesis. Retrieval-adjacent heavy lifting is delegated to isolated Claude Code subagents with explicit `model` overrides (`references/model-tiers.md`); independent uncoordinated agents amplify errors on fidelity-critical work, so coordination is always centralized in the lead.
+
+- **Phase-2 grading delegation.** On exhaustive runs (or any run with >6 sub-questions), per-sub-question grading runs in parallel subagents (model override `sonnet`). Each receives the sub-question, the candidate list (URL, title, score, date, snippet), and the grading rules; each returns **condensed findings only** — graded rows (id, url, tier, reliability, one-line relevance) — never raw page content. The lead's context stays clean for synthesis; one polluted retrieval chain cannot contaminate the whole run.
+- **Entailment judging delegation.** The Phase-5 fidelity judge is a subagent on a **different Claude model** than the session, fed only claim + cited span — decorrelated context, no scratch (breaks same-model judge circularity together with the distinct personas of §11).
+- **Confidential runs (`--confidential`).** Subagents receive and return **neutral references only** — `[doc_id, char_range]` anchors, URLs, source IDs. Confidential text never enters a subagent prompt, a log line, or an MCP call.
+
+**Long-context policy by working-set size** (the lead's evidence buffer, not the raw corpus):
+
+| Working set | Policy |
+|---|---|
+| < 200k tokens | Keep fully in the lead's context |
+| 200k – 1M | Delegate reading to subagents; the lead holds condensed findings + anchors. Keep stable content (doctrine, plan) as a fixed prefix for cache reuse |
+| > 1M | Anchor-index only in the lead: every document lives as `[doc_id, snapshot_sha256]` references; subagents fetch and read on demand |
+
+**Compaction is scratch-only.** When context pressure forces summarization, compact working notes and intermediate reasoning — NEVER the evidence layer. `research-sources.json` rows, anchors, and verbatim quotes are never summarized away; a source that must still be cited is never compacted (compacting evidence breaks the citation chain irreversibly).
+
+**Contradictions are surfaced, not smoothed.** Real corpora disagree with themselves. Disagreements between equally authoritative sources go to "Contradictions & open debates" with both sides' evidence; under the `critical` rigor profile a dedicated critic pass re-scans the draft for smoothed-over disagreements before Phase 6.
+
 ## Length calibration (skill-specific extension of report §10)
 
 | `--length` | Sub-questions | Broad candidates | Final cited | CRAG max | Tavily calls (approx) |

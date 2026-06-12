@@ -73,6 +73,46 @@
       "primary_source_present": {
         "type": "boolean"
       },
+      "anchor": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Span-level grounding for the claim. Optional under the standard rigor profile; required on every claim under the critical profile (gate-enforced by scripts/verify_gates.py --rigor critical). verbatim_quote anchors web sources (Tavily content is reprocessed — char offsets have no stable referent); snapshot_char_range anchors persisted corpus documents.",
+        "required": ["anchor_type"],
+        "properties": {
+          "anchor_type": {
+            "type": "string",
+            "enum": ["snapshot_char_range", "verbatim_quote"]
+          },
+          "doc_id": {
+            "type": "string"
+          },
+          "char_range": {
+            "type": ["array", "null"],
+            "items": { "type": "integer", "minimum": 0 },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "snapshot_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "anchor_type": { "const": "snapshot_char_range" } } },
+            "then": { "required": ["doc_id", "char_range", "snapshot_sha256"] }
+          },
+          {
+            "if": { "properties": { "anchor_type": { "const": "verbatim_quote" } } },
+            "then": { "required": ["quote"] }
+          }
+        ]
+      },
       "notes": {
         "type": "string"
       }

@@ -133,6 +133,7 @@ Array of claim records. One record per distinct factual claim in `research-repor
 - `corroboration_count` — integer. Count of distinct independent sources supporting the claim.
 - `independent_tier12_count` — integer. Count restricted to Tier 1/2 sources.
 - `primary_source_present` — boolean. True if ≥1 supporting source has `primary_source: true`.
+- `anchor` — optional object; span-level grounding (required on every claim under the `critical` rigor profile). `anchor_type` discriminates: `verbatim_quote` (web sources — carries `quote`, ≤600 chars, the surgical quote that entails the claim) or `snapshot_char_range` (persisted corpus documents — carries `doc_id`, `char_range` `[start, end)`, and `snapshot_sha256` of the persisted snapshot the offsets are computed against). Char offsets are NEVER emitted against unpersisted web content — Tavily output is reprocessed and offsets would have no stable referent.
 - `notes` — free text (e.g., "paywalled source, abstract only", "CRAG iteration 1 added S042").
 
 ## Validation rules (emitter self-check before write)

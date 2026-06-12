@@ -2,6 +2,20 @@
 
 Applied at the end of Phase 4 (Synthesis) and Phase 5 (Grounding Validation). Every gate is a hard threshold; falling below triggers a specific action. Do not relax these silently. If a gate cannot be met after max CRAG iterations, explicitly document the failure in the Methodology note and move affected claims to "Needs Verification".
 
+## Rigor profiles
+
+Two profiles scale verification depth to the run's stakes. The default keeps the everyday research instrument fast; the critical profile carries the zero-fault discipline for confidential / high-stakes corpora.
+
+| | `standard` (default) | `critical` (implied by `--confidential`, or `--rigor critical`) |
+|---|---|---|
+| Gates below | All apply | All apply |
+| Entailment judge (decorrelated subagent, different Claude model, claim + cited span only — no scratch context) | Executive-summary claims + every single-source claim | **Every claim** |
+| Unsourced assertion (zero supporting sources) | Credibility 6 → "Needs Verification" | **Refuse-if-no-source**: the assertion is removed; the report states "no sourced answer available" — never a parametric-knowledge fallback |
+| `anchor` field on claims (`research-evidence.json`) | Optional (recommended for executive-summary claims) | **Required on every claim** — `verbatim_quote` for web sources, `snapshot_char_range` (+ snapshot SHA-256) for persisted corpus documents; verified by `scripts/verify_gates.py check-artifacts --rigor critical` |
+| Sycophancy / false-premise probe | — | Phase 0 verifies the question's presuppositions against Tier 1/2 sources; an unsupported premise is surfaced at the human gate instead of researched |
+| Contradiction critic | Contradictions section per SKILL.md | Dedicated critic pass re-scans the draft for smoothed-over disagreements before Phase 6 |
+| Subagent content policy | Condensed findings + references | **Neutral references only** — no confidential text ever enters a subagent prompt, log, or MCP call |
+
 ## Phase-2 filter gates (per individual source)
 
 These gates apply to **every** source regardless of when it is discovered — Phase 1 broad retrieval, Phase 4 (`tavily_research` citations, `tavily_extract` pulls), or Phase 5 CRAG re-queries. A source first seen after Phase 2 repasses the full battery before it may support any claim.
