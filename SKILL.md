@@ -52,6 +52,8 @@ Do NOT activate for:
 | `--exclude` | comma-separated list | tier profile blocklist | Additional blocklist |
 | `--profile` | `academic` \| `technical` \| `current-affairs` \| `mixed` | inferred | Domain tier profile (selects `include_domains` baseline) |
 | `--min-corroboration` | integer ≥1 | `2` | Minimum independent Tier 1/2 sources required for a claim to be CONFIRMED |
+| `--model` | `opus` \| `fable` | `opus` | Synthesis tier (Claude-Code-native: session model + subagent overrides, never SDK calls). See `references/model-tiers.md` |
+| `--confidential` | boolean | off | Confidential-path run: subagents receive neutral references only, rigor escalates to `critical`, retention posture recorded in the plan. See `references/model-tiers.md` |
 
 Target source counts per `--length` (from `references/methodology.md`):
 
@@ -208,4 +210,5 @@ Load these on demand — do not read all at Phase 0:
 - **`references/quality-gate.md`** — deterministic thresholds and CRAG trigger rules. Read at Phase 5.
 - **`references/anti-patterns.md`** — forbidden patterns (skill non-negotiables + report anti-patterns). Consult whenever uncertain.
 - **`references/research-plan-template.md`** — exact Phase 0 plan scaffold. Read at Phase 0.
+- **`references/model-tiers.md`** — model-tier policy (opus default, fable opt-in), subagent override mechanics, Fable 5 operational notes. Read at Phase 0 when `--model` / `--confidential` is set or the run is exhaustive.
 - **`references/examples.md`** — worked examples (plan excerpt, report excerpt, verification call). Read on demand.

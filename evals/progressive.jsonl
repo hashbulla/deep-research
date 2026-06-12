@@ -7,3 +7,4 @@
 {"id": "prog-07", "when": "any phase — uncertainty about a forbidden behavior", "expect_read": ["references/anti-patterns.md"], "expect_not_read": [], "note": "anti-patterns are consulted on doubt, not preloaded"}
 {"id": "prog-08", "when": "first-ever Phase-0 plan composition in a session", "expect_read": ["references/examples.md"], "expect_not_read": [], "note": "worked examples are on-demand only"}
 {"id": "prog-09", "when": "Phase 6 — after writing the four artifacts", "expect_read": [], "expect_not_read": [], "note": "runs scripts/verify_gates.py check-artifacts via Bash and quotes the JSON verdict; no additional reference reads"}
+{"id": "prog-10", "when": "Phase 0 — --model or --confidential set, or --length exhaustive", "expect_read": ["references/model-tiers.md"], "expect_not_read": [], "note": "tier policy loads only when a tier decision is in play; a plain standard run never reads it"}
