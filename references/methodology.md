@@ -220,6 +220,8 @@ census.gov, bls.gov, eurostat.ec.europa.eu, data.gov
 
 → Admiralty reliability **A** (use with `include_domains` for `--profile academic`).
 
+**Academic-graph sources** (conditional source, `references/academic-research.md`): DOI-resolved peer-reviewed publications are Tier 1. arXiv preprints are Tier 1 *reliability* (registry-listed domain) but un-peer-reviewed — never the sole support for a CONFIRMED claim in a contested area; the §4.1 cascade prices their corroboration normally and `notes` flags preprint status. Abstract-only ingestion caps credibility at 3 (anti-pattern B9).
+
 ### Tier 2 — Institutional / Industry research / Established press
 
 ```

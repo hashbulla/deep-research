@@ -27,6 +27,8 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `scripts/verify_gates.py` | Deterministic gate verification (stdlib-only, zero network): artifact counts/ratios/medians, §4.1 cascade conformance, punycode, CWD-report hash, `--rigor critical` anchors | Runtime quality gates (Phase 0 hash check, Phase 6 artifact check) |
 | `scripts/github_rank.py` | Composite GitHub-repo ranking (scoring only, zero network — retrieval via `gh` CLI upstream) | GitHub deep-research ranking + fake-star gate |
 | `references/github-research.md` | GitHub SOTA-repo discovery pipeline (sharding, expert prior, ecosyste.ms, measurement protocol) | Conditional GitHub source |
+| `references/academic-research.md` | Scholarly pipeline (OpenAlex ‖ arXiv → S2 → expansion → legal-OA), dual-track ranking, Exa/Valyu decision | Conditional academic source |
+| `scripts/academic_graph.py` | Dual-track paper ranking + BibTeX/RIS export (scoring only, zero network) | Academic reading-list ranking |
 | `references/model-tiers.md` | Model-tier policy + subagent override mechanics (D-4) | Tier selection |
 | `tests/check-cross-references.sh` | Walks markdown links + `[R§n]`/`[R§n.m]` back-refs (methodology, anti-patterns, SKILL.md prose), exits non-zero on miss | Link integrity |
 | `tests/check-example-invariants.sh` | jq cross-file validation of the example sources/evidence pair (IDs, cascade, routing, counts) | Example conformance to the skill's own gates |

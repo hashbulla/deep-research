@@ -52,6 +52,7 @@ SCORELESS_TOOLS = {
     "tavily_crawl",
     "context7_query_docs",
     "gh_cli",
+    "academic_api",
     "WebSearch",
 }
 
