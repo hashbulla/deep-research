@@ -241,6 +241,8 @@ gartner.com, mckinsey.com, hbr.org, mitsloan.mit.edu
 
 → Admiralty reliability **B**. Default Tier 1+2 union for `--profile mixed` / `technical` / `current-affairs`.
 
+**Context7 documentation chunks** (conditional source, `references/tool-routing.md` §Context7): canonical vendor documentation served as chunks. Tier 1 when the mapped canonical URL belongs to an official docs domain already in Tier 1 (e.g. `docs.python.org`); Tier 2 otherwise (vendor-official but not registry-listed). Provenance is `doc_provenance: {library_id, version, section}` mapped to the canonical URL; the chunk passes the full Phase-2 battery like any other source.
+
 ### Tier 3 — Trade press / Technical blogs with editorial standards
 
 ```

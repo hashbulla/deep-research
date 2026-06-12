@@ -132,6 +132,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | ![Tavily MCP](https://img.shields.io/badge/Tavily_MCP-required-1F2328?style=flat-square) | Every retrieval call. `WebSearch` is fallback only. | Visible in `/mcp` |
 | ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Only for installing from this repo | `gh auth status` |
 | ![python3](https://img.shields.io/badge/Python_3.10%2B-required-3776AB?style=flat-square) | Runs `scripts/verify_gates.py` (stdlib-only, zero network) for deterministic gate verification | `python3 --version` |
+| ![Context7 MCP](https://img.shields.io/badge/Context7_MCP-optional-6B7280?style=flat-square) | Version-current library docs on technical runs naming a dependency. Absent → graceful Tavily degradation | Visible in `/mcp` |
 
 > **Verify Tavily is registered before invoking:**
 >

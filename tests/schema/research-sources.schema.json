@@ -82,8 +82,20 @@
           "tavily_extract",
           "tavily_map",
           "tavily_crawl",
+          "context7_query_docs",
           "WebSearch"
         ]
+      },
+      "doc_provenance": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Provenance for chunk-based documentation sources (Context7). The record's url field carries the canonical documentation URL the chunk maps to.",
+        "required": ["library_id", "section"],
+        "properties": {
+          "library_id": { "type": "string", "minLength": 1 },
+          "version": { "type": ["string", "null"] },
+          "section": { "type": "string", "minLength": 1 }
+        }
       },
       "retrieval_query": {
         "type": "string"

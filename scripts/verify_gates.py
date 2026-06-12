@@ -46,7 +46,7 @@ LABELS = {
     6: "UNVERIFIED",
 }
 SOURCE_FLOORS = {"short": 15, "standard": 35, "exhaustive": 100}
-SCORELESS_TOOLS = {"tavily_extract", "tavily_map", "tavily_crawl", "WebSearch"}
+SCORELESS_TOOLS = {"tavily_extract", "tavily_map", "tavily_crawl", "context7_query_docs", "WebSearch"}
 
 
 def cascade(s12: int, s1: int, c: int) -> int:

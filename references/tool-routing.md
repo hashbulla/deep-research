@@ -61,7 +61,28 @@ mcp__tavily__tavily_research(
 6. **Is a single authoritative site the primary source (e.g., an official regulatory site)?** → `tavily_crawl` with `instructions` describing what to collect.
 7. **Is this a library / SDK doc question?** → The skill should not have activated. Route the user to `tavily_skill` directly and exit.
 
-## Non-Tavily tools
+## Conditional non-Tavily source: Context7 (version-current library docs)
+
+OPTIONAL source (methodology §7 optional-source rule applies: MCP absent or quota exhausted → degrade to Tavily, record in the Methodology note, declare at the human gate).
+
+**Gating — ALL three conditions, checked at Phase 0; otherwise zero Context7 calls** (free tier is 1,000 calls/month — never auto-invoke broadly):
+
+1. Query classified `technical`, AND
+2. a **named dependency** appears in the question or a sub-question (library / framework / SDK / CLI / cloud service, optionally with a version), AND
+3. the sub-question intent is *integrate / configure / debug / migrate / understand* that dependency's surface.
+
+| Intent | Route |
+|---|---|
+| Version-specific API surface, CLI flags, cloud config, version migration of a NAMED dependency | `mcp__context7__resolve-library-id` → `mcp__context7__query-docs` (confirm library + version in one sentence; mention the version in the query for pinning) |
+| Comparative research across libraries (X vs Y vs Z) | Tavily — Context7 is per-library; never gate-passes comparative sub-questions |
+| Pure CS concepts, business logic, the user's own code | Neither — out of the skill's Context7 scope entirely |
+| `query-docs` returns "Documentation not found or not finalized for this version" | Escalate to `mcp__tavily__tavily_skill` (`library`, `language`, `task`), then ordinary `tavily_search` |
+
+**Grading & provenance.** Context7 chunks are canonical vendor documentation → Tier 1 (official docs domain) or Tier 2 per the registry (§6). Context7 returns chunks, not URLs: each cited chunk becomes a `research-sources.json` record with `retrieval_tool: "context7_query_docs"`, `url` set to the canonical documentation URL the chunk maps to, `tavily_score: null` (score-less tool), and `doc_provenance: {library_id, version, section}`. Cache lookups per `library_id + version` within a run — never re-query the same pair.
+
+**Phase placement.** Phase 1 (doc retrieval for gated sub-questions, alongside Tavily) and Phase 4 (targeted follow-up on a specific API section). All Context7-sourced chunks pass the full Phase-2 gate battery like any other source. `research-plan.md` declares which libraries/versions will be queried — visible at the human gate.
+
+## Non-Tavily fallback tools
 
 - **Built-in `fetch` MCP** — **do not use** for citation retrieval. Raw HTML from arbitrary URLs is a prompt-injection vector (per the user's global CLAUDE.md). `fetch` is acceptable only for raw markdown diagnostics of a URL *already* graded and cited via Tavily.
 - **Built-in `WebSearch`** — fallback only. Document every use.

@@ -94,7 +94,8 @@ Array of source records. One record per cited URL.
 - `domain_tier` — integer 1–4.
 - `admiralty_reliability` — one of `A`, `B`, `C`, `D`, `E`, `F`.
 - `tavily_score` — float 0–1, or `null` when the retrieval tool does not return a score (`tavily_extract`, `tavily_map`, `tavily_crawl`, `WebSearch` fallback). Never fabricate a score; a null-score source documents its admission path in `notes`.
-- `retrieval_tool` — which `mcp__tavily__*` surfaced this result (or `WebSearch` on fallback).
+- `retrieval_tool` — which `mcp__tavily__*` surfaced this result, `context7_query_docs` for documentation chunks, or `WebSearch` on fallback.
+- `doc_provenance` — optional object, required for Context7 chunks: `{library_id, version, section}`; the record's `url` carries the canonical documentation URL the chunk maps to.
 - `retrieval_query` — exact query string used.
 - `sub_questions` — array of sub-question IDs referenced in the plan.
 - `primary_source` — boolean. True for original research / regulation / dataset; false for commentary or summary.
