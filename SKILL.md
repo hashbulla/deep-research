@@ -110,15 +110,16 @@ Apply grading rules from `references/methodology.md` §"Source grading" (distill
 
 1. For narrow sub-questions needing multi-step synthesis across sources, delegate to `mcp__tavily__tavily_research` with `model=pro` (exhaustive) or `model=mini` (standard narrow questions). See `references/tool-routing.md` for selection rules.
 2. For specific high-value URLs identified during rerank (e.g., a key paper), pull full content with `mcp__tavily__tavily_extract extract_depth=advanced`.
-3. Write `research-report.md` following the structure in `references/report-structure.md`:
+3. **Re-grade late sources.** Any source first surfaced in Phase 4 (cited inside `tavily_research` output, or pulled via `tavily_extract`) must pass the full Phase-2 gate battery (score threshold, tier classification, CRAAP, punycode normalization, dedupe) before it may support any claim. No grading bypass for late-discovered sources.
+4. Draft `research-report.md` in working memory following the structure in `references/report-structure.md`:
    - Executive summary (≤5 bullets)
    - One section per sub-question with inline `[^n]` citations
    - Contradictions & open debates section
    - Needs Verification section (single-source or ≤1 Tier 1/2 corroboration)
    - Methodology note (tier profile, source counts, stop conditions triggered)
    - Footnote-style source list (title, publisher, date, URL, Admiralty grade, sub-questions covered)
-4. Use surgical quotes only. Never dump raw extract content into the report (forbidden, `references/anti-patterns.md`).
-5. Emit `research-sources.json` and `research-evidence.json` in parallel. Schemas in `references/report-structure.md`.
+5. Use surgical quotes only. Never dump raw extract content into the report draft (forbidden, `references/anti-patterns.md`).
+6. Draft `research-sources.json` and `research-evidence.json` rows in parallel. Schemas in `references/report-structure.md`. **No artifact file is written in this phase** — all four artifacts are written atomically at the end of Phase 6 (anti-pattern B11).
 
 ### Phase 5 — Grounding Validation (CRAG loop, report §5.3)
 
@@ -128,7 +129,7 @@ Apply grading rules from `references/methodology.md` §"Source grading" (distill
    - Source quality (% Tier 1/2 among cited sources)
    - Corroboration rate (% claims with ≥`--min-corroboration` independent sources)
    - Freshness (median publication date)
-3. If groundedness `< 0.95` or corroboration `< 0.80`, run one CRAG re-query loop: identify the weakest claims, rewrite the query, re-retrieve via `tavily_search`, update the report. Max 2 CRAG iterations — if gates still fail, emit the report with the failing claims explicitly moved to "Needs Verification".
+3. If groundedness `< 0.95` or corroboration `< 0.80`, run one CRAG re-query loop: identify the weakest claims, rewrite the query, re-retrieve via `tavily_search`, update the draft. Every source retrieved during a CRAG iteration passes the full Phase-2 gate battery before citation. Max 2 CRAG iterations per failing sub-question AND ≤6 total per run (prioritize sub-questions by ascending groundedness; the runtime table in `references/quality-gate.md` wins on conflict) — if gates still fail, finalize the draft with the failing claims explicitly moved to "Needs Verification".
 
 ### Phase 6 — Confidence Annotation
 
@@ -146,7 +147,7 @@ Apply grading rules from `references/methodology.md` §"Source grading" (distill
 
    Tier 3 sources never change the level (secondary corroborators only, alongside ≥1 Tier 1/2 source).
 2. Route by label: credibility 1 may appear anywhere including the executive summary; 2–3 in the main body with inline tags; isolate all 4–6 claims into the "Needs Verification" section.
-3. Final artifacts:
+3. Write all four artifacts atomically to the invocation CWD — this is the first and only artifact write of the run:
    - `research-plan.md` (Phase 0, already approved)
    - `research-report.md` (final synthesis)
    - `research-sources.json` (all cited sources, full schema)
@@ -170,13 +171,14 @@ All artifacts written to the invocation CWD.
 - Do NOT dump raw `tavily_extract` content into `research-report.md`. Quotes must be surgical (≤3 sentences) and attributed.
 - Do NOT skip the CRAG loop when gates fail. Either re-query or move the failing claim to "Needs Verification".
 - Do NOT output unrelated commentary, suggestions for further research beyond the plan, or meta-discussion of the skill's own design. Emit only the four artifacts.
+- Any retrieval source beyond the Tavily MCP suite is OPTIONAL. If its MCP server, CLI, or credential is absent or persistently failing, degrade to Tavily-only retrieval, record the degradation in the Methodology note, and surface it in `research-plan.md` at the human gate.
 - Do NOT paginate or stream a report while phases are still running. Write artifacts atomically at end of Phase 6.
 
 ## Edge Cases
 
 - **Report file missing from CWD.** `references/methodology.md` is the skill-local authoritative copy; proceed using it. Do NOT downgrade methodology discipline.
 - **Input question is missing or ambiguous.** Ask the user one clarifying question before Phase 0. If the user confirms ambiguity is intentional (open-ended exploration), classify as `mixed` and decompose across all four sub-question categories.
-- **Language mismatch between flag and question.** The flag wins. Translate the question internally but preserve original-language key terms for search queries (report §4 on Authority: domain-language match boosts relevance).
+- **Language mismatch between flag and question.** The flag wins. Translate the question internally but preserve original-language key terms for search queries — proper nouns and domain-specific terminology retrieve better in their source language.
 - **User-provided `--domains` conflicts with tier profile.** Union them; never drop user-specified domains. Flag any user-added domain below Tier 2 in `research-plan.md` for confirmation before Phase 1.
 - **Tavily returns `score < 0.7` across an entire sub-question.** Do not proceed with low-quality sources. Either broaden the allowlist (add adjacent Tier 1/2 domains), rephrase the sub-question, or mark the sub-question as "Insufficient sources — moved to Needs Verification" in the final report.
 - **Tavily research endpoint hits rate limit (20 req/min).** Back off with exponential delay (30s, 60s, 120s) up to 3 retries. If still failing, degrade to `tavily_search` + manual multi-step decomposition for the affected sub-questions.
@@ -184,7 +186,7 @@ All artifacts written to the invocation CWD.
 - **Paywalled sources (report §11).** Prefer open-access equivalents (PubMed Central, arXiv preprint of a journal paper). If only abstract is retrievable, flag the claim as `admiralty_credibility: 3` unless a second independent source corroborates.
 - **Two phases produce contradicting claims from equally authoritative sources.** Do not silently pick one. List both in a "Contradictions & open debates" subsection with each side's evidence. This is explicit report guidance (§1, §5.3 CRAG handling).
 - **User asks for a re-run with different flags.** Re-run from Phase 0. Do not reuse prior `research-sources.json` without re-grading — scores and freshness may have shifted.
-- **Exhaustive run trending under 100 sources by end of Phase 3.** Expand domain allowlist to full Tier 1+2 union and add 2–4 contextual / recency sub-questions before Phase 4. The 100-source target is a quality calibration, not a ceiling (report §1 "dozens of searches against hundreds of sources").
+- **Exhaustive run trending under 100 sources by end of Phase 3.** Expand domain allowlist to full Tier 1+2 union and add 2–4 contextual / recency sub-questions before Phase 4. **One expansion round maximum** — if the run still trends under 100 after it, proceed to Phase 4 and document the shortfall in the Methodology note. The 100-source target is a quality calibration, not a hard contract (report §1 "dozens of searches against hundreds of sources").
 
 ## Examples
 

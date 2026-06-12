@@ -315,7 +315,7 @@ Full thresholds in [`references/quality-gate.md`](references/quality-gate.md).
 
 ## Architecture
 
-Six-phase orchestrator, single `SKILL.md` entry point, methodology externalized into reference files loaded on demand.
+Seven-phase orchestrator, single `SKILL.md` entry point, methodology externalized into reference files loaded on demand.
 
 ```mermaid
 graph LR
@@ -391,7 +391,7 @@ Research endpoint is capped at 20 req/min. The skill backs off at 30s → 60s �
 <details>
 <summary><strong>Exhaustive run came back with &lt; 100 sources</strong></summary>
 
-The skill expands the allowlist to the Tier 1+2 union and adds 2–4 contextual/recency sub-questions automatically before proceeding to Phase 4. If it still falls short, the Methodology note documents why (e.g., narrow topic, paywall-dominant domain). The 100+ target is a quality calibration, not a hard contract.
+The skill runs a single expansion round — allowlist broadened to the Tier 1+2 union, 2–4 contextual/recency sub-questions added — before proceeding to Phase 4. If it still falls short after that round, it proceeds anyway and the Methodology note documents why (e.g., narrow topic, paywall-dominant domain). The 100+ target is a quality calibration, not a hard contract.
 </details>
 
 <details>
