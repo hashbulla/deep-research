@@ -493,7 +493,8 @@ deep-research/
 ├── scripts/
 │   ├── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
 │   ├── github_rank.py                     # composite GitHub-repo ranking (scoring only, zero network)
-│   └── academic_graph.py                  # dual-track paper ranking + BibTeX/RIS export (zero network)
+│   ├── academic_graph.py                  # dual-track paper ranking + BibTeX/RIS export (zero network)
+│   └── eval_harness/                      # 5-layer verification harness (judge prompts + secret-gated CI runner)
 ├── experts.yaml.example                   # anonymous template — the real seed lives user-scope, outside the repo
 ├── references/
 │   ├── methodology.md
