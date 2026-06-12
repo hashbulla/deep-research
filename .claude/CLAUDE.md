@@ -24,7 +24,10 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `evals/` | Loading (≥12+12 incl. territorial negatives), progressive (≥8), e2e (≥3) fixtures + `rubric.md` | Activation + disclosure + mechanical e2e checks |
 | `CHANGELOG.md` | Semver release history, append-only | Release notes, waivers |
 | `gotchas-log.md` | Maintainer traps (trigger/gotcha/resolution/guard) + perishable-asset maintenance cadences | Operational memory |
-| `scripts/verify_gates.py` | Deterministic gate verification (stdlib-only, zero network): artifact counts/ratios/medians, §4.1 cascade conformance, punycode, CWD-report hash | Runtime quality gates (Phase 0 hash check, Phase 6 artifact check) |
+| `scripts/verify_gates.py` | Deterministic gate verification (stdlib-only, zero network): artifact counts/ratios/medians, §4.1 cascade conformance, punycode, CWD-report hash, `--rigor critical` anchors | Runtime quality gates (Phase 0 hash check, Phase 6 artifact check) |
+| `scripts/github_rank.py` | Composite GitHub-repo ranking (scoring only, zero network — retrieval via `gh` CLI upstream) | GitHub deep-research ranking + fake-star gate |
+| `references/github-research.md` | GitHub SOTA-repo discovery pipeline (sharding, expert prior, ecosyste.ms, measurement protocol) | Conditional GitHub source |
+| `references/model-tiers.md` | Model-tier policy + subagent override mechanics (D-4) | Tier selection |
 | `tests/check-cross-references.sh` | Walks markdown links + `[R§n]`/`[R§n.m]` back-refs (methodology, anti-patterns, SKILL.md prose), exits non-zero on miss | Link integrity |
 | `tests/check-example-invariants.sh` | jq cross-file validation of the example sources/evidence pair (IDs, cascade, routing, counts) | Example conformance to the skill's own gates |
 | `tests/check-provenance.sh` | Re-computes SHA-256 of `deep-research-report.md` vs the `Hash at generation time:` line in SKILL.md | Provenance invariant |
