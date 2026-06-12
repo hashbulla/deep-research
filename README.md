@@ -44,8 +44,8 @@ research-evidence.json   # claim → source mapping, credibility 1–6
 ```markdown
 # Impact of the EU AI Act on open-source model providers in 2026
 
-> Research date: 2026-04-17 · Length: standard
-> Source count: 42/71 · Tier 1/2 share: 86% · Median date: 2025-09-14
+> Research date: 2026-04-17 · Length: short
+> Source count: 16/28 · Tier 1/2 share: 94% · Median date: 2025-09-08
 
 ## Executive summary
 
