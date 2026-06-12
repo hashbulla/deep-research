@@ -83,6 +83,7 @@
           "tavily_map",
           "tavily_crawl",
           "context7_query_docs",
+          "gh_cli",
           "WebSearch"
         ]
       },

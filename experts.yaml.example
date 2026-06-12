@@ -1,0 +1,20 @@
+# experts.yaml — anonymous template (the REAL file lives user-scope, OUTSIDE this
+# public repository: ~/.claude/deep-research/experts.yaml — it encodes personal
+# curation and opinions about real people, which never belong in a public repo).
+#
+# Per-domain GitHub handles whose starred repositories act as the
+# expert-overlap prior in references/github-research.md. Build the inverted
+# index with:
+#   gh api "users/<handle>/starred" --paginate --jq '.[].full_name'
+# and cache it (quarterly refresh — see gotchas-log.md maintenance cadences).
+# When this file is absent, the expert-overlap component is dropped and its
+# weight is redistributed (scripts/github_rank.py prints the effective weights).
+
+domains:
+  vector-databases:
+    - example-expert-handle-1
+    - example-expert-handle-2
+  llm-orchestration:
+    - example-expert-handle-3
+  observability:
+    - example-expert-handle-4

@@ -130,7 +130,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | ![Claude Code](https://img.shields.io/badge/Claude_Code-required-7C3AED?style=flat-square) | Runtime for the skill | `claude --version` |
 | ![Opus](https://img.shields.io/badge/Opus/Sonnet_4.6%2B-recommended-E04E2A?style=flat-square) | Synthesis quality and Admiralty discipline benefit from top-tier reasoning | `/model opus` |
 | ![Tavily MCP](https://img.shields.io/badge/Tavily_MCP-required-1F2328?style=flat-square) | Every retrieval call. `WebSearch` is fallback only. | Visible in `/mcp` |
-| ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Only for installing from this repo | `gh auth status` |
+| ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Installing from this repo, and GitHub deep research (SOTA-repo discovery). Absent → graceful Tavily degradation | `gh auth status` |
 | ![python3](https://img.shields.io/badge/Python_3.10%2B-required-3776AB?style=flat-square) | Runs `scripts/verify_gates.py` (stdlib-only, zero network) for deterministic gate verification | `python3 --version` |
 | ![Context7 MCP](https://img.shields.io/badge/Context7_MCP-optional-6B7280?style=flat-square) | Version-current library docs on technical runs naming a dependency. Absent → graceful Tavily degradation | Visible in `/mcp` |
 
@@ -351,7 +351,8 @@ graph LR
 ├── SKILL.md                               # Orchestrator — 7 phases, human gate, provenance block
 ├── deep-research-report.md                # Methodology source of truth (cited below)
 ├── scripts/
-│   └── verify_gates.py                    # Deterministic gate verification (stdlib-only, zero network)
+│   ├── verify_gates.py                    # Deterministic gate verification (stdlib-only, zero network)
+│   └── github_rank.py                     # Composite GitHub-repo ranking (scoring only, zero network)
 └── references/
     ├── methodology.md                     # Full distillation — tier registry, Admiralty, CRAAP, CRAG
     ├── tool-routing.md                    # Tavily MCP tool selection per intent
@@ -360,6 +361,7 @@ graph LR
     ├── anti-patterns.md                   # Non-negotiables (no fabricated URLs, no WebSearch, etc.)
     ├── research-plan-template.md          # Phase 0 scaffold
     ├── model-tiers.md                     # Model-tier policy (opus default, fable opt-in)
+    ├── github-research.md                 # GitHub SOTA-repo discovery (sharding, expert prior, fake-star gate)
     └── examples.md                        # Worked examples (read on demand)
 ```
 
@@ -487,7 +489,9 @@ deep-research/
 ├── SKILL.md                               # skill entry point
 ├── deep-research-report.md                # methodology source of truth
 ├── scripts/
-│   └── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
+│   ├── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
+│   └── github_rank.py                     # composite GitHub-repo ranking (scoring only, zero network)
+├── experts.yaml.example                   # anonymous template — the real seed lives user-scope, outside the repo
 ├── references/
 │   ├── methodology.md
 │   ├── tool-routing.md
