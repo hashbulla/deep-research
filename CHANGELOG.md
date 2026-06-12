@@ -2,7 +2,9 @@
 
 All notable changes to the deep-research skill. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is semver. Append-only: new entries go on top, old entries are never rewritten.
 
-## [Unreleased]
+## [0.3.0] — 2026-06-12
+
+The AI-119 refonte: model tiers, grounding spine with rigor profiles, three new conditional retrieval sources, credibility overlay, and the permanent five-layer eval harness — all Claude-Code-native (decision D-4: zero API keys for consumers; a standard non-confidential run still needs nothing beyond the Tavily MCP and finishes in its usual budget).
 
 ### Added
 
