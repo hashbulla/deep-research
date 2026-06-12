@@ -152,6 +152,8 @@ Claude Code discovers the skill automatically. No restart needed.
 | `--exclude` | comma list | tier blocklist | Additional blocklist |
 | `--profile` | `academic` \| `technical` \| `current-affairs` \| `mixed` | inferred | Selects `include_domains` baseline from the tier registry |
 | `--min-corroboration` | int ≥ 1 | `2` | Min independent Tier 1/2 sources required to mark a claim CONFIRMED |
+| `--model` | `opus` \| `fable` | `opus` | Synthesis tier — Claude-Code-native (session model + subagent overrides, zero API keys). Fable 5 is opt-in at ~2× cost ([details](references/model-tiers.md)) |
+| `--confidential` | flag | off | Confidential-path run: subagents receive neutral references only; rigor escalates ([details](references/model-tiers.md)) |
 
 ---
 
@@ -356,6 +358,7 @@ graph LR
     ├── quality-gate.md                    # Deterministic thresholds, CRAG triggers
     ├── anti-patterns.md                   # Non-negotiables (no fabricated URLs, no WebSearch, etc.)
     ├── research-plan-template.md          # Phase 0 scaffold
+    ├── model-tiers.md                     # Model-tier policy (opus default, fable opt-in)
     └── examples.md                        # Worked examples (read on demand)
 ```
 

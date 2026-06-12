@@ -2,6 +2,12 @@
 
 All notable changes to the deep-research skill. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is semver. Append-only: new entries go on top, old entries are never rewritten.
 
+## [Unreleased]
+
+### Added
+
+- `references/model-tiers.md` + `--model` / `--confidential` flags (AI-120, decision D-4): Claude-Code-native model-tier selection — opus default, fable opt-in at ~2× cost, subagent `model` overrides, zero SDK calls and zero API keys. Plan template declares the tier at the human gate. Corrects the original cost estimate: Fable 5 shares the Opus 4.8 tokenizer, so the multiple is ~2× (price), not ~2.6× (facts verified against the claude-api skill, 2026-06-12).
+
 ## [0.2.0] — 2026-06-12
 
 Hardening release driven by three independent reviews run on 2026-06-12: a manual adversarial review (18 findings, ADV-1→18), a `/skill-harness` run (#1, uncalibrated — 6.6/10 FAIL: D4 eval coverage, D5 append-mostly hygiene), and an adversarial review of the remediation plan itself (13 findings, PR-1→13).

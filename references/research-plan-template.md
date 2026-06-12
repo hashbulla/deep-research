@@ -19,6 +19,8 @@ Written to `research-plan.md` at the end of Phase 0. **User must approve before 
 **Output language:** <fr | en | ...>
 **Recency window:** <--since value or "last 3 years default">
 **Min corroboration:** <integer, default 2>
+**Model tier:** session model <observed via /model> · synthesis <opus | fable (opt-in, ~2× cost)> · subagent overrides <e.g., grading=sonnet, entailment judge=different Claude model> — see `references/model-tiers.md`. <If `--model fable` but the session runs another model: recommend `/model fable` before approval.>
+**Confidential path:** <yes — subagents receive neutral references only, rigor=critical | no>
 
 ## 2. Sub-question decomposition
 
