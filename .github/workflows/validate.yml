@@ -26,3 +26,6 @@ jobs:
 
       - name: Check JSON artifact schemas
         run: bash tests/check-schema.sh tests/fixtures/research-sources.json tests/fixtures/research-evidence.json
+
+      - name: Check example cross-file invariants (cascade, routing, counts)
+        run: bash tests/check-example-invariants.sh
