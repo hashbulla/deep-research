@@ -133,6 +133,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | ![gh CLI](https://img.shields.io/badge/gh_CLI-optional-6B7280?style=flat-square) | Installing from this repo, and GitHub deep research (SOTA-repo discovery). Absent → graceful Tavily degradation | `gh auth status` |
 | ![python3](https://img.shields.io/badge/Python_3.10%2B-required-3776AB?style=flat-square) | Runs `scripts/verify_gates.py` (stdlib-only, zero network) for deterministic gate verification | `python3 --version` |
 | ![Context7 MCP](https://img.shields.io/badge/Context7_MCP-optional-6B7280?style=flat-square) | Version-current library docs on technical runs naming a dependency. Absent → graceful Tavily degradation | Visible in `/mcp` |
+| ![Newsletter corpus](https://img.shields.io/badge/Newsletter_corpus-optional-6B7280?style=flat-square) | Folds the maintainer's curated daily briefs into work-relevant runs as a routing signal. Absent → graceful Tavily degradation | `ls ~/.claude/deep-research/newsletter-corpus/` |
 
 > **Verify Tavily is registered before invoking:**
 >
@@ -181,7 +182,7 @@ flowchart TD
         direction LR
         R1["tavily_search<br/>search_depth=advanced"] --> R2["tavily_map<br/>for domain discovery"]
         R2 --> R3["Paced under 20 req/min"]
-        R3 --> R4["Conditional sources<br/>declared in the plan:<br/>GitHub · academic · Context7<br/>→ graceful Tavily degradation"]
+        R3 --> R4["Conditional sources<br/>declared in the plan:<br/>GitHub · academic · Context7 · newsletter-signal<br/>→ graceful Tavily degradation"]
     end
 
     P1 --> P2
@@ -368,6 +369,7 @@ graph LR
     ├── model-tiers.md                     # Model-tier policy (opus default, fable opt-in)
     ├── github-research.md                 # GitHub SOTA-repo discovery (sharding, expert prior, fake-star gate)
     ├── academic-research.md               # Scholarly pipeline (open graph, dual-track, OA-only ingestion)
+    ├── newsletter-signal.md               # Curated-feed routing source (local FTS5 corpus, never cited)
     └── examples.md                        # Worked examples (read on demand)
 ```
 
@@ -382,7 +384,8 @@ graph LR
 | Source grading | NATO Admiralty 2×6 | Intelligence-grade provenance, usable by humans, deterministic |
 | Contradiction handling | Dedicated report section | Report §1 stage 4 — never silent, never auto-resolve between equally authoritative sources |
 | Gate verification | `scripts/verify_gates.py` (stdlib-only, zero network) | Counts, ratios, medians, cascade conformance, and the CWD-report SHA-256 are script-verified at runtime — LLM-self-reported metrics are not gates |
-| Conditional retrieval sources | GitHub / academic / Context7, gated at Phase 0 | Declared in the plan, fire only when relevant; any absent MCP/CLI/credential degrades gracefully to Tavily-only and is recorded in the Methodology note |
+| Conditional retrieval sources | GitHub / academic / Context7 / newsletter-signal, gated at Phase 0 | Declared in the plan, fire only when relevant; any absent MCP/CLI/credential/corpus degrades gracefully to Tavily-only and is recorded in the Methodology note |
+| Newsletter-signal grading | Routing signal, never a citable record | The brief seeds retrieval; the pointed-to URL is graded normally and tagged `surfaced via newsletter-signal corpus <date>`. Avoids circular "my own digest said so" authority |
 | Rigor profiles | `standard` default · `critical` (implied by `--confidential`) | The everyday instrument stays fast; high-stakes runs escalate to entailment-on-every-claim, refuse-if-no-source, mandatory anchors, and a Phase-0 sycophancy probe |
 | Model selection | Claude-Code-native (session model + subagent overrides), zero API keys | Consumers are Claude Max users without keys; Opus 4.8 default, Fable 5 opt-in via `--model`, no SDK client |
 | Fidelity judge | Decorrelated subagent on a *different* Claude model, claim + span only | Breaks same-model self-evaluation circularity without an external key; external Gemini/GPT judges were evaluated and dropped (zero-key contract) |
@@ -444,6 +447,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 | **Add a sub-question category** | Edit `SKILL.md` Phase 0 step 4 and mirror in [`references/research-plan-template.md`](references/research-plan-template.md). |
 | **Change default length calibration** | Edit the "Length calibration" table in [`references/methodology.md`](references/methodology.md). |
 | **Swap Tavily for another MCP** | Edit [`references/tool-routing.md`](references/tool-routing.md) and the Phase 1 / Phase 4 call templates in `SKILL.md`. Keep the grading phases intact — they are MCP-agnostic. |
+| **Feed the newsletter-signal corpus** | Drop redacted `briefs/YYYY-MM.jsonl` files (schema: [`tests/schema/newsletter-corpus-record.schema.json`](tests/schema/newsletter-corpus-record.schema.json)) into `~/.claude/deep-research/newsletter-corpus/` — user-scope, outside this repo, sibling to `experts.yaml`. A producer (e.g. a newsletter agent) commits them via the GitHub Contents API; the skill reads a local clone. See [`references/newsletter-signal.md`](references/newsletter-signal.md). |
 
 ---
 
@@ -459,6 +463,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | Unicode homograph defense (punycode normalization of every domain) |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 100+ source exhaustive calibration |
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Conditional retrieval sources — GitHub SOTA-repo discovery, academic open-graph pipeline (OpenAlex / arXiv / Semantic Scholar), Context7 docs |
+| ![0.4.0](https://img.shields.io/badge/-0.4.0-059669?style=flat-square) | Newsletter-signal conditional source — folds the maintainer's curated daily briefs into work-relevant runs via a local FTS5 corpus (routing signal, never cited) |
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Claude-Code-native model tiers (Opus default, Fable 5 opt-in) + `critical` rigor profile |
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Decorrelated entailment judge (different Claude model) — breaks LLM-as-judge circularity with no external key |
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | MBFC credibility overlay on the tier registry (flag / downgrade at the margin) |
@@ -512,6 +517,7 @@ deep-research/
 │   ├── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
 │   ├── github_rank.py                     # composite GitHub-repo ranking (scoring only, zero network)
 │   ├── academic_graph.py                  # dual-track paper ranking + BibTeX/RIS export (zero network)
+│   ├── newsletter_search.py               # newsletter-signal corpus search (in-memory FTS5, zero network)
 │   └── eval_harness/                      # 5-layer verification harness (judge prompts + secret-gated CI runner)
 ├── experts.yaml.example                   # anonymous template — the real seed lives user-scope, outside the repo
 ├── references/
@@ -524,6 +530,7 @@ deep-research/
 │   ├── model-tiers.md                     # model-tier policy (opus default, fable opt-in)
 │   ├── github-research.md                 # GitHub SOTA-repo discovery
 │   ├── academic-research.md               # scholarly open-graph pipeline
+│   ├── newsletter-signal.md               # curated-feed routing source (local FTS5 corpus)
 │   └── examples.md                        # worked examples (read on demand)
 ├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts, gate-conformant)
 ├── evals/                                 # loading / progressive / e2e + sycophancy-probes + benchmark-testset + rubric

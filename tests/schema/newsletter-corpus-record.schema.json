@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hashbulla/deep-research/tests/schema/newsletter-corpus-record.schema.json",
+  "title": "Newsletter-signal corpus record",
+  "description": "One redacted signal item from a newsletter-watch-agent daily brief. Signal-items only: additionalProperties:false structurally forbids subject, sender_address/sender_domain, raw html, and q1/q2 manifests (the PII redaction boundary).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["date", "bucket", "kind", "source", "url"],
+  "properties": {
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "Brief date, ISO 8601 (YYYY-MM-DD)."
+    },
+    "bucket": {
+      "type": "string",
+      "enum": ["ai-engineering", "platform-ai-sre", "freelance-acquisition"]
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["top", "secondary", "tool"]
+    },
+    "headline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "not": { "pattern": "@" },
+      "description": "Publication / newsletter name. NEVER a sender email address. The @-guard (not/pattern) structurally enforces the redaction invariant: a full sender address can never reach the public corpus even if the producer prompt regresses. A bare sender domain remains prompt-enforced (structurally indistinguishable from a publication name)."
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^https?://",
+      "description": "Primary article URL — the URL claims ground to after normal Phase-2 grading."
+    },
+    "repo_url": {
+      "type": ["string", "null"],
+      "pattern": "^https?://"
+    },
+    "why": {
+      "type": ["string", "null"],
+      "description": "The agent's one-line relevance note (top signals)."
+    },
+    "tool_name": {
+      "type": ["string", "null"]
+    },
+    "one_liner": {
+      "type": ["string", "null"]
+    },
+    "brief_req_id": {
+      "type": ["string", "null"],
+      "description": "Optional provenance back to the brief run."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "enum": ["top", "secondary"] } } },
+      "then": { "required": ["headline"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "tool" } } },
+      "then": { "required": ["tool_name", "one_liner"] }
+    }
+  ]
+}
