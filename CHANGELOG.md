@@ -2,6 +2,12 @@
 
 All notable changes to the deep-research skill. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is semver. Append-only: new entries go on top, old entries are never rewritten.
 
+## [Unreleased]
+
+### Calibration log — `/skill-harness` run #2 (2026-06-12, uncalibrated 2/3)
+
+Evaluator verdict on 0.3.0: **PASS 8.94/10** (run #1: 6.6 FAIL) — 0 CRITICAL, 1 WARNING, 4 ADVISORY, 1 UNKNOWN; full report in the (uncommitted) `REVIEW.md`. Human-vs-evaluator agreement, measured against the pre-run human predictions: D4/D5 closures confirmed at 10.0 (agree), D3 token-budget risk materialized as the sole WARNING — load tier 6,733 tok vs the ~5k Anthropic Level-2 budget, context-budget justification absent from the 0.3.0 entry (agree; the human prediction said "overage documented in CHANGELOG 0.3.0" but the evaluator correctly noted the 0.3.0 budget remark concerns runtime cost, not context — evaluator stricter, accepted), D2 tax-test risk did not materialize at 9.0 (human over-predicted). Agreement 3/4; scores still not trusted at face value before run #3. D3 context-budget justification, recorded here per the evaluator's documentation-path fix: the 0.3.0 load tier rises to ~6,733 tok (soft 5,000 / hard 7,500) because the three conditional-source gates (GitHub, academic, Context7), the rigor profiles, and the new flag surface are load-bearing at Phase-0 plan-composition time and cannot move to `references/` without breaking the human-gate plan declaration; index tier 146 tok (soft 100 / hard 170) carries the waived 79-word dual-sibling description.
+
 ## [0.3.0] — 2026-06-12
 
 The AI-119 refonte: model tiers, grounding spine with rigor profiles, three new conditional retrieval sources, credibility overlay, and the permanent five-layer eval harness — all Claude-Code-native (decision D-4: zero API keys for consumers; a standard non-confidential run still needs nothing beyond the Tavily MCP and finishes in its usual budget).
