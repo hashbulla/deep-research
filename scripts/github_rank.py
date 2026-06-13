@@ -130,7 +130,9 @@ def main() -> int:
         raw["contributors"].append(math.log10((r.get("contributors_count") or 0) + 1))
 
         gate = fake_star_gate(stars, r.get("forks"), r.get("open_issues"), dep)
-        flags.append(bool(gate))
+        # gate is None only when all usage inputs are absent; old behavior treated
+        # that as usage=0, i.e. flagged iff stars>=500. Preserve that exactly.
+        flags.append((stars >= 500) if gate is None else gate)
 
     # Drop set-wide-unavailable components, renormalize the rest.
     active = {

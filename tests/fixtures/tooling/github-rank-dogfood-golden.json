@@ -1,0 +1,195 @@
+{
+  "effective_weights": {
+    "log_stars": 0.3636,
+    "recency": 0.3636,
+    "velocity": 0.2727
+  },
+  "dropped_components": [
+    "contributors",
+    "dependents",
+    "expert_overlap"
+  ],
+  "reference_date": "2026-06-13",
+  "ranking": [
+    {
+      "full_name": "punkpeye/awesome-mcp-servers",
+      "score": 0.8477,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 1.0,
+        "recency": 0.8976,
+        "velocity": 0.5782
+      },
+      "evidence": {
+        "stars": 89057,
+        "pushed_at": "2026-06-11T11:48:15Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "anthropics/claude-plugins-official",
+      "score": 0.7431,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.6455,
+        "recency": 1.0,
+        "velocity": 0.5308
+      },
+      "evidence": {
+        "stars": 30051,
+        "pushed_at": "2026-06-13T18:07:21Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "ComposioHQ/awesome-claude-skills",
+      "score": 0.7095,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.8944,
+        "recency": 0.3069,
+        "velocity": 1.0
+      },
+      "evidence": {
+        "stars": 64443,
+        "pushed_at": "2026-05-22T03:17:49Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "vercel-labs/agent-skills",
+      "score": 0.6827,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.6211,
+        "recency": 0.8511,
+        "velocity": 0.5405
+      },
+      "evidence": {
+        "stars": 27888,
+        "pushed_at": "2026-06-10T21:21:47Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "vercel-labs/skills",
+      "score": 0.672,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.5475,
+        "recency": 0.8976,
+        "velocity": 0.5375
+      },
+      "evidence": {
+        "stars": 22254,
+        "pushed_at": "2026-06-11T15:12:03Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "VoltAgent/awesome-claude-code-subagents",
+      "score": 0.4077,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.5396,
+        "recency": 0.4074,
+        "velocity": 0.2323
+      },
+      "evidence": {
+        "stars": 21725,
+        "pushed_at": "2026-05-27T10:45:40Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "hesreallyhim/awesome-claude-code",
+      "score": 0.3932,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.7869,
+        "recency": 0.0,
+        "velocity": 0.3927
+      },
+      "evidence": {
+        "stars": 46355,
+        "pushed_at": "2026-04-27T14:40:18Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "modelcontextprotocol/registry",
+      "score": 0.3769,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.1665,
+        "recency": 0.8511,
+        "velocity": 0.0254
+      },
+      "evidence": {
+        "stars": 6924,
+        "pushed_at": "2026-06-10T23:33:38Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "wong2/awesome-mcp-servers",
+      "score": 0.3636,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.0,
+        "recency": 1.0,
+        "velocity": 0.0
+      },
+      "evidence": {
+        "stars": 4156,
+        "pushed_at": "2026-06-13T03:35:37Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    },
+    {
+      "full_name": "travisvn/awesome-claude-skills",
+      "score": 0.1927,
+      "fake_star_suspect": false,
+      "components": {
+        "log_stars": 0.3827,
+        "recency": 0.0084,
+        "velocity": 0.1852
+      },
+      "evidence": {
+        "stars": 13432,
+        "pushed_at": "2026-04-28T19:30:24Z",
+        "dependents_count": null,
+        "contributors_count": 0,
+        "expert_stars": null,
+        "experts": []
+      }
+    }
+  ]
+}
