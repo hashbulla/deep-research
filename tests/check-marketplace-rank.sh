@@ -78,3 +78,43 @@ assert abs(rows["a/eval"]["relevance"]-1.0)<1e-9, rows["a/eval"]
 assert abs(rows["b/vat"]["relevance"]-0.4)<1e-9, rows["b/vat"]
 print("  T2 PASS")
 PY
+
+echo "== T3: trust-tier cascade is total + null-safe =="
+cat > tests/fixtures/tooling/tiers.json <<'JSON'
+[
+ {"id":"official_verified","dedup_key":"o/v","channels":["mcp-registry"],"categories":["mcp-server"],"category_fit":1,
+  "official":true,"verified_namespace":true,"official_publisher":false,"last_activity_days":10,
+  "stars":900,"forks":50,"open_issues":3,"dependents_count":7,"adoption":7,"use_count":null,
+  "unverified":false,"releases_count":2,"signed":true,"provenance":"mcp-registry","is_meta_list":false,"install_command":"x"},
+ {"id":"official_null_div","dedup_key":"o/n","channels":["mcp-registry"],"categories":["mcp-server"],"category_fit":1,
+  "official":true,"verified_namespace":true,"official_publisher":false,"last_activity_days":10,
+  "stars":null,"forks":null,"open_issues":null,"dependents_count":null,"adoption":null,"use_count":null,
+  "unverified":false,"releases_count":null,"signed":null,"provenance":"mcp-registry","is_meta_list":false,"install_command":"x"},
+ {"id":"community_active","dedup_key":"c/a","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":20,
+  "stars":300,"forks":2,"open_issues":1,"dependents_count":5,"adoption":5,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,"install_command":"x"},
+ {"id":"gap_120d_nulladopt","dedup_key":"g/1","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":120,
+  "stars":300,"forks":2,"open_issues":1,"dependents_count":null,"adoption":null,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,"install_command":"x"},
+ {"id":"stale","dedup_key":"s/1","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":true,"verified_namespace":true,"official_publisher":false,"last_activity_days":400,
+  "stars":300,"forks":2,"open_issues":1,"dependents_count":5,"adoption":5,"use_count":null,
+  "unverified":false,"releases_count":1,"signed":true,"provenance":"github","is_meta_list":false,"install_command":"x"},
+ {"id":"all_null","dedup_key":"a/n","channels":["mcp-registry"],"categories":["eval"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":null,
+  "stars":null,"forks":null,"open_issues":null,"dependents_count":null,"adoption":null,"use_count":null,
+  "unverified":true,"releases_count":null,"signed":null,"provenance":"mcp-registry","is_meta_list":false,"install_command":"x"}
+]
+JSON
+T3_OUT=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/tiers.json)
+python3 - "$T3_OUT" <<'PY'
+import json,sys
+r={x["id"]:x["trust_tier"] for x in json.loads(sys.argv[1])["ranking"]}
+exp={"official_verified":"VERIFIED","official_null_div":"COMMUNITY","community_active":"MAINTAINED",
+     "gap_120d_nulladopt":"COMMUNITY","stale":"CAUTION","all_null":"CAUTION"}
+for k,v in exp.items():
+    assert r.get(k)==v, f"{k}: got {r.get(k)} want {v}"
+print("  T3 PASS (totality + null-safety verified)")
+PY

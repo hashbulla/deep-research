@@ -15,6 +15,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 from github_rank import fake_star_gate  # noqa: E402
@@ -29,11 +30,42 @@ DEFAULT_CATEGORY_HAT = {
 }
 
 
-def load_json(path: str):
+def load_json(path: str) -> Any:
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         sys.exit(f"FAIL: cannot load {path}: {exc}")
+
+
+def official_of(c: dict) -> bool:
+    return bool(
+        c.get("official") or c.get("verified_namespace") or c.get("official_publisher")
+    )
+
+
+def trust_tier(cand: dict) -> str:
+    official = official_of(cand)
+    lad = cand.get("last_activity_days")
+    activity_known = lad is not None
+    maintained = activity_known and lad <= 90
+    stale = activity_known and lad > 180
+    adoption = cand.get("adoption")
+    adoption_known = adoption is not None
+    adopted = adoption_known and adoption > 0
+    flag = cand.get("fake_signal_flag")
+    divergence_known = flag is not None
+
+    if flag is True:
+        return "CAUTION"
+    if stale:
+        return "CAUTION"
+    if official and maintained and adoption_known and flag is not True:
+        return "VERIFIED"
+    if (not official) and maintained and adopted and flag is not True:
+        return "MAINTAINED"
+    if maintained or adoption_known or divergence_known:
+        return "COMMUNITY"
+    return "CAUTION"
 
 
 def relevance(cand: dict, hats: dict, cat_hat: dict) -> float:
@@ -62,6 +94,15 @@ def main() -> int:
         hats = cfg.get("hats", DEFAULT_HATS)
         cat_hat = cfg.get("category_hat", DEFAULT_CATEGORY_HAT)
 
+    for c in rows:
+        if "github" in c.get("channels", []):
+            c["fake_signal_flag"] = fake_star_gate(
+                c.get("stars"), c.get("forks"),
+                c.get("open_issues"), c.get("dependents_count"),
+            )
+        else:
+            c.setdefault("fake_signal_flag", None)
+
     ranked = []
     for c in rows:
         if c.get("is_meta_list"):
@@ -69,7 +110,11 @@ def main() -> int:
         rel = relevance(c, hats, cat_hat)
         if rel == 0.0:
             continue
-        ranked.append({"id": c.get("id"), "relevance": round(rel, 4)})
+        ranked.append({
+            "id": c.get("id"),
+            "relevance": round(rel, 4),
+            "trust_tier": trust_tier(c),
+        })
 
     ranked.sort(key=lambda x: x["relevance"], reverse=True)
     print(json.dumps({"ranking": ranked[: args.top]}, indent=2))
