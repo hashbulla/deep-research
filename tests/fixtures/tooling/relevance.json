@@ -1,0 +1,17 @@
+[
+ {"id":"a/eval","dedup_key":"a/eval","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":10,
+  "stars":100,"forks":5,"open_issues":1,"dependents_count":2,"adoption":2,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,
+  "install_command":"x"},
+ {"id":"b/vat","dedup_key":"b/vat","channels":["github"],"categories":["fr-b2b-ops"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":10,
+  "stars":100,"forks":5,"open_issues":1,"dependents_count":2,"adoption":2,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,
+  "install_command":"x"},
+ {"id":"c/none","dedup_key":"c/none","channels":["github"],"categories":["medieval"],"category_fit":0,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":10,
+  "stars":100,"forks":5,"open_issues":1,"dependents_count":2,"adoption":2,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,
+  "install_command":"x"}
+]

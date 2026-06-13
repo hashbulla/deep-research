@@ -46,3 +46,35 @@ fi
 echo "  github_rank dogfood output byte-stable"
 
 echo "  T1 PASS"
+
+echo "== T2: relevance = category_fit x max(hat weight); 0 -> excluded =="
+cat > tests/fixtures/tooling/relevance.json <<'JSON'
+[
+ {"id":"a/eval","dedup_key":"a/eval","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":10,
+  "stars":100,"forks":5,"open_issues":1,"dependents_count":2,"adoption":2,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,
+  "install_command":"x"},
+ {"id":"b/vat","dedup_key":"b/vat","channels":["github"],"categories":["fr-b2b-ops"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":10,
+  "stars":100,"forks":5,"open_issues":1,"dependents_count":2,"adoption":2,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,
+  "install_command":"x"},
+ {"id":"c/none","dedup_key":"c/none","channels":["github"],"categories":["medieval"],"category_fit":0,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":10,
+  "stars":100,"forks":5,"open_issues":1,"dependents_count":2,"adoption":2,"use_count":null,
+  "unverified":true,"releases_count":1,"signed":false,"provenance":"github","is_meta_list":false,
+  "install_command":"x"}
+]
+JSON
+# Note: `cmd | python3 - <<'HEREDOC'` is broken under bash (heredoc wins for stdin, pipe
+# output is unreadable via sys.stdin). Capture to variable first, then inject via heredoc.
+t2_out=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/relevance.json)
+python3 - <<PY
+import json
+d=json.loads("""${t2_out}"""); rows={r["id"]:r for r in d["ranking"]}
+assert "c/none" not in rows, "category_fit=0 must be excluded"
+assert abs(rows["a/eval"]["relevance"]-1.0)<1e-9, rows["a/eval"]
+assert abs(rows["b/vat"]["relevance"]-0.4)<1e-9, rows["b/vat"]
+print("  T2 PASS")
+PY
