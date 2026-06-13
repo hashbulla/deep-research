@@ -34,7 +34,9 @@ exists. Never for: topics outside those domains, or when the corpus is absent. D
   URL), optional `repo_url`, `why`, `tool_name`, `one_liner`, `brief_req_id`.
 - **Redaction invariant:** signal-items only — no email subjects, sender addresses, raw message
   bodies, or fetch manifests. Enforced by `tests/schema/newsletter-corpus-record.schema.json`
-  (`additionalProperties:false`); CI validates every fixture line.
+  two ways: `additionalProperties:false` rejects any forbidden key, and a `not`/`@` guard on
+  `source` rejects a sender-address value. CI validates every fixture line plus both leak
+  negatives.
 
 ## Retrieval pipeline (Phase 1 conditional step)
 

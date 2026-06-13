@@ -27,7 +27,8 @@
     "source": {
       "type": "string",
       "minLength": 1,
-      "description": "Publication / newsletter name. NEVER a sender email address."
+      "not": { "pattern": "@" },
+      "description": "Publication / newsletter name. NEVER a sender email address. The @-guard (not/pattern) structurally enforces the redaction invariant: a full sender address can never reach the public corpus even if the producer prompt regresses. A bare sender domain remains prompt-enforced (structurally indistinguishable from a publication name)."
     },
     "url": {
       "type": "string",

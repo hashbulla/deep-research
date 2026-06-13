@@ -61,6 +61,33 @@ out="$(python3 "$HELPER" "prompt cache" --corpus "$CORPUS" --as-of 2026-06-12 --
 [ "$(jq -r '.items | length' <<<"$out")" = "0" ]    || fail "far-future --since should yield 0 items"
 pass "present-but-filtered-empty keeps corpus_present:true (not a degradation)"
 
+# 3c. No-match query -> 'nothing relevant' (items:[]), NOT the whole corpus -----
+# A non-empty query whose tokens match no record must not dump the entire corpus
+# as recency-ranked seeds: the 0.70 relevance weight must not be neutralized by
+# min-max flattening. corpus_present stays true (present, nothing relevant).
+out="$(python3 "$HELPER" "quantum cryptography blockchain zerg" --corpus "$CORPUS" --as-of 2026-06-12)"
+[ "$(jq -r '.corpus_present' <<<"$out")" = "true" ] || fail "no-match query should keep corpus_present:true"
+[ "$(jq -r '.items | length' <<<"$out")" = "0" ]    || fail "no-match query leaked $(jq -r '.items | length' <<<"$out") item(s); relevance weight neutralized"
+pass "no-match query yields 0 items (relevance signal not flattened away)"
+
+# 3d. Empty/punctuation-only query -> recency-only ranking over ALL items -------
+# Distinct from 3c: with no usable query tokens the caller asked nothing specific,
+# so recency-ranked-all is the intended behavior (must NOT be emptied by 3c's fix).
+out="$(python3 "$HELPER" '!!! ???' --corpus "$CORPUS" --as-of 2026-06-12)"
+[ "$(jq -r '.items | length' <<<"$out")" -ge 5 ] || fail "empty-token query should rank all items by recency, got $(jq -r '.items | length' <<<"$out")"
+pass "empty-token query falls back to recency-only ranking over all items"
+
+# 3e. Tool-kind items carry tool_name + one_liner in the output --------------------
+# item_text() ranks on these fields; dropping them from output strands a
+# headline-less tool item with no descriptive text (only its url seed).
+out="$(python3 "$HELPER" "agent orchestration durable state" --corpus "$CORPUS" --as-of 2026-06-12)"
+toolitem="$(jq -c '[.items[] | select(.kind == "tool")][0]' <<<"$out")"
+[ "$toolitem" != "null" ] || fail "expected at least one tool item for the orchestration query"
+[ "$(jq -r 'has("tool_name")' <<<"$toolitem")" = "true" ] || fail "tool item missing tool_name in output"
+[ "$(jq -r 'has("one_liner")' <<<"$toolitem")" = "true" ] || fail "tool item missing one_liner in output"
+[ "$(jq -r '.tool_name' <<<"$toolitem")" = "langgraph" ] || fail "tool item tool_name not surfaced"
+pass "tool-kind items carry tool_name + one_liner"
+
 # 4. Graceful degradation -------------------------------------------------------
 set +e
 out="$(python3 "$HELPER" "anything" --corpus /nonexistent/newsletter-corpus 2>/dev/null)"
@@ -115,6 +142,22 @@ else
       || fail "fixture line $line_no failed schema validation"
   done < "$FIXTURE"
   pass "all $line_no fixture lines validate against the schema"
+
+  # 6b. Redaction guard: a sender ADDRESS in `source` must be structurally
+  # rejected (the @-guard turns the prompt-only redaction invariant into a schema
+  # invariant — the highest-stakes leak, a full email address, cannot reach the
+  # public corpus even if the producer prompt regresses).
+  leak='{"date":"2026-06-13","bucket":"ai-engineering","kind":"top","headline":"x","source":"newsletter@substack.com","url":"https://e.com/x"}'
+  printf '%s' "$leak" > "$tmp/leak.json"
+  if npx -y ajv-cli@5 validate --spec=draft7 -s "$SCHEMA" -d "$tmp/leak.json" >/dev/null 2>&1; then
+    fail "schema accepted a sender ADDRESS in source (redaction @-guard missing)"
+  fi
+  # And a clean publication name with no @ must still pass.
+  clean='{"date":"2026-06-13","bucket":"ai-engineering","kind":"top","headline":"x","source":"The Batch","url":"https://e.com/x"}'
+  printf '%s' "$clean" > "$tmp/clean.json"
+  npx -y ajv-cli@5 validate --spec=draft7 -s "$SCHEMA" -d "$tmp/clean.json" >/dev/null 2>&1 \
+    || fail "schema rejected a clean publication name in source"
+  pass "redaction @-guard: sender address in source rejected, publication name accepted"
 fi
 
 echo "OK: newsletter-search checks passed."

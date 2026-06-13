@@ -212,6 +212,23 @@ def main() -> int:
     else:
         relevance, ranker_used = python_relevance(records, query_tokens), "python"
 
+    # A non-empty query with zero token overlap must signal "nothing relevant"
+    # (items:[]), not dump the whole corpus as recency-ranked seeds: min-max would
+    # otherwise flatten an all-zero relevance vector to 0.5 and let pure recency
+    # rank every record, silently neutralizing the 0.70 relevance weight. So drop
+    # non-matching records before ranking. An empty-token query (no usable terms,
+    # e.g. all punctuation) is exempt: the caller asked nothing specific, so
+    # recency-ranked-all is the intended behavior there.
+    if query_tokens:
+        kept = [(r, d, s) for r, d, s in zip(records, dates, relevance) if s > 0.0]
+        if not kept:
+            return emit(corpus_present=True, ranker_used=ranker_used,
+                        reference_date=str(ref_date),
+                        reason="corpus present but no records match the query")
+        records = [r for r, _, _ in kept]
+        dates = [d for _, d, _ in kept]
+        relevance = [s for _, _, s in kept]
+
     recency_raw = [1.0 / (1.0 + (max((ref_date - d).days, 0) if d else 3650) / 30.0)
                    for d in dates]
     rel_norm = minmax(relevance)
@@ -229,6 +246,8 @@ def main() -> int:
             "url": r.get("url"),
             "repo_url": r.get("repo_url"),
             "why": r.get("why"),
+            "tool_name": r.get("tool_name"),
+            "one_liner": r.get("one_liner"),
             "score": round(score, 4),
         })
     # Stable order: score desc, then newest, then url.
