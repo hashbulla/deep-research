@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <em>Intelligence-grade multi-source research as a Claude Code skill, benchmarked against Perplexity Deep Research.</em>
+  <em>Intelligence-grade multi-source research as a Claude Code skill — source-graded, human-gated, evidence-anchored.</em>
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 ---
 
-Point it at a research question. It decomposes the question into orthogonal sub-questions, retrieves across a tiered domain registry with Tavily, grades every source on the NATO Admiralty 2×6 matrix, and hands you a report where every claim traces to a URL and an explicit confidence label. Exhaustive runs reach **100+ sources**, calibrated to Perplexity Deep Research output.
+Point it at a research question. It decomposes the question into orthogonal sub-questions, retrieves across a tiered domain registry with Tavily, grades every source on the NATO Admiralty 2×6 matrix, and hands you a report where every claim traces to a URL and an explicit confidence label. Exhaustive runs reach **100+ sources**. Quality is held to absolute gates — groundedness, source-quality, corroboration, and a decorrelated entailment judge — verified per run, not against an external product.
 
 > **Why does this exist?** LLM research agents confidently synthesize from SEO farms unless you force source discipline. Anthropic's own internal research system found that *"early agents consistently chose SEO-optimized content farms over academic PDFs, even when authoritative sources were retrievable."* The fix is not better prompting alone. It is a **source-grading harness that runs before the synthesis step** — tier registry, score threshold, Admiralty reliability, CRAAP authority check, LLM-as-judge rerank, CRAG grounding loop. This skill bakes all of that into a 7-phase pipeline with **one human gate** before any retrieval call fires.
 
@@ -155,6 +155,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | `--min-corroboration` | int ≥ 1 | `2` | Min independent Tier 1/2 sources required to mark a claim CONFIRMED |
 | `--model` | `opus` \| `fable` | `opus` | Synthesis tier — Claude-Code-native (session model + subagent overrides, zero API keys). Fable 5 is opt-in at ~2× cost ([details](references/model-tiers.md)) |
 | `--confidential` | flag | off | Confidential-path run: subagents receive neutral references only; rigor escalates ([details](references/model-tiers.md)) |
+| `--rigor` | `standard` \| `critical` | `standard` (`critical` implied by `--confidential`) | Verification depth — entailment-judge scope, refuse-if-no-source, mandatory anchors, sycophancy probe ([details](references/quality-gate.md)) |
 
 ---
 
@@ -180,6 +181,7 @@ flowchart TD
         direction LR
         R1["tavily_search<br/>search_depth=advanced"] --> R2["tavily_map<br/>for domain discovery"]
         R2 --> R3["Paced under 20 req/min"]
+        R3 --> R4["Conditional sources<br/>declared in the plan:<br/>GitHub · academic · Context7<br/>→ graceful Tavily degradation"]
     end
 
     P1 --> P2
@@ -187,7 +189,8 @@ flowchart TD
     subgraph P2["Phase 2 — Source Grading"]
         direction LR
         S1["score &gt; 0.7"] --> S2["Tier 1–4 classification"]
-        S2 --> S3["CRAAP Currency + Authority"]
+        S2 --> S2b["MBFC credibility overlay<br/>flag / downgrade at the margin<br/>(optional, user-scope dataset)"]
+        S2b --> S3["CRAAP Currency + Authority"]
         S3 --> S4["Admiralty A–F"]
         S4 --> S5["Dedupe canonical URL<br/>punycode check"]
     end
@@ -210,9 +213,10 @@ flowchart TD
 
     P4 --> P5
 
-    subgraph P5["Phase 5 — CRAG Grounding"]
+    subgraph P5["Phase 5 — Grounding Validation (CRAG)"]
         direction LR
-        C1["groundedness ≥ 0.95?<br/>corroboration ≥ 0.80?"] --> C2{gates pass}
+        C0["Decorrelated entailment judge<br/>different Claude model, claim + span only<br/>scope by rigor profile"] --> C1["groundedness ≥ 0.95?<br/>corroboration ≥ 0.80?"]
+        C1 --> C2{gates pass}
         C2 -- "no, &lt;2 iters" --> Req["rewrite query →<br/>tavily_search supplement"]
         Req --> C1
         C2 -- "yes, or 2 iters done" --> C3["move failing claims<br/>to Needs Verification"]
@@ -378,6 +382,10 @@ graph LR
 | Source grading | NATO Admiralty 2×6 | Intelligence-grade provenance, usable by humans, deterministic |
 | Contradiction handling | Dedicated report section | Report §1 stage 4 — never silent, never auto-resolve between equally authoritative sources |
 | Gate verification | `scripts/verify_gates.py` (stdlib-only, zero network) | Counts, ratios, medians, cascade conformance, and the CWD-report SHA-256 are script-verified at runtime — LLM-self-reported metrics are not gates |
+| Conditional retrieval sources | GitHub / academic / Context7, gated at Phase 0 | Declared in the plan, fire only when relevant; any absent MCP/CLI/credential degrades gracefully to Tavily-only and is recorded in the Methodology note |
+| Rigor profiles | `standard` default · `critical` (implied by `--confidential`) | The everyday instrument stays fast; high-stakes runs escalate to entailment-on-every-claim, refuse-if-no-source, mandatory anchors, and a Phase-0 sycophancy probe |
+| Model selection | Claude-Code-native (session model + subagent overrides), zero API keys | Consumers are Claude Max users without keys; Opus 4.8 default, Fable 5 opt-in via `--model`, no SDK client |
+| Fidelity judge | Decorrelated subagent on a *different* Claude model, claim + span only | Breaks same-model self-evaluation circularity without an external key; external Gemini/GPT judges were evaluated and dropped (zero-key contract) |
 
 ---
 
@@ -441,19 +449,29 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 
 ## Roadmap
 
-| Status | Feature |
+### Shipped
+
+| Status | Capability |
 |:------:|:--------|
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 7-phase pipeline with human gate |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | NATO Admiralty 2×6 grading with deterministic credibility assignment |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | CRAG grounding loop (2 iterations max, graceful Needs-Verification fallback) |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | Unicode homograph defense (punycode normalization of every domain) |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 100+ source exhaustive calibration |
-| ![Planned](https://img.shields.io/badge/-Planned-D97706?style=flat-square) | Exa `findSimilar` MCP for academic citation chaining |
-| ![Planned](https://img.shields.io/badge/-Planned-D97706?style=flat-square) | Valyu academic index integration (arXiv / PubMed / bioRxiv full-text) |
-| ![Planned](https://img.shields.io/badge/-Planned-D97706?style=flat-square) | NewsGuard / MBFC ratings overlay on the tier registry |
-| ![Future](https://img.shields.io/badge/-Future-6B7280?style=flat-square) | External-model judge (Gemini / GPT-4) to break LLM-as-judge circularity |
-| ![Future](https://img.shields.io/badge/-Future-6B7280?style=flat-square) | Citation graph export (BibTeX / RIS) for academic handoff |
-| ![Future](https://img.shields.io/badge/-Future-6B7280?style=flat-square) | Benchmark harness vs Perplexity Deep Research on a fixed test set |
+| ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Conditional retrieval sources — GitHub SOTA-repo discovery, academic open-graph pipeline (OpenAlex / arXiv / Semantic Scholar), Context7 docs |
+| ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Claude-Code-native model tiers (Opus default, Fable 5 opt-in) + `critical` rigor profile |
+| ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Decorrelated entailment judge (different Claude model) — breaks LLM-as-judge circularity with no external key |
+| ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | MBFC credibility overlay on the tier registry (flag / downgrade at the margin) |
+| ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Citation graph export — BibTeX / RIS for academic handoff |
+| ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Five-layer eval harness + frozen benchmark test set, secret-gated CI judges |
+
+### Considered / deferred
+
+| Status | Item | Why |
+|:------:|:-----|:----|
+| ![Deferred](https://img.shields.io/badge/-Deferred-D97706?style=flat-square) | Exa `findSimilar` / Valyu full-text academic index | Evaluated during the 0.3.0 academic-pipeline work; the open-graph pipeline (OpenAlex / arXiv / Semantic Scholar) shipped instead. Revisit only if a recall benchmark shows a material gap, and only as an optional, key-gated source |
+| ![Dropped](https://img.shields.io/badge/-Dropped-6B7280?style=flat-square) | External-model judge (Gemini / GPT-4) | Superseded by the decorrelated Claude judge above; the zero-API-key contract (consumers are Claude Max users) rules out external providers |
+| ![Dropped](https://img.shields.io/badge/-Dropped-6B7280?style=flat-square) | Quality benchmark *vs* Perplexity Deep Research | The harness ships with absolute quality gates instead — groundedness, source-quality, corroboration, entailment — tracked per run over a frozen test set. Perplexity is no longer the reference comparator |
 
 ---
 
@@ -502,9 +520,13 @@ deep-research/
 │   ├── report-structure.md
 │   ├── quality-gate.md
 │   ├── anti-patterns.md
-│   └── research-plan-template.md
+│   ├── research-plan-template.md
+│   ├── model-tiers.md                     # model-tier policy (opus default, fable opt-in)
+│   ├── github-research.md                 # GitHub SOTA-repo discovery
+│   ├── academic-research.md               # scholarly open-graph pipeline
+│   └── examples.md                        # worked examples (read on demand)
 ├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts, gate-conformant)
-├── evals/                                 # loading / progressive / e2e fixtures + rubric
+├── evals/                                 # loading / progressive / e2e + sycophancy-probes + benchmark-testset + rubric
 ├── CHANGELOG.md                           # semver release history (append-only)
 ├── gotchas-log.md                         # maintainer traps + perishable-asset cadences
 ├── tests/                                 # cross-reference / provenance / schema / invariant checks
@@ -514,7 +536,7 @@ deep-research/
 │   ├── check-example-invariants.sh
 │   ├── schema/{research-sources,research-evidence}.schema.json
 │   └── fixtures/ → examples/eu-ai-act-2026/*.json
-└── .github/workflows/validate.yml         # CI — runs the three checks on push
+└── .github/workflows/validate.yml         # CI — runs the check suite on push + PR
 ```
 
 ### Sync model
