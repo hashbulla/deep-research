@@ -30,6 +30,9 @@ jobs:
       - name: Check example cross-file invariants (cascade, routing, counts)
         run: bash tests/check-example-invariants.sh
 
+      - name: Check newsletter-signal helper + corpus schema
+        run: bash tests/check-newsletter-search.sh
+
       - name: Lint runtime scripts
         run: python3 -m py_compile scripts/*.py
 

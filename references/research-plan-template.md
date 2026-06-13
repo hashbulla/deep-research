@@ -59,6 +59,7 @@ Written to `research-plan.md` at the end of Phase 0. **User must approve before 
 
 **Conditional sources (declared here, or "none"):**
 - Context7: <library_id@version per gated sub-question, e.g. "/vercel/next.js@15 (sq3)" — only when the technical-profile + named-dependency + integrate/configure/debug/migrate/understand gating passes; availability status; or "not applicable">
+- Newsletter-signal: <buckets + sub-questions consulted, e.g. "ai-engineering (sq2, sq4)" — only when the topic is work-relevant and `~/.claude/deep-research/newsletter-corpus/` exists; routing signal only, never cited; corpus availability status; or "not applicable">
 - <other optional sources, with availability status and Tavily degradation noted if unavailable>
 
 **Phase 4 (deep extract & synthesis):**

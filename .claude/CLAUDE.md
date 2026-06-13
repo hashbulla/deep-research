@@ -29,6 +29,8 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `references/github-research.md` | GitHub SOTA-repo discovery pipeline (sharding, expert prior, ecosyste.ms, measurement protocol) | Conditional GitHub source |
 | `references/academic-research.md` | Scholarly pipeline (OpenAlex ‖ arXiv → S2 → expansion → legal-OA), dual-track ranking, Exa/Valyu decision | Conditional academic source |
 | `scripts/academic_graph.py` | Dual-track paper ranking + BibTeX/RIS export (scoring only, zero network) | Academic reading-list ranking |
+| `references/newsletter-signal.md` | Curated-feed routing source: corpus location/shape, FTS5 search invocation, routing-signal (never-cited) grading, confidential posture, degradation | Conditional newsletter source |
+| `scripts/newsletter_search.py` | Newsletter-corpus search — in-memory FTS5 (bm25 + recency) with pure-Python fallback, derives reference date from data; stdlib, zero network | Newsletter-signal retrieval |
 | `scripts/eval_harness/` | Five-layer verification harness: layer-1 = verify_gates.py; versioned judge prompts (entailment/adversarial/completeness); `run_ci_judges.sh` (maintainer-secret-gated, skips gracefully) | AI-124 permanent verification; per-run vs CI mapping per rigor profile |
 | `evals/sycophancy-probes.jsonl` + `evals/benchmark-testset.jsonl` | Versioned false-premise probes + frozen Perplexity-benchmark questions (4-weekly cadence) | Harness layers 5 + benchmark |
 | `references/model-tiers.md` | Model-tier policy + subagent override mechanics (D-4) | Tier selection |
@@ -38,6 +40,7 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `tests/check-schema.sh` | Validates JSON artifacts against `tests/schema/*.schema.json` via `npx ajv-cli` | Artifact conformance |
 | `tests/schema/research-sources.schema.json` | JSON Schema for source records (draft-07) | Sources artifact shape |
 | `tests/schema/research-evidence.schema.json` | JSON Schema for claim records (draft-07) | Evidence artifact shape |
+| `tests/schema/newsletter-corpus-record.schema.json` + `tests/check-newsletter-search.sh` + `tests/fixtures/newsletter-corpus/` | Corpus-record contract (`additionalProperties:false` enforces redaction) + helper check (ranking, `--since`, `--bucket`, degradation, fallback, per-line schema validation via direct `ajv -s`) + fixture corpus | Newsletter-signal conformance |
 | `tests/fixtures/` | Symlinks to `examples/eu-ai-act-2026/*.json` consumed by check-schema | CI inputs |
 | `examples/eu-ai-act-2026/` | End-to-end mock run of the README example query | Illustrative reference |
 | `.github/workflows/validate.yml` | GitHub Actions — runs all three check scripts on push + PR | CI |

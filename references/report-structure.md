@@ -100,7 +100,7 @@ Array of source records. One record per cited URL.
 - `sub_questions` — array of sub-question IDs referenced in the plan.
 - `primary_source` — boolean. True for original research / regulation / dataset; false for commentary or summary.
 - `credibility_overlay` — optional object, present only when the user-scope MBFC overlay dataset rated this domain: `{source, factual_reporting, bias, action: none|flag|downgrade, dataset_version}` (rules in `references/methodology.md` §6 "Credibility overlay"). A `downgrade` action means the record's `domain_tier` already reflects the worsened tier.
-- `notes` — free text. Always populated on `WebSearch` fallback or on any deviation (paywall, abstract-only, corroboration incomplete, etc.).
+- `notes` — free text. Always populated on `WebSearch` fallback or on any deviation (paywall, abstract-only, corroboration incomplete, etc.). When a source was first surfaced via the newsletter-signal corpus (`references/newsletter-signal.md`), record the discovery channel here as `surfaced via newsletter-signal corpus <date>` — the brief is a routing signal, never itself a source record, and this note is its only footprint. `retrieval_tool` still reflects the tool that actually retrieved the URL (e.g. `tavily_search`), not the corpus.
 
 ## 4. `research-evidence.json`
 
