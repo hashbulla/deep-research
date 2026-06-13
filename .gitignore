@@ -8,6 +8,9 @@
 /research-sources.json
 /research-evidence.json
 
+# Skill-harness review output — local audit artifact, never committed
+/REVIEW.md
+
 # Editor / OS
 .DS_Store
 *.swp
