@@ -94,11 +94,13 @@ stale            := activity_known and last_activity_days > 180
 adoption_known   := adoption is not null            # dependents/useCount present
 adopted          := adoption_known and adoption > 0
 divergence_known := fake_signal_flag is not null    # the fake-signal gate actually ran
+signed           := bool(signed)                    # signed provenance present
+corroborated     := divergence_known or adoption_known or signed   # >=1 signal beyond identity
 
 if   fake_signal_flag is True:                                  -> CAUTION    # gamed signal
 elif stale:                                                     -> CAUTION    # abandoned
-elif official and maintained and divergence_known
-     and fake_signal_flag is not True:                          -> VERIFIED   # gate RAN and passed
+elif official and maintained and corroborated
+     and fake_signal_flag is not True:                          -> VERIFIED   # identity + >=1 corroborating signal, not gamed
 elif (not official) and maintained and adopted
      and fake_signal_flag is not True:                          -> MAINTAINED
 elif maintained or adoption_known or divergence_known:          -> COMMUNITY  # some positive-but-insufficient signal
@@ -107,7 +109,7 @@ else:                                                           -> CAUTION    # 
 
 Key disambiguations (each is a §9 unit fixture):
 - **`null` adoption routes to COMMUNITY, never MAINTAINED.** Most real candidates have `dependents_count: null` (confirmed: all 10 dogfood repos) — absence of an adoption signal is "unknown," not "adopted." MAINTAINED requires `adopted` (a *positive* number).
-- **VERIFIED requires the divergence gate to have actually run AND passed.** If divergence data is absent (`divergence_known` False) the check is *vacuous*, so an official-but-unverifiable candidate falls through to COMMUNITY — it does not earn VERIFIED on stars alone (an 89k-star repo with `dependents: null` lands COMMUNITY, not VERIFIED).
+- **VERIFIED requires a corroborating signal beyond identity (anti-vacuity).** Official identity + maintained is not enough on its own; the candidate must also have `divergence_known` (the fake-signal gate actually ran) OR `adoption_known` OR `signed` provenance. This keeps an empty official stub (verified namespace but no usage, no signature, no gate result — all null) at COMMUNITY, while letting a verified-namespace **signed** MCP server reach VERIFIED via the `signed` path even though it has no GitHub fake-star data. A non-official repo riding on stars alone never qualifies (VERIFIED requires `official`). Decision A, ratified 2026-06-14 — supersedes the stricter "divergence-gate-must-run" rule from review finding N1, which wrongly capped the registry's strongest signal (namespace verification) at COMMUNITY.
 - **Null `last_activity` is handled, not crashed.** `activity_known` gates both `maintained` and `stale`, so a candidate with unknown activity satisfies none of the upper branches and falls to the explicit `else → CAUTION` (conservative). Totality holds for the all-null candidate.
 - No rule references `relevance` — trust tier stays orthogonal to the relevance rank.
 

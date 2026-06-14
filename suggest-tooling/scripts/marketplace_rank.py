@@ -54,12 +54,16 @@ def trust_tier(cand: dict) -> str:
     adopted = adoption_known and adoption > 0
     flag = cand.get("fake_signal_flag")
     divergence_known = flag is not None
+    signed = bool(cand.get("signed"))
+    # VERIFIED needs a corroborating signal beyond identity alone (anti-vacuity):
+    # the fake-signal gate actually ran, OR adoption is known, OR provenance is signed.
+    corroborated = divergence_known or adoption_known or signed
 
     if flag is True:
         return "CAUTION"
     if stale:
         return "CAUTION"
-    if official and maintained and adoption_known and flag is not True:
+    if official and maintained and corroborated and flag is not True:
         return "VERIFIED"
     if (not official) and maintained and adopted and flag is not True:
         return "MAINTAINED"
