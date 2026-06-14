@@ -30,12 +30,15 @@ DEFAULT_CATEGORY_HAT = {
 }
 SCALAR_MIN_N = 8
 SCALAR_PCTL = 0.90
+MAINTAINED_DAYS = 90
+STALE_DAYS = 180
 
 
 def percentile(values: list[float], q: float) -> float:
     s = sorted(values)
     if not s:
         return 0.0
+    # nearest-rank via midpoint rounding (deterministic; not numpy linear interpolation)
     idx = min(int(q * (len(s) - 1) + 0.5), len(s) - 1)
     return s[idx]
 
@@ -57,6 +60,50 @@ def apply_scalar_gate(rows: list[dict]) -> None:
         c["fake_signal_flag"] = bool(c.get("unverified") and loud and no_trace)
 
 
+def merge_pair(a: dict, b: dict) -> dict:
+    """Trust-conservative, commutative merge of two same-key candidates."""
+    def strongest(k: str) -> bool:
+        return bool(a.get(k)) or bool(b.get(k))
+
+    def oldest(k: str) -> int | None:  # most-cautious activity = largest idle days; None = unknown
+        vals = [v for v in (a.get(k), b.get(k)) if v is not None]
+        return max(vals) if vals else None
+
+    def cautious_flag() -> bool | None:  # True if either flags
+        fa, fb = a.get("fake_signal_flag"), b.get("fake_signal_flag")
+        if fa is True or fb is True:
+            return True
+        if fa is None and fb is None:
+            return None
+        return False
+
+    m = dict(a)
+    m["channels"] = sorted(set(a.get("channels", [])) | set(b.get("channels", [])))
+    for k in ("official", "verified_namespace", "official_publisher", "signed"):
+        m[k] = strongest(k)
+    m["last_activity_days"] = oldest("last_activity_days")
+    m["fake_signal_flag"] = cautious_flag()
+    for k in ("adoption", "use_count", "stars", "dependents_count"):
+        vals = [v for v in (a.get(k), b.get(k)) if v is not None]
+        m[k] = max(vals) if vals else None
+    m["categories"] = sorted(set(a.get("categories", [])) | set(b.get("categories", [])))
+    m["category_fit"] = max(a.get("category_fit", 0), b.get("category_fit", 0))
+    return m
+
+
+def dedupe(rows: list[dict]) -> list[dict]:
+    by_key: dict[str, dict] = {}
+    order: list[str] = []
+    for c in rows:
+        k = c.get("dedup_key") or c.get("id")
+        if k in by_key:
+            by_key[k] = merge_pair(by_key[k], c)
+        else:
+            by_key[k] = c
+            order.append(k)
+    return [by_key[k] for k in order]
+
+
 def load_json(path: str) -> Any:
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
@@ -74,8 +121,8 @@ def trust_tier(cand: dict) -> str:
     official = official_of(cand)
     lad = cand.get("last_activity_days")
     activity_known = lad is not None
-    maintained = activity_known and lad <= 90
-    stale = activity_known and lad > 180
+    maintained = activity_known and lad <= MAINTAINED_DAYS
+    stale = activity_known and lad > STALE_DAYS
     adoption = cand.get("adoption")
     adoption_known = adoption is not None
     adopted = adoption_known and adoption > 0
@@ -118,6 +165,8 @@ def main() -> int:
     rows = load_json(args.candidates)
     if not isinstance(rows, list):
         sys.exit("FAIL: candidates must be a JSON array")
+
+    rows = dedupe(rows)
 
     hats, cat_hat = DEFAULT_HATS, DEFAULT_CATEGORY_HAT
     if args.hats:

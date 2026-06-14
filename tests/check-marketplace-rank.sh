@@ -150,3 +150,28 @@ assert rows["b/9"]["trust_evidence"]["fake_signal_flag"] is True, "the 9000-useC
 assert rows["b/9"]["trust_tier"]=="CAUTION"
 print("  T4 PASS")
 PY
+
+echo "== T5: cross-channel dedupe is trust-conservative + order-independent =="
+cat > tests/fixtures/tooling/dedupe.json <<'JSON'
+[
+ {"id":"reg/x","dedup_key":"acme/x","channels":["mcp-registry"],"categories":["mcp-server"],"category_fit":1,
+  "official":true,"verified_namespace":true,"official_publisher":false,"last_activity_days":5,
+  "stars":null,"forks":null,"open_issues":null,"dependents_count":null,"adoption":null,"use_count":null,
+  "unverified":false,"releases_count":null,"signed":true,"provenance":"mcp-registry","is_meta_list":false,"install_command":"reg"},
+ {"id":"sm/x","dedup_key":"acme/x","channels":["smithery"],"categories":["mcp-server"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":300,
+  "stars":null,"forks":null,"open_issues":null,"dependents_count":null,"adoption":50,"use_count":50,
+  "unverified":true,"releases_count":null,"signed":false,"provenance":"smithery","is_meta_list":false,"install_command":"sm"}
+]
+JSON
+OUT5=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/dedupe.json)
+python3 - "$OUT5" <<'PY'
+import json,sys
+rk=json.loads(sys.argv[1])["ranking"]
+assert len(rk)==1, f"must collapse to one row, got {len(rk)}"
+row=rk[0]
+assert set(row["channels"])=={"mcp-registry","smithery"}, row["channels"]
+assert row["trust_evidence"]["verified_namespace"] is True
+assert row["trust_tier"]=="CAUTION", f"most-cautious activity (300d) wins -> {row['trust_tier']}"
+print("  T5 PASS")
+PY
