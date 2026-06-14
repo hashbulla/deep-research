@@ -88,6 +88,11 @@ def merge_pair(a: dict, b: dict) -> dict:
         m[k] = max(vals) if vals else None
     m["categories"] = sorted(set(a.get("categories", [])) | set(b.get("categories", [])))
     m["category_fit"] = max(a.get("category_fit", 0), b.get("category_fit", 0))
+    # Inverted signals: True is the unsafe value -> OR is the trust-conservative,
+    # order-independent merge (without this, unverified/is_meta_list are first-wins,
+    # and unverified leaks into apply_scalar_gate's flag, breaking order-independence).
+    m["unverified"] = bool(a.get("unverified")) or bool(b.get("unverified"))
+    m["is_meta_list"] = bool(a.get("is_meta_list")) or bool(b.get("is_meta_list"))
     return m
 
 

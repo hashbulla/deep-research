@@ -175,3 +175,13 @@ assert row["trust_evidence"]["verified_namespace"] is True
 assert row["trust_tier"]=="CAUTION", f"most-cautious activity (300d) wins -> {row['trust_tier']}"
 print("  T5 PASS")
 PY
+# order-independence: reversed input must produce byte-identical output (catches first-wins merges)
+python3 -c "import json; d=json.load(open('tests/fixtures/tooling/dedupe.json')); json.dump(list(reversed(d)), open('tests/fixtures/tooling/dedupe_rev.json','w'))"
+OUT5R=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/dedupe_rev.json)
+python3 - "$OUT5" "$OUT5R" <<'PY'
+import json,sys
+fwd=json.loads(sys.argv[1]); rev=json.loads(sys.argv[2])
+assert fwd==rev, "dedupe is order-dependent: forward != reversed output"
+print("  T5 order-independence PASS")
+PY
+rm -f tests/fixtures/tooling/dedupe_rev.json
