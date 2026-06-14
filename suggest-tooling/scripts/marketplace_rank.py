@@ -77,7 +77,11 @@ def merge_pair(a: dict, b: dict) -> dict:
             return None
         return False
 
-    m = dict(a)
+    # Canonical representative for trust-neutral DISPLAY fields (id/install_command/
+    # provenance/releases_count): pick deterministically (smallest id) so the whole
+    # merge is order-independent, not just the trust signals.
+    rep = a if (a.get("id") or "") <= (b.get("id") or "") else b
+    m = dict(rep)
     m["channels"] = sorted(set(a.get("channels", [])) | set(b.get("channels", [])))
     for k in ("official", "verified_namespace", "official_publisher", "signed"):
         m[k] = strongest(k)
