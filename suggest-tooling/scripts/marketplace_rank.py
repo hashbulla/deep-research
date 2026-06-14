@@ -167,8 +167,12 @@ def minmax(values: list[float]) -> list[float]:
 
 def raw_components(rows: list[dict]) -> dict[str, list[float]]:
     rel = [r["_relevance"] for r in rows]
+    # Unknown last_activity (None) -> 9999 sentinel -> near-zero maintenance score:
+    # an unmaintained-unknown candidate is scored conservatively (below a 400-day-stale one).
     maint = [1.0 / (1.0 + (r.get("last_activity_days") or 9999) / 30.0) for r in rows]
     adopt = [math.log10((r.get("adoption") or 0) + 1) for r in rows]
+    # stars==0 (or None) falls through to use_count: a 0-star repo borrows its marketplace
+    # install count as the popularity signal (intentional `or` fall-through).
     pop = [math.log10((r.get("stars") or r.get("use_count") or 0) + 1) for r in rows]
     return {"relevance": rel, "maintenance": maint, "adoption": adopt, "popularity": pop}
 
