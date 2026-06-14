@@ -185,3 +185,28 @@ assert fwd==rev, "dedupe is order-dependent: forward != reversed output"
 print("  T5 order-independence PASS")
 PY
 rm -f tests/fixtures/tooling/dedupe_rev.json
+
+echo "== T6: composite score + tier-major ordering =="
+cat > tests/fixtures/tooling/ranking.json <<'JSON'
+[
+ {"id":"hi/rel","dedup_key":"hi/rel","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":true,"verified_namespace":true,"official_publisher":false,"last_activity_days":5,
+  "stars":2000,"forks":300,"open_issues":40,"dependents_count":80,"adoption":80,"use_count":null,
+  "unverified":false,"releases_count":10,"signed":true,"provenance":"github","is_meta_list":false,"install_command":"x"},
+ {"id":"lo/caution","dedup_key":"lo/caution","channels":["github"],"categories":["eval"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":400,
+  "stars":50,"forks":0,"open_issues":0,"dependents_count":0,"adoption":0,"use_count":null,
+  "unverified":true,"releases_count":0,"signed":false,"provenance":"github","is_meta_list":false,"install_command":"x"}
+]
+JSON
+OUT6=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/ranking.json)
+python3 - "$OUT6" <<'PY'
+import json,sys
+d=json.loads(sys.argv[1])
+assert "effective_weights" in d and "dropped_components" in d, list(d.keys())
+ids=[r["id"] for r in d["ranking"]]
+assert ids==["hi/rel","lo/caution"], ids  # VERIFIED before CAUTION regardless of raw score
+assert all("score" in r for r in d["ranking"])
+print("  T6 PASS")
+print("  ALL marketplace_rank checks PASS")
+PY

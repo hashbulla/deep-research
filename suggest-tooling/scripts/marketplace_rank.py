@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,8 @@ SCALAR_MIN_N = 8
 SCALAR_PCTL = 0.90
 MAINTAINED_DAYS = 90
 STALE_DAYS = 180
+RANK_WEIGHTS = {"relevance": 0.40, "maintenance": 0.25, "adoption": 0.20, "popularity": 0.15}
+TIER_ORDER = {"VERIFIED": 0, "MAINTAINED": 1, "COMMUNITY": 2, "CAUTION": 3}
 
 
 def percentile(values: list[float], q: float) -> float:
@@ -155,6 +158,21 @@ def trust_tier(cand: dict) -> str:
     return "CAUTION"
 
 
+def minmax(values: list[float]) -> list[float]:
+    lo, hi = min(values), max(values)
+    if hi == lo:
+        return [0.5] * len(values)
+    return [(v - lo) / (hi - lo) for v in values]
+
+
+def raw_components(rows: list[dict]) -> dict[str, list[float]]:
+    rel = [r["_relevance"] for r in rows]
+    maint = [1.0 / (1.0 + (r.get("last_activity_days") or 9999) / 30.0) for r in rows]
+    adopt = [math.log10((r.get("adoption") or 0) + 1) for r in rows]
+    pop = [math.log10((r.get("stars") or r.get("use_count") or 0) + 1) for r in rows]
+    return {"relevance": rel, "maintenance": maint, "adoption": adopt, "popularity": pop}
+
+
 def relevance(cand: dict, hats: dict, cat_hat: dict) -> float:
     if not cand.get("category_fit"):
         return 0.0
@@ -194,17 +212,35 @@ def main() -> int:
 
     apply_scalar_gate(rows)
 
-    ranked = []
+    survivors: list[dict] = []
     for c in rows:
         if c.get("is_meta_list"):
             continue
         rel = relevance(c, hats, cat_hat)
         if rel == 0.0:
             continue
-        ranked.append({
+        c["_relevance"] = rel
+        survivors.append(c)
+
+    # Composite scoring: minmax-normalize each component, drop set-wide-zero
+    # components and renormalize weights (mirrors github_rank.py lines ~138-144).
+    comps = raw_components(survivors) if survivors else {}
+    active = {
+        k: w for k, w in RANK_WEIGHTS.items()
+        if survivors and any(v != 0 for v in comps[k])
+    }
+    total_w = sum(active.values()) if active else 1.0
+    effective: dict[str, float] = {k: round(w / total_w, 4) for k, w in active.items()}
+    normalized = {k: minmax(comps[k]) for k in active}
+
+    ranked = []
+    for i, c in enumerate(survivors):
+        score = round(sum(effective[k] * normalized[k][i] for k in active), 4)
+        row = {
             "id": c.get("id"),
             "channels": c.get("channels", []),
-            "relevance": round(rel, 4),
+            "relevance": round(c["_relevance"], 4),
+            "score": score,
             "trust_tier": trust_tier(c),
             "install_command": c.get("install_command"),
             "trust_evidence": {
@@ -216,10 +252,18 @@ def main() -> int:
                 "stars": c.get("stars"),
                 "fake_signal_flag": c.get("fake_signal_flag"),
             },
-        })
+        }
+        ranked.append(row)
 
-    ranked.sort(key=lambda x: x["relevance"], reverse=True)
-    print(json.dumps({"ranking": ranked[: args.top]}, indent=2))
+    # Tier-major sort: VERIFIED → MAINTAINED → COMMUNITY → CAUTION, then by
+    # descending composite score within each tier.
+    ranked.sort(key=lambda x: (TIER_ORDER[x["trust_tier"]], -x["score"]))
+
+    print(json.dumps({
+        "effective_weights": effective,
+        "dropped_components": sorted(set(RANK_WEIGHTS) - set(active)),
+        "ranking": ranked[: args.top],
+    }, indent=2))
     return 0
 
 
