@@ -118,3 +118,35 @@ for k,v in exp.items():
     assert r.get(k)==v, f"{k}: got {r.get(k)} want {v}"
 print("  T3 PASS (totality + null-safety verified)")
 PY
+
+echo "== T4: scalar fake-signal gate fires only at N>=8 =="
+python3 - <<'PY'
+import json
+small=[{"id":f"s/{i}","dedup_key":f"s/{i}","channels":["smithery"],"categories":["mcp-server"],
+ "category_fit":1,"official":False,"verified_namespace":False,"official_publisher":False,
+ "last_activity_days":10,"stars":None,"forks":None,"open_issues":None,"dependents_count":None,
+ "adoption":uc,"use_count":uc,"unverified":True,"releases_count":None,"signed":None,
+ "provenance":"smithery","is_meta_list":False,"install_command":"x"} for i,uc in enumerate([10,20,9000])]
+with open("tests/fixtures/tooling/scalar_smalln.json","w") as f: json.dump(small,f)
+big=[{"id":f"b/{i}","dedup_key":f"b/{i}","channels":["smithery"],"categories":["mcp-server"],
+ "category_fit":1,"official":False,"verified_namespace":False,"official_publisher":False,
+ "last_activity_days":10,"stars":None,"forks":None,"open_issues":None,"dependents_count":None,
+ "adoption":uc,"use_count":uc,"unverified":True,"releases_count":None,"signed":None,
+ "provenance":"smithery","is_meta_list":False,"install_command":"x"} for i,uc in enumerate([5,6,7,8,9,10,11,12,13,9000])]
+with open("tests/fixtures/tooling/scalar_bign.json","w") as f: json.dump(big,f)
+PY
+SMALL=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/scalar_smalln.json)
+python3 - "$SMALL" <<'PY'
+import json,sys
+flags=[x["trust_evidence"]["fake_signal_flag"] for x in json.loads(sys.argv[1])["ranking"]]
+assert all(f is None for f in flags), f"small N must not flag: {flags}"
+print("  small-N: no spurious flag OK")
+PY
+BIG=$(python3 suggest-tooling/scripts/marketplace_rank.py tests/fixtures/tooling/scalar_bign.json)
+python3 - "$BIG" <<'PY'
+import json,sys
+rows={x["id"]:x for x in json.loads(sys.argv[1])["ranking"]}
+assert rows["b/9"]["trust_evidence"]["fake_signal_flag"] is True, "the 9000-useCount outlier must flag at N=10"
+assert rows["b/9"]["trust_tier"]=="CAUTION"
+print("  T4 PASS")
+PY

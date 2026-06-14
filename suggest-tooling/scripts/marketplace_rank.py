@@ -28,6 +28,33 @@ DEFAULT_CATEGORY_HAT = {
     "secrets-mgmt": "devsecops", "ci-cd": "devsecops", "scraping": "ai-engineer",
     "fr-b2b-ops": "fr-b2b",
 }
+SCALAR_MIN_N = 8
+SCALAR_PCTL = 0.90
+
+
+def percentile(values: list[float], q: float) -> float:
+    s = sorted(values)
+    if not s:
+        return 0.0
+    idx = min(int(q * (len(s) - 1) + 0.5), len(s) - 1)
+    return s[idx]
+
+
+def apply_scalar_gate(rows: list[dict]) -> None:
+    """Flag non-GitHub scalar-count outliers; only meaningful at N>=8."""
+    scalar = [
+        c for c in rows
+        if "github" not in c.get("channels", []) and c.get("use_count") is not None
+    ]
+    if len(scalar) < SCALAR_MIN_N:
+        for c in scalar:
+            c.setdefault("fake_signal_flag", None)
+        return
+    thresh = percentile([c["use_count"] for c in scalar], SCALAR_PCTL)
+    for c in scalar:
+        loud = c["use_count"] >= thresh
+        no_trace = not c.get("dependents_count")
+        c["fake_signal_flag"] = bool(c.get("unverified") and loud and no_trace)
 
 
 def load_json(path: str) -> Any:
@@ -107,6 +134,8 @@ def main() -> int:
         else:
             c.setdefault("fake_signal_flag", None)
 
+    apply_scalar_gate(rows)
+
     ranked = []
     for c in rows:
         if c.get("is_meta_list"):
@@ -116,8 +145,19 @@ def main() -> int:
             continue
         ranked.append({
             "id": c.get("id"),
+            "channels": c.get("channels", []),
             "relevance": round(rel, 4),
             "trust_tier": trust_tier(c),
+            "install_command": c.get("install_command"),
+            "trust_evidence": {
+                "official": official_of(c),
+                "verified_namespace": bool(c.get("verified_namespace")),
+                "signed": c.get("signed"),
+                "last_activity_days": c.get("last_activity_days"),
+                "adoption": c.get("adoption"),
+                "stars": c.get("stars"),
+                "fake_signal_flag": c.get("fake_signal_flag"),
+            },
         })
 
     ranked.sort(key=lambda x: x["relevance"], reverse=True)
