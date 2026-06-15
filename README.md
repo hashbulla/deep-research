@@ -39,6 +39,8 @@ research-sources.json    # every cited source, Admiralty-graded
 research-evidence.json   # claim → source mapping, credibility 1–6
 ```
 
+Exactly four — always. The optional [`--suggest-tooling`](#companion-skill-tooling-recommender) flag adds a fifth file (`research-toolbox.md`) written by a *separate* companion skill, not the engine; the four-artifact contract stays intact.
+
 ### `research-report.md` excerpt
 
 ```markdown
@@ -393,6 +395,23 @@ graph LR
 
 ---
 
+## Companion skill: tooling recommender
+
+`suggest-tooling` is a sibling skill in this repository. It consumes a finished `/deep-research` run and proposes the Claude Code **skills, plugins, and MCP servers** worth adopting to act on what the research surfaced — relevance-ranked against your work profile and **trust-graded for supply-chain safety**. It never installs anything.
+
+| Property | Detail |
+|:---------|:-------|
+| **Invoke** | `/suggest-tooling <run-dir>`, or set `--suggest-tooling` on a deep-research run to delegate automatically at the end of Phase 6 |
+| **Six discovery channels** | GitHub, the MCP Registry, Claude Code marketplaces, Vercel skills, Smithery, and awesome-* lists (seed-only) — each independently degradable |
+| **Trust tiers** | `VERIFIED` · `MAINTAINED` · `COMMUNITY` · `CAUTION`, derived deterministically from official/verified-namespace status, signed provenance, maintenance recency, and a fake-signal divergence gate — kept **orthogonal** to the relevance rank |
+| **Never auto-installs** | Install commands are shown as text, never executed. Every listing and README is untrusted data (anti-pattern A6) — parsed for identifiers, never obeyed |
+| **Output** | `research-toolbox.md` + a `research-toolbox.json` sidecar (the 5th artifact) |
+| **Determinism** | Ranking and tiering run entirely in `suggest-tooling/scripts/marketplace_rank.py` — stdlib-only, zero-network, zero-LLM — reusing the fake-star divergence gate extracted from `scripts/github_rank.py` |
+
+It was itself designed by dogfooding a `/deep-research` run on the discovery landscape; that graded report is kept under [`docs/superpowers/`](docs/superpowers/) as the design's evidence base.
+
+---
+
 ## Troubleshooting
 
 <details>
@@ -449,6 +468,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 | **Change default length calibration** | Edit the "Length calibration" table in [`references/methodology.md`](references/methodology.md). |
 | **Swap Tavily for another MCP** | Edit [`references/tool-routing.md`](references/tool-routing.md) and the Phase 1 / Phase 4 call templates in `SKILL.md`. Keep the grading phases intact — they are MCP-agnostic. |
 | **Feed the newsletter-signal corpus** | Drop redacted `briefs/YYYY-MM.jsonl` files (schema: [`tests/schema/newsletter-corpus-record.schema.json`](tests/schema/newsletter-corpus-record.schema.json)) into `~/.claude/deep-research/newsletter-corpus/` — user-scope, outside this repo, sibling to `experts.yaml`. A producer (e.g. a newsletter agent) commits them via the GitHub Contents API; the skill reads a local clone. See [`references/newsletter-signal.md`](references/newsletter-signal.md). |
+| **Tune the tooling recommender** | Edit `suggest-tooling/references/tooling-categories.md` (the closed category taxonomy) and the hat weights in `~/.claude/deep-research/tooling-hats.json` (user-scope; template ships as `suggest-tooling/tooling-hats.json.example`). The category set is parity-checked against the ranker in CI. |
 
 ---
 
@@ -470,6 +490,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | MBFC credibility overlay on the tier registry (flag / downgrade at the margin) |
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Citation graph export — BibTeX / RIS for academic handoff |
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Five-layer eval harness + frozen benchmark test set, secret-gated CI judges |
+| ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | [`suggest-tooling`](#companion-skill-tooling-recommender) companion skill + `--suggest-tooling` delegation flag — trust-graded skill/plugin/MCP recommender across six discovery channels, never auto-installing |
 
 ### Considered / deferred
 
@@ -516,7 +537,7 @@ deep-research/
 ├── deep-research-report.md                # methodology source of truth
 ├── scripts/
 │   ├── verify_gates.py                    # deterministic gate verification (stdlib-only, zero network)
-│   ├── github_rank.py                     # composite GitHub-repo ranking (scoring only, zero network)
+│   ├── github_rank.py                     # composite GitHub-repo ranking + exported fake_star_gate() (zero network)
 │   ├── academic_graph.py                  # dual-track paper ranking + BibTeX/RIS export (zero network)
 │   ├── newsletter_search.py               # newsletter-signal corpus search (in-memory FTS5, zero network)
 │   └── eval_harness/                      # 5-layer verification harness (judge prompts + secret-gated CI runner)
@@ -533,6 +554,13 @@ deep-research/
 │   ├── academic-research.md               # scholarly open-graph pipeline
 │   ├── newsletter-signal.md               # curated-feed routing source (local FTS5 corpus)
 │   └── examples.md                        # worked examples (read on demand)
+├── suggest-tooling/                       # companion skill — trust-graded tooling recommender
+│   ├── SKILL.md                           # entry point, 6-connector orchestration, no-auto-install
+│   ├── references/                        # tooling-discovery / tooling-categories / toolbox-output
+│   ├── scripts/marketplace_rank.py        # composite rank + trust tiers (stdlib-only, zero network)
+│   ├── tooling-hats.json.example          # hat-weight template (real file lives user-scope)
+│   └── evals/                             # loading + e2e fixtures for the five failure modes
+├── docs/superpowers/                      # design specs, plans, and the dogfood research run
 ├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts, gate-conformant)
 ├── evals/                                 # loading / progressive / e2e + sycophancy-probes + benchmark-testset + rubric
 ├── CHANGELOG.md                           # semver release history (append-only)
@@ -542,6 +570,8 @@ deep-research/
 │   ├── check-provenance.sh
 │   ├── check-schema.sh
 │   ├── check-example-invariants.sh
+│   ├── check-newsletter-search.sh
+│   ├── check-marketplace-rank.sh          # suggest-tooling ranker unit + regression checks
 │   ├── schema/{research-sources,research-evidence}.schema.json
 │   └── fixtures/ → examples/eu-ai-act-2026/*.json
 └── .github/workflows/validate.yml         # CI — runs the check suite on push + PR
