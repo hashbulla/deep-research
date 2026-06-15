@@ -1,0 +1,24 @@
+{"id": "pos-01", "prompt": "/suggest-tooling ~/Desktop/AIEngineering/research-runs/rag-juridique-rgpd", "expect": "load", "boundary": "slash invocation with run-dir path"}
+{"id": "pos-02", "prompt": "what tools could help me act on this research", "expect": "load", "boundary": "EN post-run recommendation intent"}
+{"id": "pos-03", "prompt": "suggère des outils pour ce run", "expect": "load", "boundary": "FR trigger phrase (exact)"}
+{"id": "pos-04", "prompt": "propose tools for my research run", "expect": "load", "boundary": "EN trigger phrase (exact)"}
+{"id": "pos-05", "prompt": "what skills match this research on RAG evaluation methods", "expect": "load", "boundary": "EN skills-match trigger"}
+{"id": "pos-06", "prompt": "quels outils Claude Code correspondent aux thèmes de cette recherche ?", "expect": "load", "boundary": "FR paraphrase of skills-match intent"}
+{"id": "pos-07", "prompt": "I just finished a deep-research run on LLM observability — what MCP servers or skills should I look at?", "expect": "load", "boundary": "post-run MCP/skill discovery paraphrase"}
+{"id": "pos-08", "prompt": "which Claude Code plugins are relevant to this research on agent orchestration frameworks?", "expect": "load", "boundary": "plugin discovery paraphrase"}
+{"id": "pos-09", "prompt": "run tooling recommendations for the research at /tmp/runs/multi-agent-2026", "expect": "load", "boundary": "imperative with absolute run-dir"}
+{"id": "pos-10", "prompt": "based on this research run, suggest skills or MCP servers I should install", "expect": "load", "boundary": "install-suggest (recommendation intent, not install action)"}
+{"id": "pos-11", "prompt": "deep-research --suggest-tooling passed this run directory — please process it", "expect": "load", "boundary": "delegation from deep-research (--suggest-tooling flag)"}
+{"id": "pos-12", "prompt": "/suggest-tooling . (run-dir is the current directory)", "expect": "load", "boundary": "slash invocation with dot as run-dir"}
+{"id": "neg-01", "prompt": "install the playwright MCP server", "expect": "skip", "boundary": "install action → not a recommender invocation"}
+{"id": "neg-02", "prompt": "run deep research on zero-trust architecture", "expect": "skip", "boundary": "fresh research run → deep-research skill"}
+{"id": "neg-03", "prompt": "what is an MCP server?", "expect": "skip", "boundary": "single-fact / concept question — not a run-based recommendation"}
+{"id": "neg-04", "prompt": "what does the tavily MCP server do?", "expect": "skip", "boundary": "single-tool lookup → not suggest-tooling"}
+{"id": "neg-05", "prompt": "/deep-research impact of EU AI Act on open-source model providers", "expect": "skip", "boundary": "deep-research invocation (territorial neighbor)"}
+{"id": "neg-06", "prompt": "add the context7 MCP to my Claude Code settings", "expect": "skip", "boundary": "registration/config action — not a recommender"}
+{"id": "neg-07", "prompt": "which npm packages should I use for web scraping in Node.js?", "expect": "skip", "boundary": "non-Claude-ecosystem tooling (npm) → out of scope"}
+{"id": "neg-08", "prompt": "recommend Python libraries for building RAG pipelines", "expect": "skip", "boundary": "Python libs recommendation → not Claude Code skills/plugins/MCPs"}
+{"id": "neg-09", "prompt": "I just finished a research run on medieval French trade routes. What tools do I need?", "expect": "skip", "boundary": "non-work-relevant topic run — skill should emit empty toolbox, not skip at activation; but the prompt alone should NOT activate because no work-relevant framing"}
+{"id": "neg-10", "prompt": "npx skills add anthropic/claude-trace", "expect": "skip", "boundary": "direct package-manager action — install, not recommend"}
+{"id": "neg-11", "prompt": "show me the research report from last night's run", "expect": "skip", "boundary": "artifact reading intent — not a tooling recommendation"}
+{"id": "neg-12", "prompt": "make a LinkedIn post about the RAG evaluation research I just finished", "expect": "skip", "boundary": "content generation → linkedin-post skill"}
