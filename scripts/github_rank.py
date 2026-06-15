@@ -61,6 +61,27 @@ def minmax(values: list[float]) -> list[float]:
     return [(v - lo) / (hi - lo) for v in values]
 
 
+def fake_star_gate(
+    stars: int | None,
+    forks: int | None,
+    open_issues: int | None,
+    dependents: int | None,
+) -> bool | None:
+    """StarScout-derived divergence test: high stars with flat usage.
+
+    Returns None (unknown) when stars is absent, or when ALL three usage
+    inputs (forks, open_issues, dependents) are absent -- there is then
+    nothing to diverge from. Present-but-zero usage counts as usage data.
+    Below the 500-star floor a repo never flags (too small to be worth gaming).
+    """
+    if stars is None:
+        return None
+    if forks is None and open_issues is None and dependents is None:
+        return None
+    usage = (forks or 0) + (open_issues or 0) + (dependents or 0)
+    return stars >= 500 and usage < stars / 200
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("candidates", help="candidate JSON (pre-collected via gh CLI)")
@@ -108,9 +129,10 @@ def main() -> int:
         raw["dependents"].append(math.log10(dep + 1) if dep is not None else math.nan)
         raw["contributors"].append(math.log10((r.get("contributors_count") or 0) + 1))
 
-        # Fake-star divergence (StarScout-derived): high stars, flat usage.
-        usage = (r.get("forks") or 0) + (r.get("open_issues") or 0) + (dep or 0)
-        flags.append(stars >= 500 and usage < stars / 200)
+        gate = fake_star_gate(stars, r.get("forks"), r.get("open_issues"), dep)
+        # gate is None only when all usage inputs are absent; old behavior treated
+        # that as usage=0, i.e. flagged iff stars>=500. Preserve that exactly.
+        flags.append((stars >= 500) if gate is None else gate)
 
     # Drop set-wide-unavailable components, renormalize the rest.
     active = {

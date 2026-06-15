@@ -55,6 +55,7 @@ Do NOT activate for:
 | `--model` | `opus` \| `fable` | `opus` | Synthesis tier (Claude-Code-native: session model + subagent overrides, never SDK calls). See `references/model-tiers.md` |
 | `--confidential` | boolean | off | Confidential-path run: subagents receive neutral references only, rigor escalates to `critical`, retention posture recorded in the plan. See `references/model-tiers.md` |
 | `--rigor` | `standard` \| `critical` | `standard` (`critical` implied by `--confidential`) | Verification depth — entailment-judge scope, refuse-if-no-source, mandatory anchors, sycophancy probe. See `references/quality-gate.md` §"Rigor profiles" |
+| `--suggest-tooling` | boolean | off | After Phase 6 completes, delegate the finished run to the `suggest-tooling` sibling skill (proposes work-relevant Claude Code skills/plugins/MCP servers; writes `research-toolbox.md`). Default OFF — runs are byte-identical without it. This engine still emits exactly the four artifacts; the sibling skill writes the 5th file. |
 
 Target source counts per `--length` (from `references/methodology.md`):
 
@@ -169,6 +170,7 @@ Apply grading rules from `references/methodology.md` §"Source grading" (distill
    - `research-sources.json` (all cited sources, full schema)
    - `research-evidence.json` (claim → source IDs mapping)
 4. **Deterministic gate verification (mandatory).** Run `python3 <skill-dir>/scripts/verify_gates.py check-artifacts --sources research-sources.json --evidence research-evidence.json --length <length> --min-corroboration <n> [--since <date>]` via Bash. On any violation or failed gate, fix the artifacts (or move the offending claims to "Needs Verification") and re-run until the verdict is PASS. Quote the script's JSON verdict in the final chat message — self-reported metrics are not acceptable evidence.
+5. **Conditional delegation (only when `--suggest-tooling` is set; default OFF).** After all four artifacts are written and the gate verdict is quoted, invoke the `suggest-tooling` sibling skill on the invocation CWD, passing the work-relevant topics flagged in Phase 0. This engine still emits exactly the four artifacts — `suggest-tooling` is a separate skill that writes `research-toolbox.md`. If the sibling skill is unavailable, note it in one line and finish; the four artifacts are unaffected. When the flag is unset (default), this step is skipped and the run is byte-identical to a normal run.
 
 ## Output Format
 

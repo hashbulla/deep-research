@@ -1,0 +1,10 @@
+[
+ {"id":"reg/x","dedup_key":"acme/x","channels":["mcp-registry"],"categories":["mcp-server"],"category_fit":1,
+  "official":true,"verified_namespace":true,"official_publisher":false,"last_activity_days":5,
+  "stars":null,"forks":null,"open_issues":null,"dependents_count":null,"adoption":null,"use_count":null,
+  "unverified":false,"releases_count":null,"signed":true,"provenance":"mcp-registry","is_meta_list":false,"install_command":"reg"},
+ {"id":"sm/x","dedup_key":"acme/x","channels":["smithery"],"categories":["mcp-server"],"category_fit":1,
+  "official":false,"verified_namespace":false,"official_publisher":false,"last_activity_days":300,
+  "stars":null,"forks":null,"open_issues":null,"dependents_count":null,"adoption":50,"use_count":50,
+  "unverified":true,"releases_count":null,"signed":false,"provenance":"smithery","is_meta_list":false,"install_command":"sm"}
+]
