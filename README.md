@@ -157,6 +157,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | `--model` | `opus` \| `fable` | `opus` | Synthesis tier — Claude-Code-native (session model + subagent overrides, zero API keys). Fable 5 is opt-in at ~2× cost ([details](references/model-tiers.md)) |
 | `--confidential` | flag | off | Confidential-path run: subagents receive neutral references only; rigor escalates ([details](references/model-tiers.md)) |
 | `--rigor` | `standard` \| `critical` | `standard` (`critical` implied by `--confidential`) | Verification depth — entailment-judge scope, refuse-if-no-source, mandatory anchors, sycophancy probe ([details](references/quality-gate.md)) |
+| `--suggest-tooling` | flag | off | After Phase 6 completes, delegate the finished run to the `suggest-tooling` sibling skill, which proposes work-relevant Claude Code skills, plugins, and MCP servers and writes `research-toolbox.md`. Default OFF — runs are byte-identical without it. The engine still emits exactly the four artifacts; `suggest-tooling` is a separate skill that writes the 5th file and never auto-installs anything. |
 
 ---
 
