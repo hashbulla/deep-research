@@ -11,7 +11,7 @@ description: >
 argument-hint: "<research-run-dir>"
 user-invocable: true
 disable-model-invocation: false
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Bash(python3 *), Bash(gh *), Bash(curl -s *), Bash(git *), mcp__tavily__tavily_search, mcp__tavily__tavily_extract
+allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Bash(python3 *), Bash(gh *), Bash(curl -s *), Bash(git *), Bash(npx skills find *), Bash(npx skills list *), mcp__tavily__tavily_search, mcp__tavily__tavily_extract
 ---
 
 > Consumes a finished `/deep-research` run and proposes work-relevant Claude Code skills,
@@ -72,6 +72,12 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Bash(python3 *), Bash(g
    connector's README-extraction path (`provenance: "awesome-list-seed"`). Set it also
    on any candidate whose categories map to no hat (the `§3` classifier maps obvious
    index repos to a `meta-list` category). The ranker filters these out.
+
+   Field-provenance notes for the contract above:
+   - **Do NOT pre-populate `fake_signal_flag`.** It is computed by the ranker (GitHub
+     divergence gate + non-GitHub scalar gate) after dedupe; supplying it upstream is ignored/overwritten.
+   - `releases_count` and `provenance` are harvested for audit/display and dedupe-representative
+     selection only; the ranker does not score them. `last_activity_days` is the maintenance signal.
 
 4. **Assemble the pre-classified candidate JSON.** Write all collected candidates (with
    their `categories`, `category_fit`, `channels`, and trust primitives) to a temp file.
