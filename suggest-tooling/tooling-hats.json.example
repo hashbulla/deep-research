@@ -1,0 +1,10 @@
+{
+  "hats": {"ai-engineer": 1.0, "devsecops": 0.7, "platform": 0.5, "fr-b2b": 0.4},
+  "category_hat": {
+    "eval": "ai-engineer", "rag": "ai-engineer", "mcp-server": "ai-engineer",
+    "prompt-eng": "ai-engineer", "agent-orchestration": "ai-engineer",
+    "scraping": "ai-engineer", "observability": "platform",
+    "k8s-security": "devsecops", "secrets-mgmt": "devsecops",
+    "ci-cd": "devsecops", "fr-b2b-ops": "fr-b2b"
+  }
+}

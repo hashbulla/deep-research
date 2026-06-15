@@ -210,3 +210,13 @@ assert all("score" in r for r in d["ranking"])
 print("  T6 PASS")
 print("  ALL marketplace_rank checks PASS")
 PY
+
+echo "== T9: taxonomy parity (script default == example) =="
+python3 - <<'PY'
+import json,sys; sys.path.insert(0,"suggest-tooling/scripts")
+import marketplace_rank as m
+with open("suggest-tooling/tooling-hats.json.example") as f: ex=json.load(f)
+assert set(m.DEFAULT_CATEGORY_HAT)==set(ex["category_hat"]), "category sets diverged"
+assert set(m.DEFAULT_HATS)==set(ex["hats"]), "hat sets diverged"
+print("  T9 PASS")
+PY
