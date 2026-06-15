@@ -89,6 +89,7 @@ the run metadata:
     {
       "id": "owner/repo",
       "channels": ["github", "mcp-registry"],
+      "categories": ["eval", "rag"],
       "relevance": 1.0,
       "score": 0.87,
       "trust_tier": "VERIFIED",

@@ -207,6 +207,7 @@ assert "effective_weights" in d and "dropped_components" in d, list(d.keys())
 ids=[r["id"] for r in d["ranking"]]
 assert ids==["hi/rel","lo/caution"], ids  # VERIFIED before CAUTION regardless of raw score
 assert all("score" in r for r in d["ranking"])
+assert all("categories" in r for r in d["ranking"]), "rows must carry categories (e2e-fragile/drifter group by it)"
 print("  T6 PASS")
 print("  ALL marketplace_rank checks PASS")
 PY

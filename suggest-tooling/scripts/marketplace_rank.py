@@ -243,6 +243,7 @@ def main() -> int:
         row = {
             "id": c.get("id"),
             "channels": c.get("channels", []),
+            "categories": c.get("categories", []),
             "relevance": round(c["_relevance"], 4),
             "score": score,
             "trust_tier": trust_tier(c),
