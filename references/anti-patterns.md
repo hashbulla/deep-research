@@ -4,8 +4,8 @@ Every item here is a non-negotiable. Any violation is a skill failure, regardles
 
 ## A. Non-negotiables (skill-level, override everything)
 
-### A1. No tool calls before Phase-0 approval
-Phase 0 emits `research-plan.md` and **stops** until the user approves. Executing `mcp__tavily__*` before approval is a hard failure. If the user pastes a question with obvious urgency, still produce the plan and ask for approval — do not skip the gate.
+### A1. No retrieval before the plan is written (and refinement, if triggered, resolved)
+Phase 0 writes `research-plan.md` before any retrieval call. Executing `mcp__tavily__*` before the plan exists — or before a triggered Phase-0 step-3 `AskUserQuestion` refinement has resolved — is a hard failure. There is **no mandatory approval halt**: a well-formed query proceeds autonomously the moment the plan is written. But planning still precedes retrieval, and a refinement that the ambiguity-signal checklist (`references/methodology.md` §9) fired is never skipped under urgency.
 
 ### A2. No fabricated URLs or citations
 Every `[^n]` footnote in `research-report.md` resolves to a `research-sources.json` record whose `url` was returned by a real Tavily call (or `WebSearch` fallback, explicitly logged). URLs are not inferred, reconstructed, or "corrected" against memory. If a Tavily result returns a 404-suspect URL, flag it in `notes` but keep the exact returned URL.
@@ -59,7 +59,7 @@ When only an abstract is retrievable for a paywalled paper, the `research-eviden
 Two sources that both cite a third source are not "independent". Before counting corroboration, check that supporting sources are not derivative (e.g., three news articles all quoting the same press release count as one source, not three). Derivative chains are logged in `notes` and counted once.
 
 ### B11. Over-eager emit
-Do not write any of the four artifacts before Phase 6 completes. No streaming, no intermediate "here's what I have so far" dumps in the chat. The user sees the Phase-0 plan (for approval) and the four artifacts (at the end).
+Do not write the report or JSON artifacts before Phase 6 completes. No streaming, no intermediate "here's what I have so far" dumps in the chat. `research-plan.md` is the sole exception — it is written in Phase 0 (artifact #1). The user sees the Phase-0 plan (written to disk, no approval step) and the final three artifacts (at the end).
 
 ### B12. Out-of-scope sprawl
 The skill answers the user's research question. It does **not**:
@@ -70,7 +70,7 @@ The skill answers the user's research question. It does **not**:
 
 ## C. Chat-output anti-patterns
 
-- **No "here's what I'm thinking" streams.** Phase 0 emits `research-plan.md` + one-line approval prompt. That is the full Phase-0 chat output.
+- **No "here's what I'm thinking" streams.** Phase 0 writes `research-plan.md`; its chat output is a one-line summary — plus, only when the ambiguity-signal checklist trips, a single `AskUserQuestion` round. That is the full Phase-0 chat output.
 - **No verbose "completed Phase N" reports** between phases. The user sees the final artifacts. Intermediate progress is silent.
 - **No apologizing for Tavily rate limits, paywalls, or any other infrastructure state.** Document the constraint in `notes` / Methodology and move on.
 - **No emoji, no flourish, no AI self-description** in any artifact.

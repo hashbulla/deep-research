@@ -12,7 +12,7 @@ Two profiles scale verification depth to the run's stakes. The default keeps the
 | Entailment judge (decorrelated subagent, different Claude model, claim + cited span only — no scratch context) | Executive-summary claims + every single-source claim | **Every claim** |
 | Unsourced assertion (zero supporting sources) | Credibility 6 → "Needs Verification" | **Refuse-if-no-source**: the assertion is removed; the report states "no sourced answer available" — never a parametric-knowledge fallback |
 | `anchor` field on claims (`research-evidence.json`) | Optional (recommended for executive-summary claims) | **Required on every claim** — `verbatim_quote` for web sources, `snapshot_char_range` (+ snapshot SHA-256) for persisted corpus documents; verified by `scripts/verify_gates.py check-artifacts --rigor critical` |
-| Sycophancy / false-premise probe | — | Phase 0 verifies the question's presuppositions against Tier 1/2 sources; an unsupported premise is surfaced at the human gate instead of researched |
+| Sycophancy / false-premise probe | — | Phase 0 flags the question's presuppositions (parametric suspicion, no retrieval call); a likely-unsupported premise is surfaced via the pre-flight `AskUserQuestion` refinement (`references/methodology.md` §9) instead of researched |
 | Contradiction critic | Contradictions section per SKILL.md | Dedicated critic pass re-scans the draft for smoothed-over disagreements before Phase 6 |
 | Subagent content policy | Condensed findings + references | **Neutral references only** — no confidential text ever enters a subagent prompt, log, or MCP call |
 

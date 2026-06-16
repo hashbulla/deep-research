@@ -32,7 +32,7 @@ Trace which files the skill reads at each pipeline moment. A fixture passes when
 
 Run each invocation live (Tavily MCP required; results vary — only the **mechanical checks** are scored, never the prose quality). Every mechanical check is a deterministic command or transcript predicate.
 
-**Pass bar:** every mechanical check in every fixture. The human-gate check in `e2e-01` (no Tavily call before approval) is the skill's first non-negotiable; its failure invalidates the entire run regardless of artifact quality.
+**Pass bar:** every mechanical check in every fixture. The plan-precedes-retrieval check in `e2e-01` (no Tavily call before `research-plan.md` exists) and its `e2e-10` companion (no Tavily call before a triggered AskUserQuestion refinement resolves) are the skill's first non-negotiable (anti-pattern A1); their failure invalidates the entire run regardless of artifact quality.
 
 ## Adding fixtures
 

@@ -18,7 +18,7 @@
 {"id": "neg-05", "prompt": "scrape the product prices from this e-commerce site", "expect": "skip", "boundary": "scraping → /scrape"}
 {"id": "neg-06", "prompt": "quick search: what did Anthropic release this week?", "expect": "skip", "boundary": "quick time-sensitive search → tavily_search"}
 {"id": "neg-07", "prompt": "/research koyeb custom domain peering", "expect": "skip", "boundary": "user-scope /research command (territorial)"}
-{"id": "neg-08", "prompt": "fan out a bunch of research agents on this topic and just give me the gist, no plan needed", "expect": "skip", "boundary": "plugin-namespaced deep-research sibling — ungated fan-out (territorial)"}
+{"id": "neg-08", "prompt": "fan out a bunch of research agents on this topic and just give me the gist, no plan needed", "expect": "skip", "boundary": "plugin-namespaced deep-research sibling — quick gist, no plan or graded artifacts; this skill always writes a plan + four graded artifacts even when running autonomously (territorial)"}
 {"id": "neg-09", "prompt": "summarize this PDF I just downloaded", "expect": "skip", "boundary": "local document task"}
 {"id": "neg-10", "prompt": "write a LinkedIn post about deep research best practices", "expect": "skip", "boundary": "content generation → linkedin-post"}
 {"id": "neg-11", "prompt": "debug why my Tavily MCP returns 429 on every call", "expect": "skip", "boundary": "tooling debug, not research"}

@@ -63,7 +63,7 @@ mcp__tavily__tavily_research(
 
 ## Conditional non-Tavily source: Context7 (version-current library docs)
 
-OPTIONAL source (methodology §7 optional-source rule applies: MCP absent or quota exhausted → degrade to Tavily, record in the Methodology note, declare at the human gate).
+OPTIONAL source (methodology §7 optional-source rule applies: MCP absent or quota exhausted → degrade to Tavily, record in the Methodology note, declare in `research-plan.md` before Phase 1).
 
 **Gating — ALL three conditions, checked at Phase 0; otherwise zero Context7 calls** (free tier is 1,000 calls/month — never auto-invoke broadly):
 
@@ -80,7 +80,7 @@ OPTIONAL source (methodology §7 optional-source rule applies: MCP absent or quo
 
 **Grading & provenance.** Context7 chunks are canonical vendor documentation → Tier 1 (official docs domain) or Tier 2 per the registry (§6). Context7 returns chunks, not URLs: each cited chunk becomes a `research-sources.json` record with `retrieval_tool: "context7_query_docs"`, `url` set to the canonical documentation URL the chunk maps to, `tavily_score: null` (score-less tool), and `doc_provenance: {library_id, version, section}`. Cache lookups per `library_id + version` within a run — never re-query the same pair.
 
-**Phase placement.** Phase 1 (doc retrieval for gated sub-questions, alongside Tavily) and Phase 4 (targeted follow-up on a specific API section). All Context7-sourced chunks pass the full Phase-2 gate battery like any other source. `research-plan.md` declares which libraries/versions will be queried — visible at the human gate.
+**Phase placement.** Phase 1 (doc retrieval for gated sub-questions, alongside Tavily) and Phase 4 (targeted follow-up on a specific API section). All Context7-sourced chunks pass the full Phase-2 gate battery like any other source. `research-plan.md` declares which libraries/versions will be queried — written before Phase 1.
 
 ## Non-Tavily fallback tools
 

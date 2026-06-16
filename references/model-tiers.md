@@ -14,12 +14,12 @@
 
 ## How selection actually works (no SDK, D-4)
 
-1. **Session model** — the lead orchestrator (the model reading this file) runs on whatever the user selected with `/model`. The skill cannot switch it. If `--model fable` is requested but the session runs on another model, say so in `research-plan.md` at the human gate and recommend the user switch (`/model fable`) before approving — never silently proceed as if the tier applied.
+1. **Session model** — the lead orchestrator (the model reading this file) runs on whatever the user selected with `/model`. The skill cannot switch it. If `--model fable` is requested but the session runs on another model, say so in `research-plan.md` and recommend the user switch (`/model fable`) before Phase 1 — never silently proceed as if the tier applied.
 2. **Subagent overrides** — Claude Code's Agent tool accepts a per-subagent `model` parameter (`haiku`, `sonnet`, `opus`, `fable`). The pipeline uses it for:
    - Phase 2 grading subagents per sub-question: `sonnet` (cheap, mechanical tier/CRAAP application);
    - the Phase 5 decorrelated entailment judge: a **different** Claude model than the synthesis model (e.g. synthesis on opus → judge on sonnet), breaking same-model circularity;
    - optional Fable 5 synthesis subagents on exhaustive runs when the user opted in but keeps the session on opus.
-3. **Declare the tier in the plan.** `research-plan.md` states the session model observed, the subagent models the run will use, and the cost implication — visible at the human gate.
+3. **Declare the tier in the plan.** `research-plan.md` states the session model observed, the subagent models the run will use, and the cost implication — written before Phase 1.
 
 ## Flags
 
@@ -31,11 +31,11 @@
 ## Fable 5 operational notes (verified 2026-06-12)
 
 - **Retention:** requires 30-day data retention; orgs configured for ZDR get `400` on every request. D-1 accepts 30-day retention for the target corpus — recorded in Linear AI-120.
-- **Latency:** single turns on hard tasks can run many minutes. On exhaustive runs, expect the synthesis phase to be substantially slower; the runtime table in `quality-gate.md` still applies — if the 15-minute exhaustive budget cannot hold on fable, say so at the human gate.
+- **Latency:** single turns on hard tasks can run many minutes. On exhaustive runs, expect the synthesis phase to be substantially slower; the runtime table in `quality-gate.md` still applies — if the 15-minute exhaustive budget cannot hold on fable, say so in `research-plan.md`.
 - **Refusals:** Fable 5 runs safety classifiers targeting research biology and most cybersecurity content; benign security research can trigger false positives (`stop_reason: refusal` surfaced as a subagent failure). For research questions in security/bio domains, prefer the opus tier — note this in the plan when the topic matches.
 - **Thinking:** always on for fable (no configuration needed or possible from a skill); opus runs adaptive thinking. No action required at the skill level.
 - **Prompt cache is per model.** Never alternate the lead's work between models mid-run (cold cache each switch). Use dedicated subagents per model instead — each keeps its own warm cache.
 
 ## Cost re-baselining
 
-When the user asks for a cost estimate at the human gate: estimate from the plan's Tavily call count and candidate volume, then apply the price table above for the chosen tier. For precise re-baselining of a recurring research workload, the user can run `/cost` after a run — the skill itself performs no token accounting (no API access, D-4).
+When the user asks for a cost estimate from the plan: estimate from the plan's Tavily call count and candidate volume, then apply the price table above for the chosen tier. For precise re-baselining of a recurring research workload, the user can run `/cost` after a run — the skill itself performs no token accounting (no API access, D-4).

@@ -1,13 +1,13 @@
 # Phase-0 research plan template
 
-Written to `research-plan.md` at the end of Phase 0. **User must approve before Phase 1 fires.** This file is the approval artifact — it is not overwritten by later phases.
+Written to `research-plan.md` at the end of Phase 0, before Phase 1 retrieval. This is the run's planning artifact (artifact #1) — it is not overwritten by later phases. There is no approval halt: Phase 0 proceeds autonomously unless the pre-flight ambiguity-signal checklist (`references/methodology.md` §9) fired a clarifying `AskUserQuestion` round.
 
 ---
 
 ```markdown
 # Research plan: <question in --lang, ≤ 12 words>
 
-> Generated: YYYY-MM-DD HH:MM · Skill: deep-research · Status: awaiting approval
+> Generated: YYYY-MM-DD HH:MM · Skill: deep-research · Status: planned — proceeding to Phase 1
 
 ## 1. Question & scope
 
@@ -19,7 +19,7 @@ Written to `research-plan.md` at the end of Phase 0. **User must approve before 
 **Output language:** <fr | en | ...>
 **Recency window:** <--since value or "last 3 years default">
 **Min corroboration:** <integer, default 2>
-**Model tier:** session model <observed via /model> · synthesis <opus | fable (opt-in, ~2× cost)> · subagent overrides <e.g., grading=sonnet, entailment judge=different Claude model> — see `references/model-tiers.md`. <If `--model fable` but the session runs another model: recommend `/model fable` before approval.>
+**Model tier:** session model <observed via /model> · synthesis <opus | fable (opt-in, ~2× cost)> · subagent overrides <e.g., grading=sonnet, entailment judge=different Claude model> — see `references/model-tiers.md`. <If `--model fable` but the session runs another model: recommend `/model fable` before Phase 1.>
 **Confidential path:** <yes — subagents receive neutral references only, rigor=critical | no>
 
 ## 2. Sub-question decomposition
@@ -96,13 +96,12 @@ Failure to meet any gate routes affected claims to "Needs Verification" and docu
 
 At Phase 6 the skill will emit:
 
-- `research-plan.md` (this file — approved)
+- `research-plan.md` (this file)
 - `research-report.md` (final synthesis, in <--lang>)
 - `research-sources.json` (all cited sources, Admiralty-graded)
 - `research-evidence.json` (claim → sources mapping with credibility)
 
 ---
 
-**Approve this plan to proceed to Phase 1.**
-Reply `approve` to run as-specified, or edit any section above and re-send.
+*This plan is the run's first artifact; Phase 0 proceeds to Phase 1 automatically. It pauses only when the pre-flight ambiguity-signal checklist (`references/methodology.md` §9) fires a clarifying `AskUserQuestion` round — otherwise the run is fully autonomous.*
 ```

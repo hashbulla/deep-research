@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-06-16 — The Phase-0 human approval gate was removed ON PURPOSE
+
+- **Trigger:** user design decision (spec `docs/superpowers/specs/2026-06-15-remove-human-gate-design.md`), to make the skill usable by fully autonomous agents.
+- **Gotcha:** the mandatory "HUMAN GATE — STOP" between Phase 0 and Phase 1 was, until 0.3.0, a documented **non-negotiable** (old anti-pattern A1, old README "The Human Gate" section). A future audit that sees no approval halt may "restore" it as a regression — **do not.** Its removal was deliberate and approved.
+- **Resolution:** the halt is replaced by a **conditional pre-flight refinement** at Phase 0 step 3 — a single `AskUserQuestion` round fires only when the ambiguity-signal checklist (`references/methodology.md` §9, authoritative) or a safety trigger (sub-Tier-2 `--domains`, critical-rigor false premise) trips. A1 was rewritten from "no tool calls before approval" to "no retrieval before the plan is written and any triggered refinement has resolved" — planning still precedes retrieval; only the *human halt* is gone. The four-artifact contract is unchanged (`research-plan.md` is still artifact #1).
+- **Guard:** `e2e-01` (well-formed query → zero AskUserQuestion, autonomous) + `e2e-10` (ambiguous query → exactly one AskUserQuestion before any Tavily call); rubric §3 names both as the first non-negotiable. Provenance untouched (the report never mentioned the gate; SHA-256 unchanged).
+
 ## 2026-06-12 — Example fixture drifted from the skill's own gates
 
 - **Trigger:** adversarial review finding ADV-7 (verified by direct jq count).

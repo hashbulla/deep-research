@@ -21,7 +21,7 @@ one-line curation note, nothing more.
 Activates when a sub-question's topic intersects one of the three buckets
 (`ai-engineering`, `platform-ai-sre`, `freelance-acquisition`) **and** the corpus directory
 exists. Never for: topics outside those domains, or when the corpus is absent. Declared in
-`research-plan.md` (Conditional sources) at the human gate, like any other optional source.
+`research-plan.md` (Conditional sources), before Phase 1, like any other optional source.
 
 ## Corpus location & shape
 

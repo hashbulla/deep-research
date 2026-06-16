@@ -31,7 +31,7 @@
 Proceed? (reply 'approve' or edit the plan)
 ```
 
-**After user approves**, Phases 1–6 execute. Final `research-report.md` (excerpt):
+**Once the plan is written**, Phases 1–6 execute autonomously. Final `research-report.md` (excerpt):
 
 ```markdown
 # Impact of the EU AI Act on open-source model providers in 2026
