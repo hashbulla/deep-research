@@ -4,7 +4,7 @@
 
 ## Project identity
 
-`deep-research` is a markdown-only Claude Code skill packaged as a GitHub repository. It orchestrates a 7-phase agentic deep-research pipeline over the Tavily MCP tool suite, calibrated to Perplexity Deep Research output (≥100 cited sources on `--length exhaustive`). The skill produces four artifacts in the invocation CWD: `research-plan.md`, `research-report.md`, `research-sources.json`, `research-evidence.json`. Sources are graded on the NATO Admiralty A–F × 1–6 matrix against a 4-tier domain registry. A non-negotiable **human approval gate** sits between Phase 0 (planning) and Phase 1 (retrieval) — no Tavily call fires before the user approves `research-plan.md`.
+`deep-research` is a markdown-only Claude Code skill packaged as a GitHub repository. It orchestrates a 7-phase agentic deep-research pipeline over the Tavily MCP tool suite, calibrated to Perplexity Deep Research output (≥100 cited sources on `--length exhaustive`). The skill produces four artifacts in the invocation CWD: `research-plan.md`, `research-report.md`, `research-sources.json`, `research-evidence.json`. Sources are graded on the NATO Admiralty A–F × 1–6 matrix against a 4-tier domain registry. Phase 0 (planning) writes `research-plan.md` and proceeds **autonomously** to Phase 1 (retrieval) — there is no mandatory human approval halt. A **conditional pre-flight refinement** sits at Phase 0 step 3: a single `AskUserQuestion` round fires only when a named ambiguity signal or a safety trigger trips (`references/methodology.md` §9, the authoritative checklist). The one hard invariant remains: no Tavily call before `research-plan.md` is written and any triggered refinement has resolved (`references/anti-patterns.md` A1).
 
 The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic helpers live under `scripts/` and are invocable at runtime via Bash (amendment I4a, 2026-06-12): `scripts/verify_gates.py` computes counts, ratios, medians, cascade conformance, punycode normalization, and the CWD-report SHA-256 check — quality gates are script-verified, never LLM-self-reported. Everything else is documentation, a reference file, a JSON Schema, a bash test script, or a GitHub Actions workflow.
 
@@ -19,7 +19,7 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `references/report-structure.md` | Output structure + JSON schemas for `research-sources.json` and `research-evidence.json` | Artifact schemas |
 | `references/quality-gate.md` | Deterministic thresholds + CRAG trigger rules | Phase 5 gates, confidence-tag assignment |
 | `references/anti-patterns.md` | Forbidden behaviors (skill non-negotiables + report anti-patterns) | Guardrails |
-| `references/research-plan-template.md` | Phase 0 plan scaffold | Approval artifact shape |
+| `references/research-plan-template.md` | Phase 0 plan scaffold | Plan artifact shape |
 | `references/examples.md` | Worked examples moved out of SKILL.md (token budget) | Illustrative plan/report excerpts |
 | `evals/` | Loading (≥12+12 incl. territorial negatives), progressive (≥8), e2e (≥3) fixtures + `rubric.md` | Activation + disclosure + mechanical e2e checks |
 | `CHANGELOG.md` | Semver release history, append-only | Release notes, waivers |
@@ -79,7 +79,7 @@ bash tests/check-cross-references.sh
 6. Phase 5 — Grounding Validation
 7. Phase 6 — Confidence Annotation
 
-(Phase 0 is the human-gated planning phase; Phases 1–6 run post-approval.)
+(Phase 0 is the planning phase — pre-flight refinement plus plan authoring; it proceeds autonomously to Phases 1–6 unless the ambiguity-signal checklist fires a clarifying question.)
 
 ### I4a. Markdown skill-surface; deterministic helpers under `scripts/` only
 

@@ -279,7 +279,7 @@ Deterministic overlay rules, applied at Phase 2 after tier classification:
 | `factual_reporting` | Action | Effect |
 |---|---|---|
 | very-high / high / mostly | none | — |
-| mixed | **flag** | `credibility_overlay.action: "flag"`; bias + rating recorded in the source record; visible at the human gate for allowlisted domains |
+| mixed | **flag** | `credibility_overlay.action: "flag"`; bias + rating recorded in the source record; declared in `research-plan.md` for allowlisted domains |
 | low / very-low | **downgrade** | Domain tier worsened by one (2→3, 3→4; never upgrades, never below 4) + flag; a downgraded source follows the rules of its new tier |
 
 The overlay can only worsen or annotate — a good overlay rating never upgrades a tier (the registry stays the prior; the overlay is posterior evidence against, not for).
@@ -289,7 +289,7 @@ The overlay can only worsen or annotate — a good overlay rating never upgrades
 ## 7. Specialized APIs (reference only) [R§7]
 The report recommends a multi-API stack (Tavily + Exa `findSimilar` + Valyu + Firecrawl). Only the **Tavily MCP** is available in this environment. Known coverage gap: deep academic citation-chaining (Exa) and full-text academic search (Valyu). Mitigation: include full Tier 1 academic domain list in `include_domains`, plus `tavily_extract extract_depth=advanced` on any paper URL surfaced during rerank.
 
-**Optional-source rule.** Any retrieval source added beyond the Tavily MCP suite (additional MCP servers, CLIs, keyed APIs) is OPTIONAL by contract: when its credential, server, or endpoint is absent or persistently failing, the skill degrades to Tavily-only retrieval, records the degradation in the report's Methodology note, and declares the source's availability status in `research-plan.md` at the human gate. A missing optional source is never a run failure.
+**Optional-source rule.** Any retrieval source added beyond the Tavily MCP suite (additional MCP servers, CLIs, keyed APIs) is OPTIONAL by contract: when its credential, server, or endpoint is absent or persistently failing, the skill degrades to Tavily-only retrieval, records the degradation in the report's Methodology note, and declares the source's availability status in `research-plan.md` (written before Phase 1). A missing optional source is never a run failure.
 
 ---
 
@@ -334,7 +334,26 @@ PHASE 5  Grounding Validation    (CRAG loop, up to 2 iterations)
 PHASE 6  Confidence Annotation   (Admiralty 1–6 per claim, Needs Verification isolation)
 ```
 
-The **human gate** sits between Phase 0 and Phase 1. No Tavily call fires before the plan is approved.
+Phase 0 writes `research-plan.md` and proceeds **autonomously** to Phase 1 — there is no mandatory human approval halt. A single `AskUserQuestion` round fires **only when** the query is genuinely ambiguous or trips a safety trigger (see the pre-flight refinement checklist below). No Tavily call fires before `research-plan.md` is written and any triggered refinement has resolved.
+
+### Pre-flight refinement — ambiguity-signal checklist (authoritative)
+
+This is the single source of truth for **when** Phase 0 pauses to ask the user a question. SKILL.md Phase 0 step 3 and the README conform to it.
+
+The skill fires **one** `AskUserQuestion` round iff **≥1** of these named **ambiguity signals** is present:
+
+1. **No scope boundary** — the subject's extent is unbounded (e.g. "research AI agents" with no facet, sector, or question named).
+2. **Undefined comparison axis** — a compare / "X vs Y" intent with no stated dimensions to compare on.
+3. **Ambiguous timeframe** — a time-sensitive topic with no date range and no `--since`.
+4. **Unspecified depth** — the query's breadth is mismatched to the `--length` default (a sprawling topic with no `--length`, or a narrow one flagged `exhaustive`).
+5. **Undefined audience / jurisdiction** — a legal / regulatory / regional topic with no locale, jurisdiction, or audience fixed.
+
+The dialog **also** opens — even on an otherwise-clear query — for either **safety trigger**:
+
+- a user-supplied `--domains` entry **below Tier 2** → confirm its inclusion;
+- under `--rigor critical`, an embedded premise the presupposition probe flags as **likely unsupported** by Tier 1/2 sources → offer proceed / reframe / cancel. The probe is a **parametric-suspicion flag**, not a retrieval check — Phase 0 fires no Tavily call.
+
+If neither a signal nor a safety trigger fires, Phase 0 proceeds **silently** — a well-formed query runs fully autonomously with no human checkpoint. In a headless / unattended context an ambiguous query blocks at the `AskUserQuestion` call; that is intended (researching an ambiguous question unattended is the worse failure). The contract for fully autonomous callers is therefore: **supply a well-formed query** (no signal trips), and the run never pauses.
 
 ---
 
@@ -362,7 +381,7 @@ Quality gates applied at Phase 5 (deterministic thresholds in `references/qualit
 
 ## Orchestration topology & context policy (skill-specific extension, AI-123)
 
-**Lead + isolated subagents — never a swarm.** One lead orchestrator (the session) owns the plan, the human gate, and the final synthesis. Retrieval-adjacent heavy lifting is delegated to isolated Claude Code subagents with explicit `model` overrides (`references/model-tiers.md`); independent uncoordinated agents amplify errors on fidelity-critical work, so coordination is always centralized in the lead.
+**Lead + isolated subagents — never a swarm.** One lead orchestrator (the session) owns the plan, the pre-flight refinement, and the final synthesis. Retrieval-adjacent heavy lifting is delegated to isolated Claude Code subagents with explicit `model` overrides (`references/model-tiers.md`); independent uncoordinated agents amplify errors on fidelity-critical work, so coordination is always centralized in the lead.
 
 - **Phase-2 grading delegation.** On exhaustive runs (or any run with >6 sub-questions), per-sub-question grading runs in parallel subagents (model override `sonnet`). Each receives the sub-question, the candidate list (URL, title, score, date, snippet), and the grading rules; each returns **condensed findings only** — graded rows (id, url, tier, reliability, one-line relevance) — never raw page content. The lead's context stays clean for synthesis; one polluted retrieval chain cannot contaminate the whole run.
 - **Entailment judging delegation.** The Phase-5 fidelity judge is a subagent on a **different Claude model** than the session, fed only claim + cited span — decorrelated context, no scratch (breaks same-model judge circularity together with the distinct personas of §11).

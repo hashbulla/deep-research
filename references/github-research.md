@@ -1,10 +1,10 @@
 # GitHub deep research — SOTA repository discovery with auditable evidence
 
-> Read at Phase 0 when a sub-question asks "what are the best / state-of-the-art tools, libraries, or implementations for X". OPTIONAL source (methodology §7 rule): requires an authenticated `gh` CLI — absent or unauthenticated, degrade to Tavily (`site:github.com` searches), record the degradation in the Methodology note, and declare it at the human gate. All retrieval runs through Bash (`gh` CLI, scoped curl); `scripts/github_rank.py` is scoring-only — stdlib, zero network (I4a).
+> Read at Phase 0 when a sub-question asks "what are the best / state-of-the-art tools, libraries, or implementations for X". OPTIONAL source (methodology §7 rule): requires an authenticated `gh` CLI — absent or unauthenticated, degrade to Tavily (`site:github.com` searches), record the degradation in the Methodology note, and declare it in `research-plan.md` before Phase 1. All retrieval runs through Bash (`gh` CLI, scoped curl); `scripts/github_rank.py` is scoring-only — stdlib, zero network (I4a).
 
 ## Gating
 
-Activates when a sub-question's intent is *tooling discovery* — "best/SOTA implementations of X", "which libraries do X", "production-grade alternatives to Y". Never for: code reading (use the repo directly), single known repos (tavily_extract the README), or non-software topics. Declared in `research-plan.md` (Conditional sources) at the human gate.
+Activates when a sub-question's intent is *tooling discovery* — "best/SOTA implementations of X", "which libraries do X", "production-grade alternatives to Y". Never for: code reading (use the repo directly), single known repos (tavily_extract the README), or non-software topics. Declared in `research-plan.md` (Conditional sources), before Phase 1.
 
 ## Retrieval pipeline
 

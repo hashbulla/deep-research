@@ -3,12 +3,12 @@
 </p>
 
 <p align="center">
-  <em>Intelligence-grade multi-source research as a Claude Code skill — source-graded, human-gated, evidence-anchored.</em>
+  <em>Intelligence-grade multi-source research as a Claude Code skill — source-graded, autonomous-capable, evidence-anchored.</em>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-Skill-7C3AED?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6Ii8+PHBhdGggZD0iTTIgMTdsMTAgNSAxMC01Ii8+PHBhdGggZD0iTTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Claude Code Skill">
-  <img src="https://img.shields.io/badge/Phases-7_+_Human_Gate-E04E2A?style=for-the-badge" alt="7 Phases">
+  <img src="https://img.shields.io/badge/Phases-7_+_Pre--flight_Refinement-E04E2A?style=for-the-badge" alt="7 Phases">
   <img src="https://img.shields.io/badge/Grading-Admiralty_A--F_×_1--6-0891B2?style=for-the-badge" alt="Admiralty">
   <img src="https://img.shields.io/badge/Target-100%2B_Sources-059669?style=for-the-badge" alt="100+ Sources">
   <img src="https://img.shields.io/badge/Retrieval-Tavily_MCP-1F2328?style=for-the-badge" alt="Tavily MCP">
@@ -24,7 +24,7 @@
 
 Point it at a research question. It decomposes the question into orthogonal sub-questions, retrieves across a tiered domain registry with Tavily, grades every source on the NATO Admiralty 2×6 matrix, and hands you a report where every claim traces to a URL and an explicit confidence label. Exhaustive runs reach **100+ sources**. Quality is held to absolute gates — groundedness, source-quality, corroboration, and a decorrelated entailment judge — verified per run, not against an external product.
 
-> **Why does this exist?** LLM research agents confidently synthesize from SEO farms unless you force source discipline. Anthropic's own internal research system found that *"early agents consistently chose SEO-optimized content farms over academic PDFs, even when authoritative sources were retrievable."* The fix is not better prompting alone. It is a **source-grading harness that runs before the synthesis step** — tier registry, score threshold, Admiralty reliability, CRAAP authority check, LLM-as-judge rerank, CRAG grounding loop. This skill bakes all of that into a 7-phase pipeline with **one human gate** before any retrieval call fires.
+> **Why does this exist?** LLM research agents confidently synthesize from SEO farms unless you force source discipline. Anthropic's own internal research system found that *"early agents consistently chose SEO-optimized content farms over academic PDFs, even when authoritative sources were retrievable."* The fix is not better prompting alone. It is a **source-grading harness that runs before the synthesis step** — tier registry, score threshold, Admiralty reliability, CRAAP authority check, LLM-as-judge rerank, CRAG grounding loop. This skill bakes all of that into a 7-phase pipeline that **runs autonomously**, pausing for a single clarifying question only when the query is genuinely ambiguous — so an orchestrating agent can drive it unattended, yet an ambiguous question is refined with you before a single Tavily credit is spent.
 
 ---
 
@@ -33,7 +33,7 @@ Point it at a research question. It decomposes the question into orthogonal sub-
 Four artifacts in your invocation directory, written atomically at the end of the run.
 
 ```
-research-plan.md         # approved by you at the human gate
+research-plan.md         # the run's plan, written in Phase 0
 research-report.md       # final synthesis, inline citations, confidence tags
 research-sources.json    # every cited source, Admiralty-graded
 research-evidence.json   # claim → source mapping, credibility 1–6
@@ -170,16 +170,16 @@ flowchart TD
     Start(["/deep-research &lt;question&gt;"]) --> P0
 
     subgraph P0["Phase 0 — Query Architect"]
-        B1[Parse question & flags] --> B2[Classify: academic/technical/current/mixed]
+        B1[Parse question & flags] --> RF{"ambiguity signal<br/>or safety trigger?<br/>methodology §9"}
+        RF -- "yes" --> ASK["AskUserQuestion<br/>one round — refine"]
+        RF -- "no — autonomous" --> B2[Classify: academic/technical/current/mixed]
+        ASK --> B2
         B2 --> B3[Decompose into sub-questions<br/>factual · contextual · contradictory · recency]
         B3 --> B4[Assemble tier profile<br/>+ include_domains preview]
         B4 --> B5[Write research-plan.md]
     end
 
-    P0 --> G1
-
-    G1{{"HUMAN GATE\n\nreview the plan\napprove / edit / cancel\nno Tavily call before approval"}}
-    G1 -- "approve" --> P1
+    P0 --> P1
 
     subgraph P1["Phase 1 — Broad Retrieval"]
         direction LR
@@ -236,7 +236,7 @@ flowchart TD
 
     P6 --> Done(["4 artifacts written atomically"])
 
-    style G1 fill:#FEF3C7,stroke:#D97706,color:#92400E
+    style RF fill:#FEF3C7,stroke:#D97706,color:#92400E
     style P1 fill:#DBEAFE,stroke:#3B82F6
     style P2 fill:#FEF9C3,stroke:#CA8A04
     style P3 fill:#FEF9C3,stroke:#CA8A04
@@ -247,13 +247,13 @@ flowchart TD
     style Done fill:#059669,stroke:#059669,color:#fff
 ```
 
-### The Human Gate
+### Pre-flight Refinement
 
-Three minutes of your attention, one decision. You review the plan — classification, sub-question decomposition, domain allowlist preview, estimated Tavily calls, stop conditions — and approve or edit. **No retrieval call fires before approval.** This is non-negotiable; it is the single most effective intervention against wasted runtime and off-target research.
+The skill runs **autonomously** by default: Phase 0 writes `research-plan.md` and proceeds straight to retrieval. It pauses for a single `AskUserQuestion` round **only when** the query trips a named ambiguity signal — no scope boundary, undefined comparison axis, ambiguous timeframe, unspecified depth, or undefined audience/jurisdiction — or a safety trigger (a sub-Tier-2 `--domains` entry, or a likely-false premise under `--rigor critical`). A well-formed query never pauses, so an orchestrating agent can drive the skill unattended; an ambiguous one is refined with you before a single Tavily credit is spent. The checklist is authoritative in [`references/methodology.md` §9](references/methodology.md).
 
-| Gate | Purpose | Time |
+| Refinement | Fires when | Time |
 |:-----|:--------|:-----|
-| ![Gate](https://img.shields.io/badge/Phase_0-Plan_Approval-D97706?style=flat-square) | Catches bad classification, wrong tier profile, and missed sub-question categories before any Tavily credit is spent | ~2–3 min |
+| ![Refine](https://img.shields.io/badge/Phase_0-Pre--flight_Refinement-D97706?style=flat-square) | A named ambiguity signal or safety trigger trips — otherwise the run is fully autonomous | 0–2 min |
 
 ---
 
@@ -356,7 +356,7 @@ graph LR
 ```
 ~/.claude/skills/deep-research/
 ├── .claude/CLAUDE.md                      # Maintainer spec anchor — invariants, gotchas, conventions
-├── SKILL.md                               # Orchestrator — 7 phases, human gate, provenance block
+├── SKILL.md                               # Orchestrator — 7 phases, pre-flight refinement, provenance block
 ├── deep-research-report.md                # Methodology source of truth (cited below)
 ├── scripts/
 │   ├── verify_gates.py                    # Deterministic gate verification (stdlib-only, zero network)
@@ -447,7 +447,7 @@ The corroboration threshold is `--min-corroboration 2` by default. A single Tier
 <details>
 <summary><strong>I want to override the tier profile</strong></summary>
 
-Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` directly. User-specified domains are unioned with the tier profile; they are never silently dropped. Any `--domains` entry below Tier 2 is flagged in `research-plan.md` for your confirmation at the human gate.
+Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` directly. User-specified domains are unioned with the tier profile; they are never silently dropped. Any `--domains` entry below Tier 2 trips a one-round `AskUserQuestion` confirmation in Phase 0 before retrieval, and the decision is recorded in `research-plan.md`.
 </details>
 
 <details>
@@ -478,7 +478,7 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 
 | Status | Capability |
 |:------:|:--------|
-| ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 7-phase pipeline with human gate |
+| ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | 7-phase pipeline with autonomous pre-flight refinement |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | NATO Admiralty 2×6 grading with deterministic credibility assignment |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | CRAG grounding loop (2 iterations max, graceful Needs-Verification fallback) |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | Unicode homograph defense (punycode normalization of every domain) |
