@@ -43,6 +43,12 @@ LLM fluency and self-reported confidence do **not** correlate with accuracy. Nev
 ### B5. Tier 4 as factual evidence [R§6 Tier 4]
 Reddit, LinkedIn, Medium, Twitter/X are social-signal-only. They may point you toward a Tier 1/2 source (a linked paper, an engineer's screenshot of internal docs), but the **linked source** is what gets cited — not the social post. A Tier 4 URL in `supporting_source_ids` is a violation.
 
+**Reframe (AI-183):** "Tier 4 = never cited" now means *ungraded or
+anonymous-low-reliability* social sources. An account graded reliability A–C via
+the §6 account-reliability rubric (mapping to tier ≤ 3) is citable like any
+other source; the deterministic Tier-4 support check (`verify_gates.py`) still
+blocks tier-4 (anonymous/burner) social sources from `supporting_source_ids`.
+
 ### B6. Ignoring contradictions [R§1 stage 4, R§5.3]
 When two Tier 1/2 sources disagree, do **not** silently pick one. List both in "Contradictions & open debates" with each side's evidence. If one side's evidence is stronger by tier or primary-source status, say so and name the winning position; otherwise label unresolved.
 
@@ -67,6 +73,14 @@ The skill answers the user's research question. It does **not**:
 - opine on the question's merit,
 - suggest code changes, architecture refactors, or non-research actions,
 - meta-comment on Tavily, Perplexity, or the skill's own design in the report body (the Methodology note is the only place for that, and it is factual, not editorial).
+
+### B13. Amplification masquerade
+Coordinated inauthentic social corroboration is not independent corroboration.
+N near-identical posts across accounts clustered in time count as **one** source
+(extends B10 to account-based sources). `verify_gates.py` flags clusters; the
+grader must record an `independence-verified` determination or the claim's
+corroboration is rejected. Cheap-to-fabricate social consensus never lifts a
+claim's credibility on volume alone.
 
 ## C. Chat-output anti-patterns
 
