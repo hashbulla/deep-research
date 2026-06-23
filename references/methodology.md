@@ -284,6 +284,41 @@ Deterministic overlay rules, applied at Phase 2 after tier classification:
 
 The overlay can only worsen or annotate — a good overlay rating never upgrades a tier (the registry stays the prior; the overlay is posterior evidence against, not for).
 
+### Account-derived reliability (OSINT/SOCMINT sources)
+
+When a source is account-based (social platform; carries `account_provenance`),
+the domain-tier registry cannot grade it — `twitter.com` as a *domain* says
+nothing. Reliability A–F is derived from account identity, and each band maps
+to a derived `domain_tier` so the existing tier-dependent rules keep working:
+
+| Reliability | Account basis | Derived `domain_tier` |
+|---|---|---|
+| A / B | Verified institutional / official account | 2 |
+| C | Established, real-identity named expert, unverified | 3 |
+| D | Pseudonymous but consistent track record | 4 |
+| E | Anonymous / burner / low-history, or injection-suspect | 4 |
+| F | Impersonation- or deception-suspect | 4 |
+
+Tier 1 stays reserved for canonical domains; a verified account caps at tier 2.
+The mapping re-encodes B5: an anonymous social source (tier 4) is never
+`primary_source`; a verified institutional account (tier 2) may be. Retrieval
+method (stealth vs Tavily) never affects the grade — it is recorded only in
+`retrieval_status`.
+
+**Anti-amplification (B13).** Before N social sources count as N independent
+corroborations, confirm distinct authorship and no shared origin. Near-identical
+posts clustered in time across accounts are coordinated amplification and count
+as one source. `verify_gates.py` flags clustered social corroboration (≥2
+distinct handles within the amplification window); the grader records the
+independence determination with an `independence-verified` note or the gate fails.
+
+**robots / stealth doctrine.** Stealth retrieval may override `robots.txt`
+(logged as `retrieval_status: robots_overridden`) and may target litigious
+platforms, but never credentialed content. It is bounded by `--max-stealth`
+(default 12) per run to stay research-scale. SOCMINT on named individuals is
+personal-data processing under GDPR; persistence defaults to cited-span
+snapshots only (see `references/osint-retrieval.md`).
+
 ---
 
 ## 7. Specialized APIs (reference only) [R§7]
