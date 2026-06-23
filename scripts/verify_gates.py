@@ -229,7 +229,7 @@ def check_artifacts(args: argparse.Namespace) -> int:
             stamped = [(r, parse_dt(srcmap[r]["account_provenance"].get("post_timestamp")))
                        for r in social_sup]
             stamped = [(r, t) for r, t in stamped if t]
-            handles = {srcmap[r]["account_provenance"].get("handle") for r in social_sup}
+            handles = {srcmap[r]["account_provenance"].get("handle") for r, _ in stamped}
             clustered = any(
                 abs(t1 - t2) <= window
                 for i, (_, t1) in enumerate(stamped)
