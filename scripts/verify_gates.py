@@ -54,7 +54,13 @@ SCORELESS_TOOLS = {
     "gh_cli",
     "academic_api",
     "WebSearch",
+    "scrapling_stealth",
 }
+
+# Account-derived reliability → domain_tier (methodology §6, Safeguard 1).
+# Applies ONLY to account-based sources (those carrying account_provenance);
+# domain-graded sources keep their registry tier.
+REL_TO_TIER = {"A": 2, "B": 2, "C": 3, "D": 4, "E": 4, "F": 4}
 
 
 def cascade(s12: int, s1: int, c: int) -> int:
@@ -134,6 +140,15 @@ def check_artifacts(args: argparse.Namespace) -> int:
                 f"{sid}: null tavily_score on score-bearing tool "
                 f"{src.get('retrieval_tool')!r}"
             )
+
+        if src.get("account_provenance"):
+            rel = src.get("admiralty_reliability")
+            expected_tier = REL_TO_TIER.get(rel)
+            if expected_tier is not None and src.get("domain_tier") != expected_tier:
+                violations.append(
+                    f"{sid}: account source reliability {rel!r} must map to "
+                    f"domain_tier {expected_tier}, found {src.get('domain_tier')}"
+                )
 
     grounded = 0
     corroborated = 0

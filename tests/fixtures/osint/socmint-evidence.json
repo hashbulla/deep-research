@@ -1,0 +1,15 @@
+[
+  {
+    "claim_id": "C001",
+    "claim_text": "The AI Office reiterated the GPAI timeline.",
+    "section": "1. GPAI timeline",
+    "supporting_source_ids": ["S001"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 3,
+    "label": "POSSIBLY TRUE",
+    "corroboration_count": 1,
+    "independent_tier12_count": 1,
+    "primary_source_present": false,
+    "notes": ""
+  }
+]
