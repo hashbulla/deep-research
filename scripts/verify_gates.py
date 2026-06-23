@@ -33,7 +33,7 @@ import json
 import re
 import statistics
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -97,6 +97,15 @@ def parse_iso(value: str | None) -> date | None:
         return None
 
 
+def parse_dt(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
 def load_array(path: Path, what: str) -> list[dict]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -113,11 +122,13 @@ def check_artifacts(args: argparse.Namespace) -> int:
     violations: list[str] = []
 
     tier: dict[str, int] = {}
+    srcmap: dict[str, dict] = {}
     for src in sources:
         sid = src.get("id", "<missing-id>")
         if sid in tier:
             violations.append(f"duplicate source id {sid}")
         tier[sid] = src.get("domain_tier", 99)
+        srcmap[sid] = src
 
         # punycode field self-consistency (defense against homograph spoofing)
         host = urlsplit(src.get("url", "")).hostname or ""
@@ -210,6 +221,27 @@ def check_artifacts(args: argparse.Namespace) -> int:
             )
         if cred <= 3 and section == "Needs Verification":
             violations.append(f"{cid}: credibility {cred} must not sit in Needs Verification")
+
+        social_sup = [r for r in sup
+                      if r in srcmap and srcmap[r].get("account_provenance")]
+        if len(social_sup) >= 2:
+            window = timedelta(hours=args.amplification_window)
+            stamped = [(r, parse_dt(srcmap[r]["account_provenance"].get("post_timestamp")))
+                       for r in social_sup]
+            stamped = [(r, t) for r, t in stamped if t]
+            handles = {srcmap[r]["account_provenance"].get("handle") for r in social_sup}
+            clustered = any(
+                abs(t1 - t2) <= window
+                for i, (_, t1) in enumerate(stamped)
+                for _, t2 in stamped[i + 1:]
+            )
+            note = (claim.get("notes") or "").lower()
+            if clustered and len(handles) >= 2 and "independence-verified" not in note:
+                violations.append(
+                    f"{cid}: {len(social_sup)} social sources corroborate within "
+                    f"{args.amplification_window}h without an 'independence-verified' "
+                    f"note (B13 amplification masquerade)"
+                )
 
         if args.rigor == "critical":
             anchor = claim.get("anchor")
@@ -359,6 +391,8 @@ def main() -> int:
     p_art.add_argument("--since", default=None, help="YYYY or YYYY-MM-DD freshness lower bound")
     p_art.add_argument("--max-stealth", type=int, default=12,
                        help="per-run ceiling on scrapling_stealth retrievals")
+    p_art.add_argument("--amplification-window", type=int, default=72,
+                       help="hours within which clustered social posts are amplification-suspect")
     p_art.set_defaults(func=check_artifacts)
 
     p_hash = sub.add_parser("check-report-hash", help="verify CWD report SHA-256 vs SKILL.md line 8")

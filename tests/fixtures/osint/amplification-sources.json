@@ -1,0 +1,38 @@
+[
+  {
+    "id": "S001",
+    "url": "https://linkedin.com/posts/acct-a-post-001",
+    "url_punycode": "linkedin.com",
+    "title": "Regulatory change signalled by industry insider (acct-a)",
+    "domain_tier": 3,
+    "admiralty_reliability": "C",
+    "retrieval_tool": "scrapling_stealth",
+    "retrieval_status": "stealth",
+    "tavily_score": null,
+    "published_date": "2026-03-01",
+    "accessed_date": "2026-03-02",
+    "account_provenance": {
+      "handle": "acct-a",
+      "post_timestamp": "2026-03-01T09:00:00Z"
+    },
+    "notes": "Social post by acct-a on LinkedIn; stealth retrieval required."
+  },
+  {
+    "id": "S002",
+    "url": "https://linkedin.com/posts/acct-b-post-002",
+    "url_punycode": "linkedin.com",
+    "title": "Regulatory change anticipated (acct-b)",
+    "domain_tier": 3,
+    "admiralty_reliability": "C",
+    "retrieval_tool": "scrapling_stealth",
+    "retrieval_status": "stealth",
+    "tavily_score": null,
+    "published_date": "2026-03-01",
+    "accessed_date": "2026-03-02",
+    "account_provenance": {
+      "handle": "acct-b",
+      "post_timestamp": "2026-03-01T15:00:00Z"
+    },
+    "notes": "Social post by acct-b on LinkedIn; stealth retrieval required."
+  }
+]
