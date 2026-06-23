@@ -150,6 +150,14 @@ def check_artifacts(args: argparse.Namespace) -> int:
                     f"domain_tier {expected_tier}, found {src.get('domain_tier')}"
                 )
 
+        if src.get("retrieval_tool") == "scrapling_stealth":
+            status = src.get("retrieval_status")
+            if status not in {"stealth", "robots_overridden"}:
+                violations.append(
+                    f"{sid}: scrapling_stealth record needs retrieval_status in "
+                    f"{{stealth, robots_overridden}}, found {status!r}"
+                )
+
     grounded = 0
     corroborated = 0
     seen_claims: set[str] = set()
