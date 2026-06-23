@@ -19,7 +19,7 @@ wall clock, so runs are deterministic and testable.
 
 Usage:
   python3 scripts/newsletter_search.py "<query>" \
-      [--corpus DIR] [--since YYYY-MM-DD] [--bucket B] [--top N] \
+      [--corpus DIR] [--since YYYY|YYYY-MM|YYYY-MM-DD] [--bucket B] [--top N] \
       [--as-of YYYY-MM-DD] [--ranker auto|python]
 
 Corpus absent/empty -> exit 0 with {"corpus_present": false, "items": []} so the
@@ -48,10 +48,14 @@ TOKEN_RE = re.compile(r"[a-z0-9]+")
 def parse_date(value: object) -> date | None:
     if not isinstance(value, str) or not value:
         return None
-    try:
-        return datetime.strptime(value, "%Y-%m-%d").date()
-    except ValueError:
-        return None
+    # Accept YYYY, YYYY-MM, or YYYY-MM-DD (the skill's --since contract);
+    # partials coerce to the first day so they act as inclusive lower bounds.
+    for fmt in ("%Y-%m-%d", "%Y-%m", "%Y"):
+        try:
+            return datetime.strptime(value, fmt).date()
+        except ValueError:
+            continue
+    return None
 
 
 def tokenize(text: str) -> list[str]:
@@ -147,7 +151,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("query", help="free-text query")
     parser.add_argument("--corpus", default=DEFAULT_CORPUS)
-    parser.add_argument("--since", default=None, help="lower bound on item date (YYYY-MM-DD)")
+    parser.add_argument("--since", default=None, help="lower bound on item date (YYYY|YYYY-MM|YYYY-MM-DD)")
     parser.add_argument("--bucket", default=None, help="restrict to one bucket")
     parser.add_argument("--top", type=int, default=10)
     parser.add_argument("--as-of", dest="as_of", default=None, help="recency reference date")
@@ -158,7 +162,7 @@ def main() -> int:
     # unfiltered results the caller believes were constrained.
     for flag, value in (("--since", args.since), ("--as-of", args.as_of)):
         if value is not None and parse_date(value) is None:
-            sys.exit(f"FAIL: {flag} must be YYYY-MM-DD, got: {value!r}")
+            sys.exit(f"FAIL: {flag} must be YYYY, YYYY-MM, or YYYY-MM-DD, got: {value!r}")
     if args.top < 0:
         sys.exit(f"FAIL: --top must be >= 0, got: {args.top}")
 
