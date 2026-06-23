@@ -25,7 +25,13 @@ sanitized structured data:
   "fetched": true,
   "text": "plain text content only",
   "candidate_quotes": ["verbatim excerpt 1", "verbatim excerpt 2"],
-  "account_provenance": "username@platform (independence-verified: true)",
+  "account_provenance": {
+    "platform": "linkedin",
+    "handle": "eu-ai-office",
+    "verified": true,
+    "account_reliability_basis": "verified institutional account",
+    "post_timestamp": "2026-03-01T09:12:00Z"
+  },
   "snapshot_sha256": "abc123...",
   "robots_state": "robots_overridden",
   "injection_suspect": false
@@ -54,9 +60,10 @@ Account reliability mapping:
 | Anonymous, unverifiable, or ephemeral (D/E/F) | 4 |
 
 Ephemeral sources persist a cited-span snapshot so the citation stays
-verifiable. `account_provenance` carries the identity string;
-`independence-verified` is a boolean flag set by the subagent when the account
-can be cross-referenced against a second source.
+verifiable. `account_provenance` carries the identity object. When clustered
+social sources are confirmed independent, the grader records `independence-verified`
+in the corresponding claim's `notes` field in research-evidence.json to clear
+the B13 anti-amplification gate.
 
 ## GDPR posture (owner's call; default = data-minimized)
 
