@@ -53,7 +53,7 @@ anti-amplification check.
 
 Account reliability mapping:
 
-| Account identity | Admiralty reliability |
+| Account identity | Derived `domain_tier` |
 |---|---|
 | Named, institutional, verifiable (A/B) | 2 |
 | Pseudonymous but consistent record (C) | 3 |
