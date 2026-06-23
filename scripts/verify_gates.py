@@ -221,6 +221,13 @@ def check_artifacts(args: argparse.Namespace) -> int:
         if s12 >= args.min_corroboration:
             corroborated += 1
 
+    stealth_n = sum(1 for s in sources if s.get("retrieval_tool") == "scrapling_stealth")
+    if stealth_n > args.max_stealth:
+        violations.append(
+            f"stealth cap exceeded: {stealth_n} scrapling_stealth retrievals > "
+            f"--max-stealth {args.max_stealth}"
+        )
+
     n_sources = len(sources)
     n_claims = len(evidence)
     tier12_sources = sum(1 for s in sources if s.get("domain_tier", 99) <= 2)
@@ -342,6 +349,8 @@ def main() -> int:
         help="critical: every claim needs an anchor; unsourced assertions are violations",
     )
     p_art.add_argument("--since", default=None, help="YYYY or YYYY-MM-DD freshness lower bound")
+    p_art.add_argument("--max-stealth", type=int, default=12,
+                       help="per-run ceiling on scrapling_stealth retrievals")
     p_art.set_defaults(func=check_artifacts)
 
     p_hash = sub.add_parser("check-report-hash", help="verify CWD report SHA-256 vs SKILL.md line 8")
