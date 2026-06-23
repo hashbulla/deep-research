@@ -18,7 +18,7 @@
 
 - **Trigger:** live AI-182 run — the orchestrator seeded the newsletter source with `--since 2026-04` (`YYYY-MM`) and piped `2>/dev/null`; all Phase-1 newsletter calls returned empty and were misread as "the corpus has nothing on this topic" (it had 322 LLM-judge + 34 observability items).
 - **Gotcha:** `newsletter_search.py` `parse_date` accepted only `%Y-%m-%d`, so a `YYYY` / `YYYY-MM` value exits non-zero — but the skill's own `--since` flag is documented as `YYYY or YYYY-MM-DD`. The script fails loud *correctly*; the trap is the contract mismatch plus a caller that suppresses stderr, turning a hard fail into a silent degradation the Methodology note never records.
-- **Resolution:** `parse_date` hardened to accept `YYYY`, `YYYY-MM`, and `YYYY-MM-DD` (partials coerce to the first day), matching the documented `--since` contract; error string and `--help`/usage updated. Commit `60bdf0d`.
+- **Resolution:** `parse_date` hardened to accept `YYYY`, `YYYY-MM`, and `YYYY-MM-DD` (partials coerce to the first day), matching the documented `--since` contract; error string and `--help`/usage updated. Commit `a3a7203`.
 - **Guard:** new positive case in `tests/check-newsletter-search.sh` ("--since accepts YYYY and YYYY-MM partials") asserts `--since 2026-06` and `--since 2026` are accepted and still filter; the existing `--since not-a-date` fail-loud case is unchanged.
 
 ## 2026-06-16 — The Phase-0 human approval gate was removed ON PURPOSE
