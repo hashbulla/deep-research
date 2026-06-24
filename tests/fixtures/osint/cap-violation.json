@@ -1,0 +1,83 @@
+[
+  {
+    "id": "S001",
+    "url": "https://linkedin.com/posts/eu-ai-office_gpai-update-activity-123",
+    "url_canonical": "linkedin.com/posts/eu-ai-office_gpai-update-activity-123",
+    "url_punycode": "linkedin.com/posts/eu-ai-office_gpai-update-activity-123",
+    "title": "EU AI Office post on GPAI timeline",
+    "publisher": "LinkedIn",
+    "author": "EU AI Office",
+    "published_date": "2026-03-01",
+    "accessed_date": "2026-06-23",
+    "domain_tier": 2,
+    "admiralty_reliability": "B",
+    "tavily_score": null,
+    "retrieval_tool": "scrapling_stealth",
+    "retrieval_status": "robots_overridden",
+    "account_provenance": {
+      "platform": "linkedin",
+      "handle": "eu-ai-office",
+      "verified": true,
+      "account_reliability_basis": "verified institutional account",
+      "post_timestamp": "2026-03-01T09:12:00Z"
+    },
+    "retrieval_query": "EU AI Office GPAI timeline",
+    "sub_questions": ["sq1"],
+    "primary_source": false,
+    "notes": "Cap-violation fixture record 1."
+  },
+  {
+    "id": "S002",
+    "url": "https://linkedin.com/posts/ai-policy-watch_eu-act-enforcement-activity-456",
+    "url_canonical": "linkedin.com/posts/ai-policy-watch_eu-act-enforcement-activity-456",
+    "url_punycode": "linkedin.com/posts/ai-policy-watch_eu-act-enforcement-activity-456",
+    "title": "AI Policy Watch on EU Act enforcement timeline",
+    "publisher": "LinkedIn",
+    "author": "AI Policy Watch",
+    "published_date": "2026-03-15",
+    "accessed_date": "2026-06-23",
+    "domain_tier": 2,
+    "admiralty_reliability": "B",
+    "tavily_score": null,
+    "retrieval_tool": "scrapling_stealth",
+    "retrieval_status": "robots_overridden",
+    "account_provenance": {
+      "platform": "linkedin",
+      "handle": "ai-policy-watch",
+      "verified": true,
+      "account_reliability_basis": "verified institutional account",
+      "post_timestamp": "2026-03-15T11:30:00Z"
+    },
+    "retrieval_query": "EU AI Act enforcement timeline",
+    "sub_questions": ["sq1"],
+    "primary_source": false,
+    "notes": "Cap-violation fixture record 2."
+  },
+  {
+    "id": "S003",
+    "url": "https://linkedin.com/posts/regulation-hub_gpai-compliance-activity-789",
+    "url_canonical": "linkedin.com/posts/regulation-hub_gpai-compliance-activity-789",
+    "url_punycode": "linkedin.com/posts/regulation-hub_gpai-compliance-activity-789",
+    "title": "Regulation Hub on GPAI compliance requirements",
+    "publisher": "LinkedIn",
+    "author": "Regulation Hub",
+    "published_date": "2026-04-01",
+    "accessed_date": "2026-06-23",
+    "domain_tier": 2,
+    "admiralty_reliability": "B",
+    "tavily_score": null,
+    "retrieval_tool": "scrapling_stealth",
+    "retrieval_status": "robots_overridden",
+    "account_provenance": {
+      "platform": "linkedin",
+      "handle": "regulation-hub",
+      "verified": true,
+      "account_reliability_basis": "verified institutional account",
+      "post_timestamp": "2026-04-01T14:00:00Z"
+    },
+    "retrieval_query": "GPAI compliance requirements",
+    "sub_questions": ["sq1"],
+    "primary_source": false,
+    "notes": "Cap-violation fixture record 3."
+  }
+]

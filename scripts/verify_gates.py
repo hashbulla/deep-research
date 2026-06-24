@@ -33,7 +33,7 @@ import json
 import re
 import statistics
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -54,7 +54,13 @@ SCORELESS_TOOLS = {
     "gh_cli",
     "academic_api",
     "WebSearch",
+    "scrapling_stealth",
 }
+
+# Account-derived reliability → domain_tier (methodology §6, Safeguard 1).
+# Applies ONLY to account-based sources (those carrying account_provenance);
+# domain-graded sources keep their registry tier.
+REL_TO_TIER = {"A": 2, "B": 2, "C": 3, "D": 4, "E": 4, "F": 4}
 
 
 def cascade(s12: int, s1: int, c: int) -> int:
@@ -91,6 +97,15 @@ def parse_iso(value: str | None) -> date | None:
         return None
 
 
+def parse_dt(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
 def load_array(path: Path, what: str) -> list[dict]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -107,11 +122,13 @@ def check_artifacts(args: argparse.Namespace) -> int:
     violations: list[str] = []
 
     tier: dict[str, int] = {}
+    srcmap: dict[str, dict] = {}
     for src in sources:
         sid = src.get("id", "<missing-id>")
         if sid in tier:
             violations.append(f"duplicate source id {sid}")
         tier[sid] = src.get("domain_tier", 99)
+        srcmap[sid] = src
 
         # punycode field self-consistency (defense against homograph spoofing)
         host = urlsplit(src.get("url", "")).hostname or ""
@@ -134,6 +151,23 @@ def check_artifacts(args: argparse.Namespace) -> int:
                 f"{sid}: null tavily_score on score-bearing tool "
                 f"{src.get('retrieval_tool')!r}"
             )
+
+        if src.get("account_provenance"):
+            rel = src.get("admiralty_reliability")
+            expected_tier = REL_TO_TIER.get(rel)
+            if expected_tier is not None and src.get("domain_tier") != expected_tier:
+                violations.append(
+                    f"{sid}: account source reliability {rel!r} must map to "
+                    f"domain_tier {expected_tier}, found {src.get('domain_tier')}"
+                )
+
+        if src.get("retrieval_tool") == "scrapling_stealth":
+            status = src.get("retrieval_status")
+            if status not in {"stealth", "robots_overridden"}:
+                violations.append(
+                    f"{sid}: scrapling_stealth record needs retrieval_status in "
+                    f"{{stealth, robots_overridden}}, found {status!r}"
+                )
 
     grounded = 0
     corroborated = 0
@@ -188,6 +222,27 @@ def check_artifacts(args: argparse.Namespace) -> int:
         if cred <= 3 and section == "Needs Verification":
             violations.append(f"{cid}: credibility {cred} must not sit in Needs Verification")
 
+        social_sup = [r for r in sup
+                      if r in srcmap and srcmap[r].get("account_provenance")]
+        if len(social_sup) >= 2:
+            window = timedelta(hours=args.amplification_window)
+            stamped = [(r, parse_dt(srcmap[r]["account_provenance"].get("post_timestamp")))
+                       for r in social_sup]
+            stamped = [(r, t) for r, t in stamped if t]
+            handles = {srcmap[r]["account_provenance"].get("handle") for r, _ in stamped}
+            clustered = any(
+                abs(t1 - t2) <= window
+                for i, (_, t1) in enumerate(stamped)
+                for _, t2 in stamped[i + 1:]
+            )
+            note = (claim.get("notes") or "").lower()
+            if clustered and len(handles) >= 2 and "independence-verified" not in note:
+                violations.append(
+                    f"{cid}: {len(social_sup)} social sources corroborate within "
+                    f"{args.amplification_window}h without an 'independence-verified' "
+                    f"note (B13 amplification masquerade)"
+                )
+
         if args.rigor == "critical":
             anchor = claim.get("anchor")
             if not anchor:
@@ -205,6 +260,13 @@ def check_artifacts(args: argparse.Namespace) -> int:
             grounded += 1
         if s12 >= args.min_corroboration:
             corroborated += 1
+
+    stealth_n = sum(1 for s in sources if s.get("retrieval_tool") == "scrapling_stealth")
+    if stealth_n > args.max_stealth:
+        violations.append(
+            f"stealth cap exceeded: {stealth_n} scrapling_stealth retrievals > "
+            f"--max-stealth {args.max_stealth}"
+        )
 
     n_sources = len(sources)
     n_claims = len(evidence)
@@ -327,6 +389,10 @@ def main() -> int:
         help="critical: every claim needs an anchor; unsourced assertions are violations",
     )
     p_art.add_argument("--since", default=None, help="YYYY or YYYY-MM-DD freshness lower bound")
+    p_art.add_argument("--max-stealth", type=int, default=12,
+                       help="per-run ceiling on scrapling_stealth retrievals")
+    p_art.add_argument("--amplification-window", type=int, default=72,
+                       help="hours within which clustered social posts are amplification-suspect")
     p_art.set_defaults(func=check_artifacts)
 
     p_hash = sub.add_parser("check-report-hash", help="verify CWD report SHA-256 vs SKILL.md line 8")

@@ -1,0 +1,15 @@
+[
+  {
+    "claim_id": "C001",
+    "claim_text": "A regulatory change is imminent (per two social posts).",
+    "section": "Needs Verification",
+    "supporting_source_ids": ["S001", "S002"],
+    "contradicting_source_ids": [],
+    "admiralty_credibility": 6,
+    "label": "UNVERIFIED",
+    "corroboration_count": 2,
+    "independent_tier12_count": 0,
+    "primary_source_present": false,
+    "notes": "independence-verified: distinct authors, no shared origin, posted independently during the EUR-Lex publication event."
+  }
+]

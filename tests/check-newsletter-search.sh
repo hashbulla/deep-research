@@ -48,6 +48,14 @@ older="$(jq -r '[.items[] | select(.date < "2026-06-01")] | length' <<<"$out")"
 [ "$older" = "0" ] || fail "--since 2026-06-01 leaked $older item(s) older than the window"
 pass "--since filters out-of-window items"
 
+# 2b. --since accepts YYYY and YYYY-MM partials (skill --since contract) --------
+out="$(python3 "$HELPER" "prompt cache" --corpus "$CORPUS" --as-of 2026-06-12 --since 2026-06)"
+[ "$(jq -r '.corpus_present' <<<"$out")" = "true" ]                              || fail "--since 2026-06 (YYYY-MM) should be accepted, not rejected"
+older="$(jq -r '[.items[] | select(.date < "2026-06-01")] | length' <<<"$out")"
+[ "$older" = "0" ]                                                              || fail "--since 2026-06 leaked $older item(s) older than 2026-06-01"
+python3 "$HELPER" "x" --corpus "$CORPUS" --since 2026 >/dev/null 2>&1            || fail "--since 2026 (YYYY) should be accepted"
+pass "--since accepts YYYY and YYYY-MM partials"
+
 # 3. --bucket restriction -------------------------------------------------------
 out="$(python3 "$HELPER" "gpu scheduling" --corpus "$CORPUS" --as-of 2026-06-12 --bucket platform-ai-sre)"
 offbucket="$(jq -r '[.items[] | select(.bucket != "platform-ai-sre")] | length' <<<"$out")"

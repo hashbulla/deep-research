@@ -14,6 +14,22 @@
 
 ---
 
+## 2026-06-23 — OSINT stealth cap default + GDPR persistence default + scrapling MCP optional
+
+- **Trigger:** AI-183 wiring — documenting the three non-obvious defaults that callers and future maintainers are most likely to misconfigure.
+- **Gotcha 1 (stealth cap).** The `--max-stealth` default is **12** dispatches per run, not unlimited. Raising it without a deliberate reason burns scrapling budget and extends runtime. The cap is enforced by `verify_gates.py check-artifacts --max-stealth N`; the default is 12 when the flag is omitted. Record the actual count in the Methodology note.
+- **Gotcha 2 (GDPR persistence).** The default GDPR posture is **data-minimized**: only the cited-span snapshot is persisted into evidence anchors; full stealth-capture output is local-only and NEVER committed. The lawful-basis (legitimate-interest) determination is the owner's to record, not the skill's to infer.
+- **Gotcha 3 (scrapling optional).** The scrapling MCP is optional. A Phase-0 availability probe decides at plan-composition time; if the MCP is absent, rung 3 is disabled for the entire run and `research-plan.md` records "scrapling MCP absent — OSINT rung 3 disabled". This is graceful degradation, not an error. Do not attempt to call scrapling tools or raise a hard failure when the MCP is missing.
+- **Resolution:** documented in `references/osint-retrieval.md`, propagated to SKILL.md Phase 1 step 9, `CHANGELOG.md` AI-183 entry, and this log entry. Commit: feat(skill): wire OSINT/SOCMINT ladder + propagate docs (AI-183).
+- **Guard:** `tests/check-osint-gates.sh` T2 asserts the cap violation fires at the declared threshold; T3 asserts `retrieval_status` is required on scrapling records; T4/T5 assert the B13 anti-amplification gate fires and clears.
+
+## 2026-06-23 — newsletter `--since YYYY-MM` rejected → silent source loss
+
+- **Trigger:** live AI-182 run — the orchestrator seeded the newsletter source with `--since 2026-04` (`YYYY-MM`) and piped `2>/dev/null`; all Phase-1 newsletter calls returned empty and were misread as "the corpus has nothing on this topic" (it had 322 LLM-judge + 34 observability items).
+- **Gotcha:** `newsletter_search.py` `parse_date` accepted only `%Y-%m-%d`, so a `YYYY` / `YYYY-MM` value exits non-zero — but the skill's own `--since` flag is documented as `YYYY or YYYY-MM-DD`. The script fails loud *correctly*; the trap is the contract mismatch plus a caller that suppresses stderr, turning a hard fail into a silent degradation the Methodology note never records.
+- **Resolution:** `parse_date` hardened to accept `YYYY`, `YYYY-MM`, and `YYYY-MM-DD` (partials coerce to the first day), matching the documented `--since` contract; error string and `--help`/usage updated. Commit `a3a7203`.
+- **Guard:** new positive case in `tests/check-newsletter-search.sh` ("--since accepts YYYY and YYYY-MM partials") asserts `--since 2026-06` and `--since 2026` are accepted and still filter; the existing `--since not-a-date` fail-loud case is unchanged.
+
 ## 2026-06-16 — The Phase-0 human approval gate was removed ON PURPOSE
 
 - **Trigger:** user design decision (spec `docs/superpowers/specs/2026-06-15-remove-human-gate-design.md`), to make the skill usable by fully autonomous agents.

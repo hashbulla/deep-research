@@ -85,8 +85,14 @@
           "context7_query_docs",
           "gh_cli",
           "academic_api",
-          "WebSearch"
+          "WebSearch",
+          "scrapling_stealth"
         ]
+      },
+      "retrieval_status": {
+        "type": "string",
+        "enum": ["direct", "stealth", "robots_overridden", "blocked"],
+        "description": "How the content was obtained relative to access obstacles. Audit metadata only — never affects the grade."
       },
       "doc_provenance": {
         "type": "object",
@@ -97,6 +103,19 @@
           "library_id": { "type": "string", "minLength": 1 },
           "version": { "type": ["string", "null"] },
           "section": { "type": "string", "minLength": 1 }
+        }
+      },
+      "account_provenance": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Account identity for account-based sources (social platforms). Drives account-derived reliability per methodology §6.",
+        "required": ["platform", "handle", "verified"],
+        "properties": {
+          "platform": { "type": "string" },
+          "handle": { "type": ["string", "null"] },
+          "verified": { "type": "boolean" },
+          "account_reliability_basis": { "type": "string" },
+          "post_timestamp": { "type": ["string", "null"] }
         }
       },
       "retrieval_query": {

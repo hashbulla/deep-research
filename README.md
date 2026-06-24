@@ -274,6 +274,8 @@ Every domain classified before any content enters the synthesis prompt. Based on
 
 Full list in [`references/methodology.md §6`](references/methodology.md).
 
+> **OSINT/SOCMINT note.** Account-graded social sources (verified institutional accounts on Tier 4 platforms, SOCMINT extracts) are citable under the account-reliability sub-rubric in `references/osint-retrieval.md` — Admiralty reliability 2/3/4 by account identity, never by platform. Stealth retrieval (scrapling MCP, rung 3 of the OSINT escalation ladder) is **optional and capped**: absent scrapling MCP → rung 3 disabled, graceful Tavily degradation. Default cap is 12 stealth dispatches per run (`--max-stealth`), recorded in the Methodology note.
+
 ### 2. NATO Admiralty 2×6 matrix
 
 Two orthogonal axes: **reliability** of the source, **credibility** of the information after corroboration. Every cited source carries a reliability letter; every claim in `research-evidence.json` carries a credibility digit.
