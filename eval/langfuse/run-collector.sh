@@ -42,11 +42,21 @@ echo "Auth header:      Basic <redacted, ${#LANGFUSE_OTLP_AUTH} chars>"
 echo "Config:           $CONFIG"
 
 mkdir -p "$HERE/.logs"
-# The container runs as a non-root user (10001) — world-writable so the file exporter can write.
-chmod 777 "$HERE/.logs"
+# Container runs AS THE HOST USER (--user), so .logs/ can stay owner-only (700).
+# No world-write needed — files created inside the container are owned by the host uid/gid.
+chmod 700 "$HERE/.logs"
+# The file exporter opens the jsonl file at startup. Pre-touch it as the host user so the
+# container (also uid:gid of the host) can append to it. If a previous run left it owned by
+# the old container uid (10001), rotate it out of the way — we can mv it even without sudo.
+_LOGFILE="$HERE/.logs/claude-logs.jsonl"
+if [ -e "$_LOGFILE" ] && ! [ -w "$_LOGFILE" ]; then
+  mv "$_LOGFILE" "${_LOGFILE}.$(date +%Y%m%dT%H%M%S).bak"
+fi
+touch "$_LOGFILE"
 
 docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 docker run -d --name "$CONTAINER" \
+  --user "$(id -u):$(id -g)" \
   -p 4317:4317 -p 4318:4318 -p 8888:8888 \
   -e LANGFUSE_OTLP_ENDPOINT \
   -e LANGFUSE_OTLP_AUTH \

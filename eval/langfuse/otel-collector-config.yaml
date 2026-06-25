@@ -106,6 +106,13 @@ exporters:
     headers:
       Authorization: ${env:LANGFUSE_OTLP_AUTH}
   # M3: raw logs to a LOCAL gitignored file for the post-run enricher. Never egresses.
+  # NOTE: the file exporter receives the SAME records as `debug` — no processor upstream
+  # of it in the `logs` pipeline scrubs log *attributes*. `transform/scrub_content` and
+  # `filter/failclosed` act only on the log *body* (event name string); content attributes
+  # (e.g. prompt/completion text on individual events) reach this file UN-redacted.
+  # That is intentional: the downstream Python enricher is the single redaction gate for
+  # attribute-level content. Do NOT add processors here that would silently drop attributes
+  # the enricher relies on.
   file/m3logs:
     path: /etc/otelcol-contrib/.logs/claude-logs.jsonl
   # Local visibility — proves redaction fired and shows what would egress.
