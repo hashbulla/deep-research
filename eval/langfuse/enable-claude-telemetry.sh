@@ -9,9 +9,10 @@
 # Collector redacts it before egress. Comment them out for metadata-only tracing.
 
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1      # REQUIRED for trace spans — without it, 0 spans emit (verified 2026-06-25, 2.1.191)
 export OTEL_METRICS_EXPORTER=otlp
 export OTEL_LOGS_EXPORTER=otlp
-export OTEL_TRACES_EXPORTER=otlp                  # traces are beta in Claude Code (CLI-only)
+export OTEL_TRACES_EXPORTER=otlp                  # traces are beta in Claude Code (CLI-only); gated by the BETA flag above
 export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf  # protobuf dodges the OTLP/JSON int64 usage-drop bug
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 export OTEL_METRIC_EXPORT_INTERVAL=10000          # 10s, for faster feedback during verification

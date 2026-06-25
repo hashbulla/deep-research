@@ -64,6 +64,25 @@ processors:
           - replace_pattern(log.body, "(?i)sk-lf-[a-z0-9-]{8,}", "****REDACTED-SECRET****")
           - replace_pattern(log.body, "(?i)CANARY-[A-Z0-9-]+", "****REDACTED-SECRET****")
 
+  # 3b. SEMCONV USAGE REMAP — Claude Code emits BARE token counts (input_tokens,
+  #     output_tokens, cache_read_tokens, cache_creation_tokens) on the
+  #     claude_code.llm_request span. Langfuse keys generation usage AND cost off the OTel
+  #     GenAI semconv `gen_ai.usage.*` (langfuse.com OTEL attribute mapping, retrieved
+  #     2026-06-25). Copy the four counts onto the semconv keys so Langfuse renders tokens
+  #     and computes cost — Anthropic cache_read/cache_creation are distinct, separately
+  #     priced categories, so all four are mapped (not just input/output) or cache spend
+  #     is silently uncharged. `where ... != nil` scopes each set to the llm_request span;
+  #     the root claude_code.interaction span has no token attrs and is left untouched.
+  transform/usage_semconv:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(span.attributes["gen_ai.usage.input_tokens"], span.attributes["input_tokens"]) where span.attributes["input_tokens"] != nil
+          - set(span.attributes["gen_ai.usage.output_tokens"], span.attributes["output_tokens"]) where span.attributes["output_tokens"] != nil
+          - set(span.attributes["gen_ai.usage.cache_read_input_tokens"], span.attributes["cache_read_tokens"]) where span.attributes["cache_read_tokens"] != nil
+          - set(span.attributes["gen_ai.usage.cache_creation_input_tokens"], span.attributes["cache_creation_tokens"]) where span.attributes["cache_creation_tokens"] != nil
+
   # 4. FAIL-CLOSED backstop — if a high-severity secret SURVIVED scrubbing, DROP the
   #    whole record rather than leak it to Cloud. Runs AFTER transform, so a sanitized
   #    record (no longer matching) is kept; only leftovers that slipped through are
@@ -103,19 +122,24 @@ service:
                 host: "0.0.0.0"
                 port: 8888
   pipelines:
-    # Spans/latency/tool-calls -> Langfuse (redacted). This is the Milestone-1 surface.
+    # Native Claude Code spans (claude_code.interaction -> llm_request/tool) -> Langfuse,
+    # redacted, with bare token counts remapped to gen_ai.usage.* so Langfuse renders cost.
+    # Claude Code emits these natively under CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1 (M2);
+    # no log->span synthesis is required.
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, redaction, transform/scrub_content, batch]
+      processors: [memory_limiter, redaction, transform/scrub_content, transform/usage_semconv, batch]
       exporters: [otlp_http/langfuse, debug]
-    # Content lives in log events. Langfuse OTLP does NOT ingest logs -> debug only.
-    # Kept here to prove content-body redaction + fail-closed drop locally. Routing
-    # this content INTO Langfuse traces (log->span enrichment) is Milestone 2.
+    # Prompt/completion CONTENT lives in log events (com.anthropic.claude_code.events);
+    # Langfuse OTLP does NOT ingest logs -> debug only. Kept to prove content-body redaction
+    # + fail-closed drop locally. Mapping that content onto Langfuse generation input/output
+    # would require log->span correlation (optional future enrichment, not needed for cost).
     logs:
       receivers: [otlp]
       processors: [memory_limiter, transform/scrub_content, filter/failclosed, batch]
       exporters: [debug]
-    # Cost/token counts live in metrics, not traces. Langfuse-trace enrichment = M2.
+    # Per-generation token counts ride on the llm_request span (remapped to gen_ai.usage.*
+    # above); these metrics are the aggregate counters -> debug-only, not sent to Langfuse.
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]

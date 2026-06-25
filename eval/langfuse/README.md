@@ -16,7 +16,7 @@ OpenTelemetry Collector  ── THIS directory ──  single control point
   │  redaction (attrs) + transform/OTTL (event & log bodies) + filter (fail-closed)
   ▼
 Langfuse Cloud Hobby   (OTLP /api/public/otel — traces signal, HTTP, Basic auth)
-  └─ renders only after M2 log->span enrichment: native Claude Code export is log-events, not spans
+  └─ traces render as generations (model, tokens, cost) — enabled by CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1
 ```
 
 ## Quickstart
@@ -31,8 +31,9 @@ docker logs -f langfuse-otelcol         # watch it authenticate + idle
 
 # 3. Launch a traced run in a fresh shell (telemetry is per-process env).
 source enable-claude-telemetry.sh && claude
-#    ...then invoke /deep-research. NOTE: native Claude Code export is log-based;
-#    Langfuse renders traces only after M2 enrichment (see Milestone scope).
+#    ...then invoke /deep-research. Each turn renders in Langfuse as a trace whose
+#    llm_request children are generations with model + tokens + cost. The beta flag in
+#    enable-claude-telemetry.sh is what makes spans emit (no flag => no spans).
 
 # Stop:  docker rm -f langfuse-otelcol
 ```
@@ -50,10 +51,11 @@ source enable-claude-telemetry.sh && claude
 
 | Milestone | State |
 |-----------|-------|
-| **M1 — egress gate (this build)** | OTEL Collector + 3-layer redaction gate, proven server-side; Claude Code telemetry confirmed reaching the Collector. **Built.** |
-| **M2 — log→span enrichment** | Synthesize Langfuse spans/generations from Claude Code's log events (+ cost from metrics). **Prerequisite for any Langfuse trace rendering.** Deferred. |
+| **M1 — egress gate** | OTEL Collector + 3-layer redaction gate, proven server-side (a real `user.email` was masked in a live span). **Built.** |
+| **M2 — native spans + cost** | `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1` makes Claude Code emit native spans; the Collector remaps token counts to `gen_ai.usage.*` so Langfuse renders them as generations **with cost**. **Built + verified 2026-06-25.** |
+| **M3 — content + hardening (optional)** | Correlate the log-event prompt/completion **content** onto generation input/output; flip redaction to a fail-closed allowlist (`allow_all_keys:false`). Deferred. |
 
-**Empirical finding (2026-06-25, Claude Code 2.1.191, headless `-p`):** Claude Code emits its run as **log events** (86 records — lifecycle, prompts, tool content; scope `com.anthropic.claude_code.events`) plus **metrics**, and **zero trace spans**. Langfuse OTLP ingests **only traces**. So a real Claude Code run currently lands **nothing** in Langfuse — not because the pipeline is broken (the Collector received all 86 records and redacted them, 0 dropped), but because the signal types don't match. There is no "free" span visibility from the native (beta) export. M2's log→span correlation is therefore the **prerequisite** for Langfuse rendering, not a content/cost nicety. The redaction egress gate (M1) is proven end-to-end with a synthetic span. Whether *interactive* sessions emit beta trace spans (vs headless) is still worth confirming. Design doc: [`docs/superpowers/specs/2026-06-23-langfuse-deep-research-eval-design.md`](../../docs/superpowers/specs/2026-06-23-langfuse-deep-research-eval-design.md).
+**Empirical finding (2026-06-25, Claude Code 2.1.191):** Claude Code emits **native OTLP trace spans** — `claude_code.interaction` (root) → `claude_code.llm_request` / `claude_code.tool` (scope `com.anthropic.claude_code.tracing`) — but **only when `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1` is set** alongside `CLAUDE_CODE_ENABLE_TELEMETRY=1`. The earlier "zero spans" result was that **missing flag**, not an interactive-vs-headless difference (there is none — both modes emit). The `llm_request` span carries OTel GenAI semconv (`gen_ai.request.model`, token counts, `ttft_ms`/`duration_ms`), so Langfuse promotes it to a **generation** automatically. Claude Code emits **bare** `input_tokens`/`output_tokens`/`cache_read_tokens`/`cache_creation_tokens`; the Collector's `transform/usage_semconv` remaps all four to `gen_ai.usage.*` so Langfuse computes **cost**. Verified end-to-end via the Langfuse API: `totalCost=$0.0355`, with `cache_creation_input_tokens` ≈ **95% of the bill** — mapping only input/output would have undercount cost ~100×. The 86 `com.anthropic.claude_code.events` **log** records still flow alongside (prompt/tool content); Langfuse OTLP ignores logs, so that content is not yet on the generation — log→span content correlation is the optional M3 enrichment. Design doc: [`docs/superpowers/specs/2026-06-23-langfuse-deep-research-eval-design.md`](../../docs/superpowers/specs/2026-06-23-langfuse-deep-research-eval-design.md).
 
 ## Security posture
 
@@ -64,5 +66,5 @@ source enable-claude-telemetry.sh && claude
 ## Known caveats (from the seeding research)
 
 - Use **protobuf** OTLP (`OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`); OTLP/JSON silently drops `gen_ai.usage.*` int64 token counts → zero cost.
-- Claude Code OTEL trace support is **beta, CLI-only**; verify the trace export empirically per Claude Code version.
+- Claude Code OTEL trace support is **beta, CLI-only**, gated by `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1` — without it, **no spans emit** (this was the original "zero spans" red herring). Re-verify the export empirically per Claude Code version.
 - `session.id` / `user.id` must propagate to every span (resource attrs / Baggage) or they fail to aggregate into a Langfuse Session.
