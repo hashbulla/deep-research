@@ -48,7 +48,7 @@ Poll with a retry or add `sleep 5` before verifying.
 
 `request_id` lives at **`metadata.attributes.request_id`** in both the list and single-observation endpoints.
 
-```
+```text
 GENERATION observation metadata structure:
   metadata
   └── attributes
@@ -65,7 +65,7 @@ GENERATION observation metadata structure:
 `metadata.request_id` (top-level) is **null** — do not use.
 `metadata.gen_ai.response.id` (top-level, not nested under `attributes`) is **null** — do not use.
 
-`metadata.attributes.request_id` == `metadata.attributes.gen_ai.response.id` — both point to the Anthropic request id (e.g., `req_011CcPwtUykNbLGH5ryW5ohn`).
+`metadata.attributes.request_id` == `metadata.attributes.gen_ai.response.id` — both point to the Anthropic request id (e.g., `req_011CcPwtUykNbLGH5ryW5ohn`). The **list endpoint** (`/api/public/observations?traceId=...`) always carries the full `metadata.attributes` with `request_id` present. The **single-observation GET** (`/api/public/observations/{id}`) carries `metadata.attributes` **before** any `generation-update` PATCH is applied to that observation; **after** a PATCH, the single-observation endpoint returns empty `metadata.attributes` (see §Critical implementation note below for details).
 
 ### jq path
 
@@ -103,6 +103,8 @@ Evidence:
 - Collector debug log: `Trace ID: 517be03934ab2078c2e508e1da9528b0` (all hex, 32 chars).
 - Langfuse API `observation.id` == OTEL `spanId` (hex, 16 chars) — identity mapping confirmed in M2.
 - Known test IDs verified hex: `[0-9a-f]+` pattern matches, no base64 padding or `+`/`/` chars present.
+
+**Note on file-exporter encoding:** The hex encoding is **inferred** from the collector debug logs and M2 Langfuse REST API evidence (confirmed spans match hex format). The file-exporter OTLP/JSON output has not yet been directly observed. **Task 2's file-exporter fixture will be the confirmation artifact** for the parser's hex-encoding assumption.
 
 The OTLP/proto binary encoding uses raw bytes internally; both the file exporter and Langfuse REST decode to hex, not base64. The parser in Task 3 should assume **hex input**.
 
