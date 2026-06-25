@@ -41,12 +41,17 @@ echo "OTLP endpoint:    $LANGFUSE_OTLP_ENDPOINT"
 echo "Auth header:      Basic <redacted, ${#LANGFUSE_OTLP_AUTH} chars>"
 echo "Config:           $CONFIG"
 
+mkdir -p "$HERE/.logs"
+# The container runs as a non-root user (10001) — world-writable so the file exporter can write.
+chmod 777 "$HERE/.logs"
+
 docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 docker run -d --name "$CONTAINER" \
   -p 4317:4317 -p 4318:4318 -p 8888:8888 \
   -e LANGFUSE_OTLP_ENDPOINT \
   -e LANGFUSE_OTLP_AUTH \
   -v "$CONFIG:/etc/otelcol-contrib/config.yaml:ro" \
+  -v "$HERE/.logs:/etc/otelcol-contrib/.logs" \
   "$IMAGE" >/dev/null
 
 echo "Started '$CONTAINER'. Receivers on :4317 (gRPC) / :4318 (HTTP). Tail: docker logs -f $CONTAINER"

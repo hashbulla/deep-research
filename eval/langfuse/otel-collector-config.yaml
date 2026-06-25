@@ -105,6 +105,9 @@ exporters:
     encoding: proto
     headers:
       Authorization: ${env:LANGFUSE_OTLP_AUTH}
+  # M3: raw logs to a LOCAL gitignored file for the post-run enricher. Never egresses.
+  file/m3logs:
+    path: /etc/otelcol-contrib/.logs/claude-logs.jsonl
   # Local visibility — proves redaction fired and shows what would egress.
   debug:
     verbosity: detailed
@@ -137,7 +140,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, transform/scrub_content, filter/failclosed, batch]
-      exporters: [debug]
+      exporters: [debug, file/m3logs]
     # Per-generation token counts ride on the llm_request span (remapped to gen_ai.usage.*
     # above); these metrics are the aggregate counters -> debug-only, not sent to Langfuse.
     metrics:
