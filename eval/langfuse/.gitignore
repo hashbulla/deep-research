@@ -1,0 +1,5 @@
+# Never commit secrets or local scratch from the lab tooling.
+*.env
+.env
+.env.*
+*-resp.json
