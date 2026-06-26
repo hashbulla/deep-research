@@ -22,7 +22,7 @@ export OTEL_LOGS_EXPORT_INTERVAL=5000
 export OTEL_LOG_USER_PROMPTS=1
 export OTEL_LOG_TOOL_DETAILS=1
 export OTEL_LOG_TOOL_CONTENT=1
-# export OTEL_LOG_RAW_API_BODIES=1   # full Messages API request/response — highest exposure, opt-in only
+# export OTEL_LOG_RAW_API_BODIES=1   # raw Messages API bodies deliberately OFF under reduce-surface posture; completion text comes from assistant_response log event instead
 
 # Identify the run in Langfuse (Session grouping is by session.id).
 export OTEL_RESOURCE_ATTRIBUTES="service.name=deep-research,service.version=skill,deployment.environment=local,session.id=${LANGFUSE_SESSION_ID:-deep-research-$$}"
