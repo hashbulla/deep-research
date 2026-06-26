@@ -35,7 +35,7 @@ M3 closes both. It is the work that completes the existing design doc's Slice-1 
 
 A real `/deep-research` run, after enrichment, shows in Langfuse:
 
-1. The **trace** `input` = the user prompt (from `user_prompt`). Each **generation** `output` = the completion text **if Claude Code exposes it without raw API bodies**; if completion lives only in raw bodies, it is omitted (surface-reduction wins over completeness) — resolve empirically in Task 5.
+1. The interaction observation `input` = the user prompt (from `user_prompt`). Each **generation** `output` = the completion text from the **`assistant_response.response`** clean structured field — confirmed available with `OTEL_LOG_USER_PROMPTS=1` and **without** raw API bodies (empirically verified 2026-06-26). Raw bodies are never enabled.
 2. Each **generation** with accurate **cost**, including `claude-opus-4-8[1m]` (cost ≠ 0), sourced from `api_request.cost_usd`.
 3. Each **tool** observation labelled with its real `tool_name` (from `tool_decision`/`tool_result`). Full tool args/output are **not** egressed.
 4. **No secret or identity-PII leakage**, fail-closed: a seeded fake secret and a fake email in a prompt do not appear in the outgoing payload, and a residual high-severity match causes the field to be **dropped**, not posted.
@@ -74,9 +74,10 @@ The enricher groups log records by `trace_id` and routes each content event to i
 
 | Log event | Join key → target observation | Langfuse fields set |
 |---|---|---|
-| `user_prompt` | `span_id` = interaction root (identity) | trace-level `input` ← prompt |
-| `api_request` | **`request_id`** → `llm_request` generation (resolve via the LIST endpoint `?traceId=`, path `metadata.attributes.request_id`) | `cost_details` ← `cost_usd`; `output` ← completion **only if present without raw API bodies** (else omit) |
-| `tool_decision` / `tool_result` | `span_id` = tool span (identity) | tool obs `name` ← `tool_name` **only** (no args/output egressed) |
+| `user_prompt` | `span_id` = interaction root (identity) | interaction obs `input` ← prompt |
+| `api_request` | **`request_id`** → `llm_request` generation (resolve via the LIST endpoint `?traceId=`, path `metadata.attributes.request_id`) | `cost_details` ← `cost_usd` |
+| `assistant_response` | **`request_id`** → same `llm_request` generation | generation `output` ← `response` (clean structured field; **no raw bodies needed** — gated by `OTEL_LOG_USER_PROMPTS`) |
+| `tool_result` | `span_id` = tool span (identity) | tool obs `name` ← `tool_name` **only** (no args/output egressed) |
 
 Emitted via the Langfuse ingestion API as **`generation-update`** for GENERATION targets and **`span-update`** for SPAN/tool targets (event type confirmed in Task 1; `observation-update` is rejected). Upsert semantics, idempotent.
 
