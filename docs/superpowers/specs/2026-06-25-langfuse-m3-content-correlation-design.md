@@ -31,12 +31,14 @@ M3 closes both. It is the work that completes the existing design doc's Slice-1 
 
 ## 2. Goal & success criteria
 
+**Egress posture (decided 2026-06-26): reduce surface + fail-closed.** Raw Messages API bodies and full tool input/output bytes do **not** egress (do not enable `OTEL_LOG_RAW_API_BODIES`). Only prompt, completion text, tool **name**, and cost reach Langfuse. The gate is defense-in-depth: broadened secret families + **recursive** `strip_identity` + a **fail-closed** backstop that drops any field still matching a high-severity-secret heuristic after scrubbing.
+
 A real `/deep-research` run, after enrichment, shows in Langfuse:
 
-1. Each **generation** with `input` (the API request messages) and `output` (the completion text); the **trace** with `input` = the user prompt.
+1. The **trace** `input` = the user prompt (from `user_prompt`). Each **generation** `output` = the completion text **if Claude Code exposes it without raw API bodies**; if completion lives only in raw bodies, it is omitted (surface-reduction wins over completeness) — resolve empirically in Task 5.
 2. Each **generation** with accurate **cost**, including `claude-opus-4-8[1m]` (cost ≠ 0), sourced from `api_request.cost_usd`.
-3. Each **tool** observation with its real `tool_name`, `input` (args), and `output` (result).
-4. **No secret or identity-PII leakage**: a seeded fake secret and a fake email in a prompt do not appear in the outgoing Langfuse payload.
+3. Each **tool** observation labelled with its real `tool_name` (from `tool_decision`/`tool_result`). Full tool args/output are **not** egressed.
+4. **No secret or identity-PII leakage**, fail-closed: a seeded fake secret and a fake email in a prompt do not appear in the outgoing payload, and a residual high-severity match causes the field to be **dropped**, not posted.
 
 ## 3. Decision: out-of-band batch enricher
 
@@ -72,19 +74,20 @@ The enricher groups log records by `trace_id` and routes each content event to i
 
 | Log event | Join key → target observation | Langfuse fields set |
 |---|---|---|
-| `user_prompt` | `span_id` = interaction root (identity) | trace-level `input` |
-| `api_request` | **`request_id`** → `llm_request` generation | `input` (request messages) + `output` (completion) when `OTEL_LOG_RAW_API_BODIES=1`; `cost_details` ← `cost_usd` |
-| `tool_decision` / `tool_result` | `span_id` = tool span (identity) | tool obs `input` (args), `output` (result), `name`/metadata ← `tool_name` |
+| `user_prompt` | `span_id` = interaction root (identity) | trace-level `input` ← prompt |
+| `api_request` | **`request_id`** → `llm_request` generation (resolve via the LIST endpoint `?traceId=`, path `metadata.attributes.request_id`) | `cost_details` ← `cost_usd`; `output` ← completion **only if present without raw API bodies** (else omit) |
+| `tool_decision` / `tool_result` | `span_id` = tool span (identity) | tool obs `name` ← `tool_name` **only** (no args/output egressed) |
 
-Emitted as `observation-update` events — **upsert semantics, idempotent**: re-running the enricher is a safe no-op-or-refresh.
+Emitted via the Langfuse ingestion API as **`generation-update`** for GENERATION targets and **`span-update`** for SPAN/tool targets (event type confirmed in Task 1; `observation-update` is rejected). Upsert semantics, idempotent.
 
 ## 6. Redaction & security
 
-Full fidelity = the largest possible egress surface (full prompts, completions, tool outputs, raw API bodies of real research runs). Redaction is therefore a first-class component, not a regex afterthought.
+Posture: **reduce surface + fail-closed** (decided 2026-06-26). Raw API bodies and full tool I/O do **not** egress, so the content surface is prompt + completion + tool-name + cost. Redaction is a first-class, defense-in-depth component.
 
-- **Single egress gate, in Python.** The `file` exporter writes **raw** logs to a **local** gitignored file (no network). The enricher redacts immediately **before** the POST — the only point where content leaves the machine. Python redaction is structured and unit-testable, stronger than regex-in-YAML.
-- **Patterns:** reuse the Collector's secret/PII set (`sk-ant-*`, Langfuse keys, AWS, GitHub, email, FR phone, canary) and **extend** for the larger content surface. `(?i)` on every pattern (the tail-leak lesson).
-- **Identity PII:** strip `user.email` and account/org ids before egress (decision deferred to spec review: drop entirely vs. map `user.email` → Langfuse `user.id`). Default: **drop**.
+- **Single egress gate, in Python.** The `file` exporter writes raw logs to a local gitignored file (no network); the enricher redacts immediately **before** the POST — the only egress point.
+- **Broadened secret families.** Reuse the Collector's set (`sk-ant-*`, Langfuse keys, generic `sk-`, AWS, GitHub, email, FR phone, canary) and add high-severity families plausible in research content: Google API key (`AIza…`), Slack (`xox[baprs]-…`), Stripe live keys (`sk_live_`/`rk_live_`), PEM private-key blocks (`-----BEGIN … PRIVATE KEY-----`), and `key=value` secret assignments. `(?i)` on **every** pattern (the tail-leak lesson — including the previously-missed AWS `AKIA`).
+- **Recursive `strip_identity`.** Drop identity keys (`user.email`, `user.id`, `user.account_id`, `user.account_uuid`, `organization.id`) at **any** nesting depth, not just top-level.
+- **Fail-closed backstop.** After scrubbing, if a field still matches a high-severity-secret heuristic (PEM block, known credential prefix, or `secret|token|api[_-]?key|password|bearer` `= <8+ chars>`), **DROP** that field (replace with a redaction placeholder) rather than POST it. Security wins over completeness; accept occasional false-positive drops.
 - **`.gitignore`:** `eval/langfuse/.logs/` and `*.jsonl` never enter git.
 
 ## 7. Error handling
@@ -98,13 +101,14 @@ Full fidelity = the largest possible egress surface (full prompts, completions, 
 
 - **Unit (fixture):** a captured JSONL sample → enricher → assert the exact `observation-update` payloads (right ids, right fields, right routing — including `request_id` → generation).
 - **Canary (the `redaction-proof` analog):** seed a fake `sk-ant-…` secret and a fake email inside a prompt; run the enricher; assert both are masked in the outgoing payload. This is the enricher's egress-gate acceptance test.
-- **Round-trip (integration):** real run → enrich → query the Langfuse API → assert `input`/`output` present on generations and tools, and **Opus cost ≠ 0**.
+- **Fail-closed test:** a field carrying an unknown-format but high-severity secret (e.g. a PEM `BEGIN PRIVATE KEY` block) is **dropped**, not posted.
+- **Round-trip (integration):** real run → enrich → query the Langfuse API → assert prompt/completion/cost present on the trace/generation and **Opus cost ≠ 0**, and that no raw API body egressed.
 
 ## 9. Scope & non-goals
 
-**In:** batch enricher; the full-fidelity content chosen; `cost_usd` cost fix; Python-side redaction; the `file` exporter on the logs pipeline; `.gitignore` for the local log file; `OTEL_LOG_RAW_API_BODIES=1` in the enable script.
+**In:** batch enricher; reduced-surface content (prompt + completion + tool-name + cost); `cost_usd` cost fix; Python-side redaction (broadened families + recursive `strip_identity` + **fail-closed drop**); the `file` exporter on the logs pipeline; `.gitignore` for the local log file.
 
-**Out (YAGNI):** custom Go / custom Collector image; a streaming daemon; a Collector image change beyond the `file` exporter; the fail-closed attribute allowlist (separate hardening item); routing logs *through* Langfuse OTLP (it rejects logs).
+**Out (YAGNI / posture):** **raw API bodies and full tool I/O do NOT egress** (`OTEL_LOG_RAW_API_BODIES` stays off); custom Go / custom Collector image; a streaming daemon; a Collector image change beyond the `file` exporter; the fail-closed *attribute allowlist* on the Collector traces path (separate M4 hardening — distinct from the enricher's fail-closed field drop, which IS in M3); routing logs *through* Langfuse OTLP (it rejects logs).
 
 ## 10. Open items to settle in the plan / implementation
 

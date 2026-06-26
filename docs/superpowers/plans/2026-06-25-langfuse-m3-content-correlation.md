@@ -12,8 +12,10 @@
 
 - **Lab zone only.** All code lives under `eval/langfuse/` (network-allowed). It must NEVER live under `scripts/` (CLAUDE.md I4a: `scripts/` is stdlib-only AND zero-network). Tests live under `eval/langfuse/tests/`.
 - **Stdlib only.** No `requests`, no `pydantic`, no `pytest` — use `urllib.request` and `unittest`.
-- **Redaction precedes every egress.** No content reaches a Langfuse API call before passing the redactor. `(?i)` on every secret/PII pattern (uppercase-only classes leak lowercase tails).
-- **Identity PII is dropped**, not mapped: `user.email`, `user.account_id`, `user.account_uuid`, `organization.id`, `user.id` never egress.
+- **Egress posture = reduce surface + fail-closed (decided 2026-06-26, supersedes "full fidelity").** Raw Messages API bodies and full tool input/output bytes do **NOT** egress (`OTEL_LOG_RAW_API_BODIES` stays OFF). Egress surface = prompt + completion (if available without raw bodies) + tool **name** + cost.
+- **Redaction precedes every egress.** No content reaches a Langfuse API call before passing the redactor. `(?i)` on **every** secret/PII pattern (uppercase-only classes leak lowercase tails). Secret families are broadened (Google `AIza`, Slack `xox*`, Stripe live, PEM private-key blocks, `key=value` secrets) beyond the Collector's base set.
+- **Fail-closed backstop.** After scrubbing, any field still matching a high-severity-secret heuristic is **dropped** (replaced with a placeholder), not posted.
+- **Identity PII is dropped recursively**, not mapped: `user.email`, `user.account_id`, `user.account_uuid`, `organization.id`, `user.id` never egress, at any nesting depth.
 - **Secret never printed/committed.** Langfuse creds come from `~/second-brain/.secrets/langfuse.env` (gitignored); never echo them.
 - **Langfuse observation id == raw OTEL span_id** (verified identity, 2026-06-25).
 - **The local log file never enters git:** `eval/langfuse/.logs/` and `*.jsonl` are gitignored.
@@ -344,6 +346,8 @@ git commit -m "feat(langfuse): M3 redaction egress gate + identity-PII drop (AI-
 
 ## Task 5: Routing — records → observation updates
 
+> **POSTURE AMENDMENT (2026-06-26): reduce surface + fail-closed.** The code block below predates the posture decision and must be adjusted: (1) DROP the `messages` (raw request) and `tool_input`/`tool_output` (raw tool I/O) fields — they do **not** egress; route only `user_prompt`→trace input, `api_request`→generation `output` (completion, only if present without raw bodies) + `cost_details`, and `tool_result`→tool `name` only. (2) Run every routed value through `redact()` AND `strip_identity()` (recursive) AND the fail-closed drop helper from Task 4 before it enters an `ObservationUpdate`. (3) Tag each `ObservationUpdate` with its target kind (`generation` vs `span`) so Task 6 emits `generation-update` vs `span-update`. Add tests for: raw fields are NOT egressed, and a fail-closed PEM block is dropped.
+
 **Files:**
 - Create: `eval/langfuse/enrich_route.py`
 - Test: `eval/langfuse/tests/test_route.py`
@@ -636,22 +640,24 @@ git commit -m "feat(langfuse): M3 enricher CLI + round-trip integration (AI-182)
 
 ---
 
-## Task 8: Docs + enable-script flag
+## Task 8: Docs + reduced-surface posture
+
+> **POSTURE AMENDMENT (2026-06-26):** do NOT enable `OTEL_LOG_RAW_API_BODIES` — the reduce-surface posture keeps raw bodies off egress.
 
 **Files:**
-- Modify: `eval/langfuse/enable-claude-telemetry.sh` (uncomment `OTEL_LOG_RAW_API_BODIES=1`)
-- Modify: `eval/langfuse/README.md` (M3 row → Built; document `enrich.py`)
+- Modify: `eval/langfuse/enable-claude-telemetry.sh` (keep `OTEL_LOG_RAW_API_BODIES` **commented**; rewrite its comment to state raw bodies are deliberately OFF under the reduce-surface posture)
+- Modify: `eval/langfuse/README.md` (M3 row → Built; document `enrich.py` + the reduce-surface + fail-closed egress posture)
 
-- [ ] **Step 1: Enable raw bodies.** Uncomment the `OTEL_LOG_RAW_API_BODIES=1` line in `enable-claude-telemetry.sh`; update its comment to note the larger redaction surface handled by the enricher.
+- [ ] **Step 1: Confirm raw bodies stay OFF.** Ensure `OTEL_LOG_RAW_API_BODIES=1` remains commented in `enable-claude-telemetry.sh`; rewrite its comment to explain raw bodies are excluded from egress (reduce-surface posture) and the enricher sends only prompt/completion/tool-name/cost.
 
-- [ ] **Step 2: Update README.** Flip the M3 milestone row to **Built**; add a "Content enrichment" subsection describing the post-run `enrich.py` flow and that redaction is enforced in Python before egress.
+- [ ] **Step 2: Update README.** Flip the M3 milestone row to **Built**; add a "Content enrichment" subsection describing the post-run `enrich.py` flow, the reduce-surface + fail-closed posture, and that redaction is enforced in Python before egress.
 
 - [ ] **Step 3: Run the full check + commit.**
 
 ```bash
 cd eval/langfuse && python3 -m unittest discover -s tests
 git add eval/langfuse/enable-claude-telemetry.sh eval/langfuse/README.md
-git commit -m "docs(langfuse): M3 enricher docs + enable raw API bodies (AI-182)"
+git commit -m "docs(langfuse): M3 enricher docs + reduce-surface posture (AI-182)"
 ```
 
 ---
