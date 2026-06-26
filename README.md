@@ -494,6 +494,13 @@ Use `--profile academic|technical|current-affairs|mixed` or pass `--domains` dir
 | ![0.3.0](https://img.shields.io/badge/-0.3.0-059669?style=flat-square) | Five-layer eval harness + frozen benchmark test set, secret-gated CI judges |
 | ![Done](https://img.shields.io/badge/-Done-059669?style=flat-square) | [`suggest-tooling`](#companion-skill-tooling-recommender) companion skill + `--suggest-tooling` delegation flag — trust-graded skill/plugin/MCP recommender across six discovery channels, never auto-installing |
 
+### Planned
+
+| Status | Item | Notes |
+|:------:|:-----|:------|
+| ![Planned](https://img.shields.io/badge/-Planned-2563EB?style=flat-square) | Langfuse live observability (Path A) — Claude Code OTEL → OTEL Collector (redaction) → Langfuse Cloud | Per-run cost / latency / tool-call spans + sanitized prompt/completion content. Zero code in the skill (instrumentation at the harness layer). Tracks AI-182. |
+| ![Planned](https://img.shields.io/badge/-Planned-2563EB?style=flat-square) | Langfuse offline eval (Path B) — artifact → Datasets + Scores uploader | Replays the four run artifacts through the five-layer judges and pushes Datasets / Runs / Scores to Langfuse as a cross-run quality leaderboard. Extends the eval harness; lives in a maintainer tool outside `scripts/` (zero-network contract). Tracks AI-182. |
+
 ### Considered / deferred
 
 | Status | Item | Why |
