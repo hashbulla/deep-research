@@ -82,6 +82,17 @@ class TestRedact(unittest.TestCase):
         bearer_raw = "Authorization: Bearer abcdef0123456789abcd"
         self.assertEqual(fail_closed(bearer_raw), _DROP_PLACEHOLDER)
 
+    def test_fail_closed_drops_nested_high_severity(self):
+        """fail_closed on nested structures must recursively drop high-severity secrets."""
+        out = fail_closed({"auth": {"token": "Bearer abcdef0123456789abcd"}})
+        self.assertEqual(out["auth"]["token"], _DROP_PLACEHOLDER)
+
+    def test_masks_github_fine_grained_pat(self):
+        """GitHub fine-grained PATs (github_pat_*) must be masked."""
+        out = redact("token github_pat_11ABCDE0123456789abcdefgh")
+        self.assertNotIn("github_pat_11ABCDE0123456789abcdefgh", out)
+        self.assertIn("REDACTED", out)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -22,11 +22,13 @@ _PATTERNS = [
     # Canary tokens
     re.compile(r"(?i)CANARY-[A-Z0-9-]+"),
     # Google API key
-    re.compile(r"AIza[0-9A-Za-z_\-]{35}"),
+    re.compile(r"(?i)AIza[0-9A-Za-z_\-]{35}"),
     # Slack tokens
     re.compile(r"(?i)xox[baprs]-[0-9A-Za-z-]{10,}"),
     # Stripe live keys
     re.compile(r"(?i)(?:sk|rk)_live_[0-9A-Za-z]{16,}"),
+    # GitHub fine-grained PATs
+    re.compile(r"(?i)github_pat_[0-9a-z_]{20,}"),
 ]
 _MASK = "****REDACTED-SECRET****"
 
@@ -34,7 +36,7 @@ _MASK = "****REDACTED-SECRET****"
 # Covers PEM private-key blocks and labelled credential assignments.
 _DROP_HEURISTIC = re.compile(
     r"(?i)(?:-----BEGIN[ A-Z0-9]*PRIVATE KEY-----|"
-    r"(?:secret|token|api[_-]?key|password|bearer|authorization)\b[\"'\s:=]+[A-Za-z0-9+/_\-]{12,})"
+    r"(?:secret|token|api[_-]?key|password|bearer|authorization)\b[\"'\s:=]+[A-Za-z0-9+/_\-]{8,})"
 )
 
 _DROP_PLACEHOLDER = "[REDACTED: dropped — possible secret]"
