@@ -87,7 +87,7 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
             updates.append(ObservationUpdate(
                 obs_id=r.span_id,
                 kind="span",
-                fields={"name": tool_name},
+                fields={"name": fail_closed(tool_name)},
             ))
 
         # tool_decision: ignored — name already captured via tool_result.

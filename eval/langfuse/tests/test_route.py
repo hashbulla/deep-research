@@ -9,7 +9,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from enrich_parse import LogRecord
+from enrich_parse import LogRecord, parse_jsonl
 from enrich_redact import _DROP_PLACEHOLDER
 from enrich_route import ObservationUpdate, build_updates
 
@@ -132,6 +132,18 @@ class TestToolDecisionIgnored(unittest.TestCase):
                           {"tool_name": "Read", "decision": "accept"})]
         ups = build_updates(recs, {})
         self.assertEqual(ups, [])
+
+
+class TestFixtureJoin(unittest.TestCase):
+    def test_fixture_assistant_response_joins_to_generation(self):
+        """Fixture: api_request request_id must match assistant_response request_id for join."""
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "logs-sample.jsonl")
+        recs = parse_jsonl(fixture_path)
+        # Build the request_id -> obs map from the api_request record, as the real client would
+        rid = next(r.attrs["request_id"] for r in recs if r.event_name == "api_request")
+        ups = build_updates(recs, {rid: "gen_fixture_1"})
+        gen_outputs = [u for u in ups if u.obs_id == "gen_fixture_1" and "output" in u.fields]
+        self.assertTrue(gen_outputs, "assistant_response should route output to the generation via request_id join")
 
 
 class TestRedactionGates(unittest.TestCase):
