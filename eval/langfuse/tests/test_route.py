@@ -98,6 +98,34 @@ class TestToolResultRouting(unittest.TestCase):
         self.assertNotIn("output", ups[0].fields)
 
 
+class TestAssistantResponseRouting(unittest.TestCase):
+    def test_assistant_response_routes_to_generation_output(self):
+        """Mapped request_id → generation-kind update with output = sanitized response."""
+        recs = [LogRecord("t" * 32, "f1a2b3c4d5e6f708", "assistant_response",
+                          {"request_id": "req_X", "response": "synthetic completion: the answer is 42"})]
+        ups = build_updates(recs, {"req_X": "gen_obs_id_0001"})
+        self.assertEqual(len(ups), 1)
+        self.assertEqual(ups[0].kind, "generation")
+        self.assertEqual(ups[0].obs_id, "gen_obs_id_0001")
+        self.assertEqual(ups[0].fields["output"], "synthetic completion: the answer is 42")
+
+    def test_assistant_response_unmapped_request_skipped(self):
+        """Unmapped request_id → no update emitted."""
+        recs = [LogRecord("t" * 32, "f1a2b3c4d5e6f708", "assistant_response",
+                          {"request_id": "req_UNKNOWN", "response": "something"})]
+        ups = build_updates(recs, {})
+        self.assertEqual(ups, [])
+
+    def test_assistant_response_output_redacted(self):
+        """Response containing a secret → output has the secret masked."""
+        recs = [LogRecord("t" * 32, "f1a2b3c4d5e6f708", "assistant_response",
+                          {"request_id": "req_X",
+                           "response": "here is your key: sk-ant-FAKE0123456789abcdef0123 use it well"})]
+        ups = build_updates(recs, {"req_X": "gen_obs_id_0001"})
+        self.assertEqual(len(ups), 1)
+        self.assertNotIn("sk-ant-FAKE0123456789abcdef0123", ups[0].fields["output"])
+
+
 class TestToolDecisionIgnored(unittest.TestCase):
     def test_tool_decision_produces_no_update(self):
         recs = [LogRecord("t" * 32, "span0000000000aa", "tool_decision",

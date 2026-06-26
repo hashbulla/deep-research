@@ -3,15 +3,13 @@
 Posture: reduced surface + fail-closed (POSTURE AMENDMENT 2026-06-26).
 
 Egress routing table:
-- user_prompt  → span update: {input: SANITIZE(prompt)}
-- api_request  → generation update (if request_id mapped): {cost_usd: <float>}
-                 Completion text is NOT egressed — the Claude Code OTEL records
-                 do not carry a completion/response field outside raw API bodies,
-                 and raw bodies are forbidden under the reduced-surface posture.
-                 Status: DONE_WITH_CONCERNS — traces show prompt + cost + tool names,
-                 no completion text under this posture.
-- tool_result  → span update: {name: tool_name} — tool I/O bytes NOT egressed.
-- tool_decision → ignored (name already in tool_result; avoiding duplicate name updates).
+- user_prompt        → span update: {input: SANITIZE(prompt)}
+- api_request        → generation update (if request_id mapped): {cost_usd: <float>}
+- assistant_response → generation update (if request_id mapped): {output: SANITIZE(response)}
+                       Claude Code emits a clean `response` attribute on this event —
+                       no raw API body needed. output is sanitized via fail_closed.
+- tool_result        → span update: {name: tool_name} — tool I/O bytes NOT egressed.
+- tool_decision      → ignored (name already in tool_result; avoiding duplicate name updates).
 
 SANITIZE(x) = fail_closed(x) for plain strings.
 """
@@ -70,6 +68,18 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
                     kind="generation",
                     fields=fields,
                 ))
+
+        elif r.event_name == "assistant_response":
+            obs_id = request_id_to_obs.get(r.attrs.get("request_id", ""))
+            if not obs_id:
+                # Unmapped request — skip; don't guess the observation id.
+                continue
+            response_raw = r.attrs.get("response", "")
+            updates.append(ObservationUpdate(
+                obs_id=obs_id,
+                kind="generation",
+                fields={"output": fail_closed(response_raw)},
+            ))
 
         elif r.event_name == "tool_result":
             # Egress: tool name only. tool_input / tool_output bytes are forbidden.
