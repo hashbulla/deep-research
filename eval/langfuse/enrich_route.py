@@ -15,13 +15,13 @@ Egress routing table:
 - tool_result        → span update: {name: tool_name} — tool I/O bytes NOT egressed.
 - tool_decision      → ignored (name already in tool_result; avoiding duplicate name updates).
 
-SANITIZE(x) = fail_closed(x) for plain strings.
+SANITIZE(x) = sanitize(x) — strip_identity (recursive dict key drop) then fail_closed (drop/mask).
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from enrich_redact import fail_closed
+from enrich_redact import sanitize
 
 
 @dataclass
@@ -69,7 +69,7 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
             updates.append(ObservationUpdate(
                 obs_id=obs_id,
                 kind="generation",
-                fields={"input": fail_closed(prompt_raw)},
+                fields={"input": sanitize(prompt_raw)},
             ))
 
         elif r.event_name == "api_request":
@@ -80,6 +80,7 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
             fields: dict = {}
             cost = r.attrs.get("cost_usd")
             if cost is not None:
+                # cost_usd is numeric — gate-exempt; no string redaction needed.
                 fields["cost_usd"] = cost
             # Completion text: not egressed.
             # The Claude Code OTEL records have no completion/response attribute
@@ -101,7 +102,7 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
             updates.append(ObservationUpdate(
                 obs_id=obs_id,
                 kind="generation",
-                fields={"output": fail_closed(response_raw)},
+                fields={"output": sanitize(response_raw)},
             ))
 
         elif r.event_name == "tool_result":
@@ -110,7 +111,7 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
             updates.append(ObservationUpdate(
                 obs_id=r.span_id,
                 kind="span",
-                fields={"name": fail_closed(tool_name)},
+                fields={"name": sanitize(tool_name)},
             ))
 
         # tool_decision: ignored — name already captured via tool_result.

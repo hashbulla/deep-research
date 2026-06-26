@@ -1,5 +1,5 @@
 import unittest
-from enrich_redact import redact, strip_identity, fail_closed
+from enrich_redact import redact, strip_identity, fail_closed, sanitize
 
 _DROP_PLACEHOLDER = "[REDACTED: dropped — possible secret]"
 
@@ -91,6 +91,23 @@ class TestRedact(unittest.TestCase):
         """GitHub fine-grained PATs (github_pat_*) must be masked."""
         out = redact("token github_pat_11ABCDE0123456789abcdefgh")
         self.assertNotIn("github_pat_11ABCDE0123456789abcdefgh", out)
+        self.assertIn("REDACTED", out)
+
+    def test_sanitize_strips_identity_in_dict(self):
+        """sanitize composes both stages: strip_identity drops keys, fail_closed masks secrets."""
+        inp = {"user.email": "x@y.com", "keep": "ok"}
+        out = sanitize(inp)
+        self.assertNotIn("user.email", out, "sanitize must drop identity keys")
+        self.assertEqual(out["keep"], "ok")
+
+    def test_sanitize_passthrough_string(self):
+        """sanitize('a string') must work — strip_identity passthrough on non-dict/list."""
+        self.assertEqual(sanitize("hello"), "hello")
+
+    def test_sanitize_masks_secret_in_string(self):
+        """sanitize on a string containing a secret must mask it."""
+        out = sanitize("key sk-ant-FAKE0123456789abcdef0123 end")
+        self.assertNotIn("sk-ant-FAKE0123456789abcdef0123", out)
         self.assertIn("REDACTED", out)
 
 

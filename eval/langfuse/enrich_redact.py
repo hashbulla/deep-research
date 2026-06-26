@@ -73,6 +73,15 @@ def strip_identity(obj: Any) -> Any:
     return obj
 
 
+def sanitize(value: Any) -> Any:
+    """The full egress gate: strip identity keys (recursive), then fail-closed drop / mask.
+
+    `strip_identity` returns a string unchanged when given a string (it recurses only
+    dict/list and passthrough scalars), so `sanitize("a string")` works correctly.
+    """
+    return fail_closed(strip_identity(value))
+
+
 def fail_closed(value: Any) -> Any:
     """Composed sanitizer applied to RAW values (before any masking).
 

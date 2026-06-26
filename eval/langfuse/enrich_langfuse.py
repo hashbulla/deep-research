@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import json
 import urllib.request
-import uuid
 from typing import Any
 
 from enrich_route import ObservationUpdate
@@ -57,8 +56,9 @@ def _parse_request_id_index(data: dict[str, Any]) -> dict[str, str]:
             continue
         attrs = (obs.get("metadata") or {}).get("attributes") or {}
         rid: str | None = attrs.get("request_id") or attrs.get("gen_ai.response.id")
-        if rid:
-            index[rid] = obs["id"]
+        oid: str | None = obs.get("id")
+        if rid and oid:
+            index[rid] = oid
     return index
 
 

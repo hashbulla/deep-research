@@ -1,5 +1,6 @@
 """Parse the Collector's file-exported OTLP logs (JSONL) into flat LogRecords."""
 import json
+import sys
 from dataclasses import dataclass
 
 @dataclass
@@ -28,7 +29,11 @@ def parse_jsonl(path: str) -> list:
             line = line.strip()
             if not line:
                 continue
-            req = json.loads(line)
+            try:
+                req = json.loads(line)
+            except json.JSONDecodeError as exc:
+                print(f"enrich_parse: skipping malformed line: {exc}", file=sys.stderr)
+                continue
             for rl in req.get("resourceLogs", []):
                 for sl in rl.get("scopeLogs", []):
                     for lr in sl.get("logRecords", []):
