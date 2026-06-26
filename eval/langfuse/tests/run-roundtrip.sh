@@ -245,35 +245,27 @@ else
     echo "WARN: no cost found on GENERATION — gen_ai.usage.* semconv mapping may not have propagated" >&2
 fi
 
-# 6c. Prompt input on the root span — from user_prompt log event.
-SPAN_OBS_ID="$(echo "$OBS_LIST_JSON" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-spans = [o for o in d.get('data', []) if o.get('type') == 'SPAN']
-print(spans[0]['id'] if spans else '')
-")"
-
-INPUT_PRESENT="0"
-if [ -n "$SPAN_OBS_ID" ]; then
-    SPAN_OBS_JSON="$(curl -s \
-        -u "${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}" \
-        "${LANGFUSE_BASE}/api/public/observations/${SPAN_OBS_ID}")"
-    INPUT_PRESENT="$(echo "$SPAN_OBS_JSON" | python3 -c "
+# 6c. Prompt input on the GENERATION observation — M3 fix: user_prompt now routes to
+# generation input via prompt.id join (not to a span, which does not persist on Hobby).
+# Re-use the already-fetched GEN_OBS_JSON (single-obs endpoint, polled above).
+INPUT_ON_GEN="$(echo "$GEN_OBS_JSON" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 print('1' if d.get('input') else '0')
 ")"
+
+if [ "$INPUT_ON_GEN" = "1" ]; then
+    pass "prompt (input) present on GENERATION observation — M3 fix confirmed"
+else
+    echo "WARN: prompt input not found on GENERATION — user_prompt prompt.id join may not have resolved" >&2
 fi
 
-if [ "$INPUT_PRESENT" = "1" ]; then
-    pass "prompt (input) present on root span"
-else
-    echo "WARN: prompt input not found — user_prompt event may not carry a prompt attr in this run" >&2
-fi
+# Retain a null value for SPAN_OBS_JSON so the raw-body scan below still works.
+SPAN_OBS_JSON=""
 
 # 6d. Assert no raw JSON Messages body egressed.
-# Concatenate both observation payloads and scan for raw Messages API markers.
-COMBINED_PAYLOAD="${GEN_OBS_JSON}${SPAN_OBS_JSON:-}"
+# Concatenate generation payload and scan for raw Messages API markers.
+COMBINED_PAYLOAD="${GEN_OBS_JSON}${SPAN_OBS_JSON}"
 RAW_BODY_PRESENT="$(echo "$COMBINED_PAYLOAD" | python3 -c "
 import sys
 text = sys.stdin.read()

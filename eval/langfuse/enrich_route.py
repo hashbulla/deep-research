@@ -3,7 +3,11 @@
 Posture: reduced surface + fail-closed (POSTURE AMENDMENT 2026-06-26).
 
 Egress routing table:
-- user_prompt        → span update: {input: SANITIZE(prompt)}
+- user_prompt        → generation update: {input: SANITIZE(prompt)}
+                       Join: user_prompt.prompt.id → api_request.prompt.id → request_id
+                       → generation observation id.  If the join fails (unmapped
+                       prompt.id), the record is SKIPPED — span-update does not
+                       persist input on Langfuse Hobby.
 - api_request        → generation update (if request_id mapped): {cost_usd: <float>}
 - assistant_response → generation update (if request_id mapped): {output: SANITIZE(response)}
                        Claude Code emits a clean `response` attribute on this event —
@@ -40,12 +44,31 @@ def build_updates(records: list, request_id_to_obs: dict) -> list[ObservationUpd
     """
     updates: list[ObservationUpdate] = []
 
+    # Build promptid_to_requestid from api_request records that carry both fields.
+    # This join is needed to route user_prompt → generation input (M3 fix).
+    promptid_to_requestid: dict[str, str] = {}
+    for r in records:
+        if r.event_name == "api_request":
+            pid = r.attrs.get("prompt.id", "")
+            rid = r.attrs.get("request_id", "")
+            if pid and rid:
+                promptid_to_requestid[pid] = rid
+
     for r in records:
         if r.event_name == "user_prompt":
+            # Join: prompt.id → request_id → generation obs id.
+            # span-update does NOT persist input on Langfuse Hobby, so we target
+            # the generation's input field instead.  If the join fails, skip —
+            # there is no reliable fallback that renders.
+            pid = r.attrs.get("prompt.id", "")
+            rid = promptid_to_requestid.get(pid, "")
+            obs_id = request_id_to_obs.get(rid, "")
+            if not obs_id:
+                continue
             prompt_raw = r.attrs.get("prompt", "")
             updates.append(ObservationUpdate(
-                obs_id=r.span_id,
-                kind="span",
+                obs_id=obs_id,
+                kind="generation",
                 fields={"input": fail_closed(prompt_raw)},
             ))
 

@@ -15,21 +15,55 @@ from enrich_route import ObservationUpdate, build_updates
 
 
 class TestUserPromptRouting(unittest.TestCase):
-    def test_user_prompt_routes_to_span_kind(self):
-        recs = [LogRecord("t" * 32, "iface000000000aa", "user_prompt", {"prompt": "hello"})]
-        ups = build_updates(recs, {})
-        self.assertEqual(len(ups), 1)
-        self.assertEqual(ups[0].kind, "span")
+    """user_prompt routes to the GENERATION's input via prompt.id → request_id join.
 
-    def test_user_prompt_obs_id_is_span_id(self):
-        recs = [LogRecord("t" * 32, "iface000000000aa", "user_prompt", {"prompt": "hello"})]
-        ups = build_updates(recs, {})
-        self.assertEqual(ups[0].obs_id, "iface000000000aa")
+    Span-update does not persist input on Langfuse Hobby (M3 fix, AI-182 review).
+    """
+
+    def _records_with_join(self, prompt: str = "hello") -> list:
+        """Minimal record pair that satisfies the prompt.id join."""
+        return [
+            LogRecord("t" * 32, "iface000000000aa", "user_prompt",
+                      {"prompt": prompt, "prompt.id": "pid_0001"}),
+            LogRecord("t" * 32, "rootspan00000000", "api_request",
+                      {"prompt.id": "pid_0001", "request_id": "req_X", "cost_usd": 0.01}),
+        ]
+
+    def test_user_prompt_routes_to_generation_kind(self):
+        ups = build_updates(self._records_with_join(), {"req_X": "gen_obs_id_0001"})
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertEqual(len(prompt_ups), 1)
+        self.assertEqual(prompt_ups[0].kind, "generation")
+
+    def test_user_prompt_obs_id_is_generation_id(self):
+        ups = build_updates(self._records_with_join(), {"req_X": "gen_obs_id_0001"})
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertEqual(prompt_ups[0].obs_id, "gen_obs_id_0001")
 
     def test_user_prompt_input_field_is_prompt(self):
-        recs = [LogRecord("t" * 32, "iface000000000aa", "user_prompt", {"prompt": "hello"})]
-        ups = build_updates(recs, {})
-        self.assertEqual(ups[0].fields["input"], "hello")
+        ups = build_updates(self._records_with_join("hello"), {"req_X": "gen_obs_id_0001"})
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertEqual(prompt_ups[0].fields["input"], "hello")
+
+    def test_user_prompt_unmapped_promptid_skipped(self):
+        """user_prompt whose prompt.id has no matching api_request → no update emitted."""
+        recs = [
+            LogRecord("t" * 32, "iface000000000aa", "user_prompt",
+                      {"prompt": "hello", "prompt.id": "pid_ORPHAN"}),
+        ]
+        ups = build_updates(recs, {"req_X": "gen_obs_id_0001"})
+        # No api_request with pid_ORPHAN → no update for this user_prompt.
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertEqual(prompt_ups, [])
+
+    def test_user_prompt_no_promptid_skipped(self):
+        """user_prompt with no prompt.id at all → skipped (cannot join)."""
+        recs = [
+            LogRecord("t" * 32, "iface000000000aa", "user_prompt", {"prompt": "hello"}),
+        ]
+        ups = build_updates(recs, {"req_X": "gen_obs_id_0001"})
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertEqual(prompt_ups, [])
 
 
 class TestApiRequestRouting(unittest.TestCase):
@@ -135,36 +169,60 @@ class TestToolDecisionIgnored(unittest.TestCase):
 
 
 class TestFixtureJoin(unittest.TestCase):
-    def test_fixture_assistant_response_joins_to_generation(self):
-        """Fixture: api_request request_id must match assistant_response request_id for join."""
+    def _fixture_recs_and_rid(self):
         fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "logs-sample.jsonl")
         recs = parse_jsonl(fixture_path)
-        # Build the request_id -> obs map from the api_request record, as the real client would
         rid = next(r.attrs["request_id"] for r in recs if r.event_name == "api_request")
+        return recs, rid
+
+    def test_fixture_assistant_response_joins_to_generation(self):
+        """Fixture: api_request request_id must match assistant_response request_id for join."""
+        recs, rid = self._fixture_recs_and_rid()
         ups = build_updates(recs, {rid: "gen_fixture_1"})
         gen_outputs = [u for u in ups if u.obs_id == "gen_fixture_1" and "output" in u.fields]
         self.assertTrue(gen_outputs, "assistant_response should route output to the generation via request_id join")
 
+    def test_fixture_user_prompt_routes_to_generation_input(self):
+        """Fixture: user_prompt.prompt.id → api_request.prompt.id → request_id → generation input."""
+        recs, rid = self._fixture_recs_and_rid()
+        ups = build_updates(recs, {rid: "gen_fixture_1"})
+        gen_inputs = [u for u in ups if u.obs_id == "gen_fixture_1" and "input" in u.fields]
+        self.assertTrue(gen_inputs, "user_prompt should route input to the generation via prompt.id join")
+        # Verify the secret in the fixture prompt is redacted.
+        self.assertNotIn("sk-ant-FAKE0123456789abcdef0123", gen_inputs[0].fields["input"])
+
 
 class TestRedactionGates(unittest.TestCase):
+    def _records_with_join(self, prompt: str) -> list:
+        """Minimal record pair that satisfies the prompt.id join for redaction tests."""
+        return [
+            LogRecord("t" * 32, "iface000000000aa", "user_prompt",
+                      {"prompt": prompt, "prompt.id": "pid_0001"}),
+            LogRecord("t" * 32, "rootspan00000000", "api_request",
+                      {"prompt.id": "pid_0001", "request_id": "req_X", "cost_usd": 0.01}),
+        ]
+
     def test_secret_in_prompt_is_masked(self):
-        recs = [LogRecord("t" * 32, "iface000000000aa", "user_prompt",
-                          {"prompt": "leak sk-ant-FAKE0123456789abcdef0123 please help"})]
-        ups = build_updates(recs, {})
-        self.assertNotIn("sk-ant-FAKE0123456789abcdef0123", ups[0].fields["input"])
+        recs = self._records_with_join("leak sk-ant-FAKE0123456789abcdef0123 please help")
+        ups = build_updates(recs, {"req_X": "gen_obs_id_0001"})
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertNotIn("sk-ant-FAKE0123456789abcdef0123", prompt_ups[0].fields["input"])
 
     def test_pem_in_prompt_triggers_drop(self):
         pem_prompt = "here is my key:\n-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----"
-        recs = [LogRecord("t" * 32, "iface000000000aa", "user_prompt", {"prompt": pem_prompt})]
-        ups = build_updates(recs, {})
-        self.assertEqual(ups[0].fields["input"], _DROP_PLACEHOLDER)
+        recs = self._records_with_join(pem_prompt)
+        ups = build_updates(recs, {"req_X": "gen_obs_id_0001"})
+        prompt_ups = [u for u in ups if u.fields.get("input") is not None]
+        self.assertEqual(prompt_ups[0].fields["input"], _DROP_PLACEHOLDER)
 
     def test_no_update_fields_contain_raw_bodies_keys(self):
         """Regression: forbidden keys must never appear in any update's fields."""
         recs = [
-            LogRecord("t" * 32, "iface000000000aa", "user_prompt", {"prompt": "hello"}),
+            LogRecord("t" * 32, "iface000000000aa", "user_prompt",
+                      {"prompt": "hello", "prompt.id": "pid_0001"}),
             LogRecord("t" * 32, "rootspan00000000", "api_request",
-                      {"request_id": "req_X", "cost_usd": 0.05, "messages": "raw", "tool_input": "raw", "tool_output": "raw"}),
+                      {"prompt.id": "pid_0001", "request_id": "req_X",
+                       "cost_usd": 0.05, "messages": "raw", "tool_input": "raw", "tool_output": "raw"}),
             LogRecord("t" * 32, "span0000000000aa", "tool_result",
                       {"tool_name": "Read", "tool_input": "raw", "tool_output": "raw"}),
         ]
