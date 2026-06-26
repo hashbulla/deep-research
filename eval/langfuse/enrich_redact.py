@@ -2,6 +2,7 @@
 import re
 from typing import Any
 
+# MASK tier — keep field, replace the secret in place.
 _PATTERNS = [
     # Anthropic
     re.compile(r"(?i)sk-ant-[a-z0-9-]{20,}"),
@@ -10,7 +11,7 @@ _PATTERNS = [
     re.compile(r"(?i)pk-lf-[a-z0-9-]{8,}"),
     # Generic sk- (OpenAI-style and similar)
     re.compile(r"(?i)sk-[a-z0-9]{20,}"),
-    # AWS access key — case-insensitive fix
+    # AWS access key
     re.compile(r"(?i)AKIA[0-9A-Z]{16}"),
     # GitHub tokens
     re.compile(r"(?i)gh[pousr]_[a-z0-9]{20,}"),
@@ -26,16 +27,12 @@ _PATTERNS = [
     re.compile(r"(?i)xox[baprs]-[0-9A-Za-z-]{10,}"),
     # Stripe live keys
     re.compile(r"(?i)(?:sk|rk)_live_[0-9A-Za-z]{16,}"),
-    # PEM private-key header
-    re.compile(r"(?i)-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"),
-    # Labelled secret assignment
-    re.compile(r"(?i)(secret|token|api[_-]?key|password|passwd|bearer)[\"'\s:=]+[A-Za-z0-9+/_\-]{8,}"),
 ]
 _MASK = "****REDACTED-SECRET****"
 
-# High-severity residual heuristic — used by fail_closed as a backstop.
-# Targets unknown-format credentials without nuking normal research prose.
-_HIGH_SEVERITY_RESIDUAL = re.compile(
+# DROP tier — whole field dropped; checked on the RAW value before any masking.
+# Covers PEM private-key blocks and labelled credential assignments.
+_DROP_HEURISTIC = re.compile(
     r"(?i)(?:-----BEGIN[ A-Z0-9]*PRIVATE KEY-----|"
     r"(?:secret|token|api[_-]?key|password|bearer|authorization)\b[\"'\s:=]+[A-Za-z0-9+/_\-]{12,})"
 )
@@ -48,7 +45,7 @@ IDENTITY_PII_KEYS = frozenset({
 
 
 def redact(value: Any) -> Any:
-    """Recursively mask secrets and PII in str/dict/list using _PATTERNS."""
+    """Recursively mask MASK-tier secrets and PII in str/dict/list using _PATTERNS."""
     if isinstance(value, str):
         out = value
         for pat in _PATTERNS:
@@ -75,15 +72,21 @@ def strip_identity(obj: Any) -> Any:
 
 
 def fail_closed(value: Any) -> Any:
-    """Backstop: replace any string that either (a) still matches a high-severity
-    residual heuristic OR (b) contains the _MASK sentinel (meaning redact() already
-    found a secret in this field) with _DROP_PLACEHOLDER.  Apply AFTER redact().
-    Does NOT drop strings merely for being long — only on the heuristic / sentinel.
+    """Composed sanitizer applied to RAW values (before any masking).
+
+    Two-tier strategy:
+    - DROP tier: if the raw string matches _DROP_HEURISTIC (PEM block or labelled
+      credential assignment), replace the entire field with _DROP_PLACEHOLDER.
+    - MASK tier: otherwise, delegate to redact() to mask known secrets/PII in place
+      while keeping the field.
+
+    Caller must pass the RAW value, not the output of redact() — the drop check must
+    see the original plaintext before masking obscures the pattern.
     """
     if isinstance(value, str):
-        if _MASK in value or _HIGH_SEVERITY_RESIDUAL.search(value):
+        if _DROP_HEURISTIC.search(value):
             return _DROP_PLACEHOLDER
-        return value
+        return redact(value)
     if isinstance(value, dict):
         return {k: fail_closed(v) for k, v in value.items()}
     if isinstance(value, list):
