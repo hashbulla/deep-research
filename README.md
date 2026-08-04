@@ -30,16 +30,17 @@ Point it at a research question. It decomposes the question into orthogonal sub-
 
 ## What You Get
 
-Four artifacts in your invocation directory, written atomically at the end of the run.
+Five artifacts in your invocation directory, written atomically at the end of the run.
 
 ```
 research-plan.md         # the run's plan, written in Phase 0
 research-report.md       # final synthesis, inline citations, confidence tags
 research-sources.json    # every cited source, Admiralty-graded
 research-evidence.json   # claim → source mapping, credibility 1–6
+research-solution-space.json # solution-space manifest: 6 swept categories + critic
 ```
 
-Exactly four — always. The optional [`--suggest-tooling`](#companion-skill-tooling-recommender) flag adds a fifth file (`research-toolbox.md`) written by a *separate* companion skill, not the engine; the four-artifact contract stays intact.
+Exactly five — always. The optional [`--suggest-tooling`](#companion-skill-tooling-recommender) flag adds a sixth file (`research-toolbox.md`) written by a *separate* companion skill, not the engine; the five-artifact contract stays intact.
 
 ### `research-report.md` excerpt
 
@@ -159,7 +160,7 @@ Claude Code discovers the skill automatically. No restart needed.
 | `--model` | `opus` \| `fable` | `opus` | Synthesis tier — Claude-Code-native (session model + subagent overrides, zero API keys). Fable 5 is opt-in at ~2× cost ([details](references/model-tiers.md)) |
 | `--confidential` | flag | off | Confidential-path run: subagents receive neutral references only; rigor escalates ([details](references/model-tiers.md)) |
 | `--rigor` | `standard` \| `critical` | `standard` (`critical` implied by `--confidential`) | Verification depth — entailment-judge scope, refuse-if-no-source, mandatory anchors, sycophancy probe ([details](references/quality-gate.md)) |
-| `--suggest-tooling` | flag | off | After Phase 6 completes, delegate the finished run to the `suggest-tooling` sibling skill, which proposes work-relevant Claude Code skills, plugins, and MCP servers and writes `research-toolbox.md`. Default OFF — runs are byte-identical without it. The engine still emits exactly the four artifacts; `suggest-tooling` is a separate skill that writes the 5th file and never auto-installs anything. |
+| `--suggest-tooling` | flag | off | After Phase 6 completes, delegate the finished run to the `suggest-tooling` sibling skill, which proposes work-relevant Claude Code skills, plugins, and MCP servers and writes `research-toolbox.md`. Default OFF — runs are byte-identical without it. The engine still emits exactly the five artifacts; `suggest-tooling` is a separate skill that writes the 6th file and never auto-installs anything. |
 
 ---
 
@@ -234,7 +235,7 @@ flowchart TD
         Z2 --> Z3["DOUBTFUL / IMPROBABLE /<br/>UNVERIFIED → Needs Verification"]
     end
 
-    P6 --> Done(["4 artifacts written atomically"])
+    P6 --> Done(["5 artifacts written atomically"])
 
     style RF fill:#FEF3C7,stroke:#D97706,color:#92400E
     style P1 fill:#DBEAFE,stroke:#3B82F6
@@ -563,7 +564,7 @@ deep-research/
 │   ├── tooling-hats.json.example          # hat-weight template (real file lives user-scope)
 │   └── evals/                             # loading + e2e fixtures for the five failure modes
 ├── docs/superpowers/                      # design specs, plans, and the dogfood research run
-├── examples/eu-ai-act-2026/               # end-to-end fixture (4 artifacts, gate-conformant)
+├── examples/eu-ai-act-2026/               # end-to-end fixture (5 artifacts, gate-conformant)
 ├── evals/                                 # loading / progressive / e2e + sycophancy-probes + benchmark-testset + rubric
 ├── CHANGELOG.md                           # semver release history (append-only)
 ├── gotchas-log.md                         # maintainer traps + perishable-asset cadences

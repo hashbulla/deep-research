@@ -12,7 +12,7 @@ For each fixture, present the prompt in a fresh session with this skill (and its
 | `expect: skip` and the skill stays silent | pass |
 | Anything else | fail — record fixture id + observed routing |
 
-**Pass bar:** ≥ 12/13 positives AND ≥ 12/13 negatives. A single negative failure on `neg-07` or `neg-08` (territorial neighbors) is a release blocker regardless of the aggregate — those two boundaries are the documented conflict surface.
+**Pass bar:** ≥ 14/15 positives AND ≥ 14/15 negatives (count realigned to the fixture file 2026-08-04; appended fixtures raise the bar with them, tolerance stays at one miss per side). A single negative failure on `neg-07`, `neg-08` or its successor `neg-15` (territorial neighbors) is a release blocker regardless of the aggregate — those boundaries are the documented conflict surface.
 
 **Failure-mode mapping** (the five activation failure modes):
 
@@ -26,13 +26,13 @@ For each fixture, present the prompt in a fresh session with this skill (and its
 
 Trace which files the skill reads at each pipeline moment. A fixture passes when every `expect_read` file is read at (or after) the stated moment AND no `expect_not_read` file is read before it.
 
-**Pass bar:** 9/9. The load-tier discipline (prog-01) and the hash-before-trust rule (prog-03) are non-negotiable; their failure is a release blocker.
+**Pass bar:** 13/13 (count realigned to the fixture file 2026-08-04; appended fixtures raise the bar with them — the stale `9/9` predated `prog-10`). The load-tier discipline (prog-01), the hash-before-trust rule (prog-03) and the conditional solution-space read (prog-11 / prog-12) are non-negotiable; their failure is a release blocker.
 
 ## 3. End-to-end evals (`e2e.jsonl`)
 
 Run each invocation live (Tavily MCP required; results vary — only the **mechanical checks** are scored, never the prose quality). Every mechanical check is a deterministic command or transcript predicate.
 
-**Pass bar:** every mechanical check in every fixture. The plan-precedes-retrieval check in `e2e-01` (no Tavily call before `research-plan.md` exists) and its `e2e-10` companion (no Tavily call before a triggered AskUserQuestion refinement resolves) are the skill's first non-negotiable (anti-pattern A1); their failure invalidates the entire run regardless of artifact quality.
+**Pass bar:** every mechanical check in every fixture. The plan-precedes-retrieval check in `e2e-01` / its successor `e2e-13` (no Tavily call before `research-plan.md` exists) and the `e2e-10` companion (no Tavily call before a triggered AskUserQuestion refinement resolves) are the skill's first non-negotiable (anti-pattern A1); their failure invalidates the entire run regardless of artifact quality. The five-artifact + `check-solution-space` PASS contract is carried by `e2e-11`; the top-of-report obligations header by `e2e-12`.
 
 ## Adding fixtures
 
@@ -43,3 +43,5 @@ Every new feature (flag, retrieval source, gate) adds:
 3. ≥1 mechanical e2e check proving its DoD.
 
 Append-only — existing fixtures are never edited to make a failing run pass; that is eval laundering. Fix the skill or document the waiver in `../gotchas-log.md`.
+
+**Superseding a fixture whose contract changed.** When a deliberate contract change makes an existing fixture assert a superseded rule, do NOT edit it. Append a **successor** with the same probe intent and the corrected assertion, state `SUPERSEDES <id> (<date>)` in the successor's own rationale field (`boundary` for loading, `note` for progressive, the first `mechanical_checks` string for e2e — never a new key), and log the supersession in `../gotchas-log.md`. The superseded fixture stays in the file unedited: it is an accurate record of the contract at its date. Pairs currently live: `neg-08`→`neg-15`, `prog-09`→`prog-13`, `e2e-01`→`e2e-13`, `e2e-08`→`e2e-14` (all 2026-08-04, four→five artifacts).

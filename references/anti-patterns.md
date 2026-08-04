@@ -65,7 +65,7 @@ When only an abstract is retrievable for a paywalled paper, the `research-eviden
 Two sources that both cite a third source are not "independent". Before counting corroboration, check that supporting sources are not derivative (e.g., three news articles all quoting the same press release count as one source, not three). Derivative chains are logged in `notes` and counted once.
 
 ### B11. Over-eager emit
-Do not write the report or JSON artifacts before Phase 6 completes. No streaming, no intermediate "here's what I have so far" dumps in the chat. `research-plan.md` is the sole exception — it is written in Phase 0 (artifact #1). The user sees the Phase-0 plan (written to disk, no approval step) and the final four artifacts (at the end).
+Do not write the report or JSON artifacts before Phase 6 completes. No streaming, no intermediate "here's what I have so far" dumps in the chat. `research-plan.md` is the sole exception — it is written in Phase 0 (artifact #1). The user sees the Phase-0 plan (written to disk, no approval step) and the final five artifacts (at the end).
 
 ### B12. Out-of-scope sprawl
 The skill answers the user's research question. It does **not**:
