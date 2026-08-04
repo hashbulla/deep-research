@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "note": "Fixture config for CI (hermetic). The real config lives user-scope at ~/.claude/deep-research/stack-paths.json — see stack-paths.json.example at the repo root.",
+  "paths": [
+    "evals/fixtures/sota-recall/stack-corpus"
+  ]
+}

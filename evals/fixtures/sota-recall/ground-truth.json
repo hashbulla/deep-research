@@ -1,0 +1,54 @@
+{
+  "frozen": "2026-08-04",
+  "perishability": "SOTA ground truth decays. Re-validate each item's `validated` date before treating a miss as a pipeline failure when replaying >6 months after `frozen`.",
+  "cases": [
+    {
+      "id": "yt",
+      "brief": "yt-brief.md",
+      "items": [
+        {
+          "id": "youtube-data-mcp-server",
+          "name": "icraft2170/youtube-data-mcp-server",
+          "expected_category": "mcp-registries",
+          "expected_mechanism": "named MCP-registry sweep (official MCP Registry, Smithery, mcp.so, Glama, LobeHub, mcpservers.org)",
+          "accept_when": "the manifest's mcp-registries findings (or the draft benchmark table) name an OAuth2-capable YouTube MCP server exposing private-playlist enumeration (getMyPlaylists or equivalent)",
+          "validated": "2026-08-03",
+          "miss_root_cause": "no registry sweep was planned; the declared-non-exhaustive MCP inventory (3 servers) became 'nothing exists' downstream despite a judge-refused universal"
+        }
+      ]
+    },
+    {
+      "id": "ig",
+      "brief": "ig-brief.md",
+      "items": [
+        {
+          "id": "unipile",
+          "name": "Unipile (unified messaging API)",
+          "expected_category": "own-stack",
+          "expected_mechanism": "stack-inventory grep BEFORE any web call (deterministic; CI uses stack-corpus/ + stack-paths.fixture.json)",
+          "accept_when": "the own-stack sweep surfaces the unified-messaging bridge documented in the configured stack corpus as covering Instagram DMs (hosted-auth session delegation, chats/messages API, webhooks)",
+          "validated": "2026-08-01",
+          "miss_root_cause": "internal-stack inventory was not ritual; queries named the problem ('Instagram scraper'), not the capability class ('unified messaging API')"
+        },
+        {
+          "id": "hikerapi",
+          "name": "HikerAPI (managed public-data Instagram API, ~$0.60/1k requests)",
+          "expected_category": "commercial-vendors",
+          "expected_mechanism": "vendor enumeration by risk class — managed public scraping",
+          "accept_when": "the commercial-vendors sweep (or benchmark table) names HikerAPI or an equivalent managed public-data vendor with per-1k pricing materially below the Apify-class option",
+          "validated": "2026-08-01",
+          "miss_root_cause": "vendor enumeration stopped at the first priced option; no per-class cost comparison was mandated"
+        },
+        {
+          "id": "session-delegation-class",
+          "name": "session-delegation vendor class (e.g. Phantombuster: 'your Instagram session cookie' as input)",
+          "expected_category": "commercial-vendors",
+          "expected_mechanism": "risk-class taxonomy enumeration (deterministic: the class must exist in the sweep plan and carry >=1 representative)",
+          "accept_when": "the commercial-vendors category enumerates a session-delegation class with at least one named representative, graded by account risk — even under a credentialed NO-GO gate (a gate is a reason to enumerate better, never to stop enumerating)",
+          "validated": "2026-08-01",
+          "miss_root_cause": "a credentialed NO-GO gate stopped enumeration of the gated class; sub-classes with very different risk profiles were never separated"
+        }
+      ]
+    }
+  ]
+}

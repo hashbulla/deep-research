@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "_comment": "Own-stack inventory config for the solution-space sweep (references/solution-space.md). Copy to ~/.claude/deep-research/stack-paths.json and list the LOCAL paths where your paid tools, connectors, playbooks and memory notes live. The file stays user-scope: paths and subscriptions are operator context and never belong in this public repo. Absent file => the own-stack category is recorded as 'degraded' in research-solution-space.json (visible, never silent).",
+  "paths": [
+    "~/.claude/playbooks",
+    "~/notes/stack",
+    "~/.claude/projects/<your-project>/memory/MEMORY.md"
+  ]
+}

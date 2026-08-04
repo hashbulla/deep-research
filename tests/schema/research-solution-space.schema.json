@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "research-solution-space.json — solution-space manifest (artifact #5, one object per run)",
+  "type": "object",
+  "required": ["schema_version", "generated", "question", "question_geometry", "categories", "declared_incompleteness", "critic"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "generated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "question": { "type": "string", "minLength": 1 },
+    "question_geometry": {
+      "type": "object",
+      "required": ["solution_space_applicable", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "solution_space_applicable": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1 },
+        "platforms": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["key", "status", "reason", "date"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "enum": [
+              "platform-official-api",
+              "own-stack",
+              "open-source",
+              "mcp-registries",
+              "commercial-vendors",
+              "substitution-channels"
+            ]
+          },
+          "status": { "enum": ["swept", "empty", "waived", "not-applicable", "degraded"] },
+          "reason": { "type": "string" },
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "queries": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "registries": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "class"],
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "class": { "enum": ["custom-build", "built-in", "open-source", "commercial"] },
+                "platform": { "type": "string" },
+                "risk_class": {
+                  "enum": [
+                    "official-api-wrapper",
+                    "managed-public-scraping",
+                    "session-delegation",
+                    "credentialed-self-hosted",
+                    "none"
+                  ]
+                },
+                "source_ids": { "type": "array", "items": { "type": "string" } },
+                "note": { "type": "string" }
+              }
+            }
+          },
+          "control": {
+            "type": "object",
+            "required": ["query", "expected_hit", "found"],
+            "additionalProperties": false,
+            "properties": {
+              "query": { "type": "string", "minLength": 1 },
+              "expected_hit": { "type": "string", "minLength": 1 },
+              "found": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "declared_incompleteness": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "text", "obligation"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "enum": ["refused-universal", "non-exhaustive-inventory"] },
+          "text": { "type": "string", "minLength": 1 },
+          "obligation": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "critic": {
+      "type": "object",
+      "required": ["ran", "model", "findings"],
+      "additionalProperties": false,
+      "properties": {
+        "ran": { "type": "boolean" },
+        "model": { "type": ["string", "null"] },
+        "waivers_reviewed": { "type": "boolean" },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["finding", "resolution"],
+            "additionalProperties": false,
+            "properties": {
+              "finding": { "type": "string", "minLength": 1 },
+              "resolution": { "enum": ["swept", "waived", "rejected"] },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "skip_reason": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
