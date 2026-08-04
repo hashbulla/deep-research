@@ -4,7 +4,21 @@ All filenames below are relative to the invocation CWD. Write artifacts atomical
 
 ## 1. `research-report.md`
 
+### Report header — mandatory order
+
+Three header blocks precede the title, each emitted only when its condition holds, in this exact order:
+
+1. **Gate-FAIL banner — line 1 of the file.** When `check-artifacts` or `check-solution-space` ends the run on a persistent FAIL, the first line is the verdict: `> **GATE FAIL — <command>: <one-line reason>. This report does not establish the state of the art.**` A failing run still delivers every artifact; it may not claim SOTA anywhere in the body.
+2. **Declared-incompleteness obligations.** One bullet per `declared_incompleteness` entry in `research-solution-space.json`, quoting the entry's `text` and stating its `obligation`. A caveat that stayed inside the manifest is a caveat that was not surfaced.
+3. **Non-applicable geometry declaration.** When `question_geometry.solution_space_applicable` is `false`, one line quoting the declared `reason`, so a reader can see the sweep was decided against rather than forgotten.
+
 ```markdown
+<Line 1, only on a persistent gate failure: "> **GATE FAIL — <command>: <reason>. This report does not establish the state of the art.**">
+
+<Then, one bullet per `declared_incompleteness` entry: "> **Declared incompleteness:** <text> → <obligation>">
+
+<Then, only when applicable = false: "> **Solution-space geometry: not applicable** — <quoted reason>">
+
 # <Title derived from research question, in --lang>
 
 > Research date: YYYY-MM-DD · Skill: deep-research · Length: <short|standard|exhaustive>
@@ -19,6 +33,16 @@ All filenames below are relative to the invocation CWD. Write artifacts atomical
 ## <Section per sub-question — numbered and titled>
 
 <Prose with inline [^n] footnote citations. Surgical quotes only (≤3 sentences). Each claim carries an Admiralty confidence tag where non-obvious: [CONFIRMED] / [PROBABLY TRUE] / [POSSIBLY TRUE]. Claims tagged [DOUBTFUL] / [IMPROBABLE] / [UNVERIFIED] do NOT appear in these sections — they belong in "Needs Verification".>
+
+## Solution-space benchmark
+
+<Emitted whenever `question_geometry.solution_space_applicable` is true. One table, one row per candidate solution surfaced by the Phase-1b sweep.>
+
+| Solution | Class | Cost | Risk class | Use-case coverage | Verdict |
+|---|---|---|---|---|---|
+| <name> | <custom-build \| built-in \| open-source \| commercial> | <price or "free" — dated> | <official-api-wrapper \| managed-public-scraping \| session-delegation \| credentialed-self-hosted \| none> | <which sub-questions / use cases it covers, and which it does not> | <recommended \| viable \| rejected — with the one-line reason> |
+
+<Every row carries at least one `[^n]` citation resolving to `research-sources.json`, and a date — a price or capability claim without a retrieval date is unusable within weeks. Rows are drawn from the manifest's `categories[].findings`; a custom-build baseline row is always present, so the benchmark compares against building it rather than assuming it.>
 
 ## Contradictions & open debates
 
@@ -139,6 +163,14 @@ Array of claim records. One record per distinct factual claim in `research-repor
 - `primary_source_present` — boolean. True if ≥1 supporting source has `primary_source: true`.
 - `anchor` — optional object; span-level grounding (required on every claim under the `critical` rigor profile). `anchor_type` discriminates: `verbatim_quote` (web sources — carries `quote`, ≤600 chars, the surgical quote that entails the claim) or `snapshot_char_range` (persisted corpus documents — carries `doc_id`, `char_range` `[start, end)`, and `snapshot_sha256` of the persisted snapshot the offsets are computed against). Char offsets are NEVER emitted against unpersisted web content — Tavily output is reprocessed and offsets would have no stable referent.
 - `notes` — free text (e.g., "paywalled source, abstract only", "CRAG iteration 1 added S042").
+
+## 5. `research-solution-space.json`
+
+One manifest object per run — artifact #5, emitted on **every** run including `not-applicable` geometries. **Authoritative contract: `tests/schema/research-solution-space.schema.json`** (draft-07, `additionalProperties: false` throughout); doctrine — categories, status vocabulary, capability classes, critic contract — in `references/solution-space.md`. The deterministic rules `verify_gates.py check-solution-space` enforces on top of the schema are tabulated in `references/quality-gate.md` §"Solution-space gates".
+
+Top-level shape (all required): `schema_version` (const `1`), `generated` (`YYYY-MM-DD`), `question`, `question_geometry` (`solution_space_applicable`, `reason`, optional `platforms`), `categories` (exactly 6 — the closed key set `platform-official-api` · `own-stack` · `open-source` · `mcp-registries` · `commercial-vendors` · `substitution-channels`, each with `status` ∈ swept/empty/waived/not-applicable/degraded, `reason`, `date`, and conditionally `queries`, `registries`, `findings`, `control`), `declared_incompleteness` (entries of kind `refused-universal` or `non-exhaustive-inventory`, each with `text` + `obligation`), and `critic` (`ran`, `model`, `findings`, optional `waivers_reviewed` / `skip_reason`).
+
+`findings[].source_ids` reference `research-sources.json` records by `id` — a benchmark row's citation and its manifest finding resolve to the same source.
 
 ## Validation rules (emitter self-check before write)
 

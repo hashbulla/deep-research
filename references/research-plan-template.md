@@ -70,11 +70,31 @@ Written to `research-plan.md` at the end of Phase 0, before Phase 1 retrieval. T
 **Estimated runtime:** <minutes, paced under 15 research/min>
 **Rate-limit headroom:** <calls/min peak>
 
-## 5. Expected contradiction axes
+## 5. Solution-space sweep plan
+
+**Geometry:** solution space applicable = <true | false> — <reason in one sentence: does the question admit "what tool or approach solves this?">
+**Platforms in scope:** <e.g. "YouTube, Instagram" — or "none (platform-independent question)">
+
+| Category | Planned status | Planned queries / registries | Notes |
+|---|---|---|---|
+| own-stack | <swept \| degraded> | `scripts/stack_inventory.py` grep terms over <configured paths, or "config absent → degraded"> | **Runs FIRST, before any web call.** Zero network, full breadth at every `--length`, never waived for cost. |
+| platform-official-api | <swept \| empty \| waived> | <official API / developer-docs queries per platform> | |
+| mcp-registries | <swept \| empty \| waived> | <which of the named registries in `references/solution-space.md` will be queried> | The registries actually queried are listed by name in the manifest. |
+| open-source | <swept \| empty \| waived> | <capability-class queries + package registries> | Reuses `references/github-research.md`. |
+| commercial-vendors | <swept \| empty \| waived> | <capability-class vendor vocabulary, one pass per risk class> | Every risk class enumerated, including a class gated NO-GO. |
+| substitution-channels | <swept \| empty \| waived> | <adjacent-modality queries: what else delivers the same outcome> | |
+
+**Sweep order:** own-stack (local, deterministic) → then the five web categories, seeded with the vocabulary the stack sweep surfaced.
+**Sweep scale for `--length <short\|standard\|exhaustive>`:** <4–6 | 6–12 | 12–20> web queries spread **across** the five web categories.
+**Control queries:** any category planned `empty` names its control query and the known-present item it must return.
+
+<When applicable = false, this section is still emitted: state the geometry, its reason, and mark all six categories `not-applicable` with that reason — `not-applicable` is reserved for this whole-question case and is never a per-category opt-out on an applicable question (that is `waived`, with a real reason). The manifest is universal; the completeness critic still runs, and challenges the declaration itself.>
+
+## 6. Expected contradiction axes
 
 <List 1–3 axes where Tier 1/2 sources are likely to disagree. These guide Phase-1 query formulation for sub-questions of category "contradictory". Example: "cost estimates (industry self-report vs independent study)", "scope of exemption (commission interpretation vs member state transposition)".>
 
-## 6. Stop conditions
+## 7. Stop conditions
 
 Successful completion requires **all** of:
 
@@ -87,12 +107,12 @@ Successful completion requires **all** of:
 
 Failure to meet any gate routes affected claims to "Needs Verification" and documents the gap in the Methodology note.
 
-## 7. Known gaps at planning time
+## 8. Known gaps at planning time
 
 <e.g., "No full-text academic search available (Exa / Valyu not in MCP stack); mitigated by Tier 1 academic `include_domains`. Any paywalled commercial journals will contribute abstracts only.">
 <e.g., "No integrated NewsGuard / MBFC rating; Tier-4 detection relies on domain tier registry only.">
 
-## 8. Artifacts
+## 9. Artifacts
 
 At Phase 6 the skill will emit:
 
@@ -100,6 +120,9 @@ At Phase 6 the skill will emit:
 - `research-report.md` (final synthesis, in <--lang>)
 - `research-sources.json` (all cited sources, Admiralty-graded)
 - `research-evidence.json` (claim → sources mapping with credibility)
+- `research-solution-space.json` (solution-space manifest — 6 categories, declared incompleteness, critic block)
+
+Plus a private Artifact page rendering the report, the solution-space benchmark and the gate verdicts (skipped on `--confidential`, or when the Artifact tool is absent).
 
 ---
 

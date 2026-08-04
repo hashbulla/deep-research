@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "generated": "2026-04-17",
+  "question": "impact of EU AI Act on open-source model providers in 2026",
+  "question_geometry": {
+    "solution_space_applicable": false,
+    "reason": "This is a regulatory-obligations question: it asks what the law requires of a class of actors and how those actors responded. There is no retrieval task to perform on a platform and no toolchain that could 'solve' it, so there is no solution space to sweep. The answer is found by reading sources, not by choosing an instrument. Recording the six categories as not-applicable is the deliberate output — an empty manifest, or an absent one, would be indistinguishable from a sweep that was simply skipped."
+  },
+  "categories": [
+    {
+      "key": "platform-official-api",
+      "status": "not-applicable",
+      "reason": "No platform is being accessed. EUR-Lex, the Commission and the AI Office are cited as documentary sources through ordinary retrieval, not queried as a data surface whose official API would need weighing against alternatives.",
+      "date": "2026-04-17"
+    },
+    {
+      "key": "own-stack",
+      "status": "not-applicable",
+      "reason": "No stack inventory is owed: the run needs no capability beyond the search and extraction tools the skill already routes through. Nothing in the operator's paid stack could change the answer to a question about what a regulation requires.",
+      "date": "2026-04-17"
+    },
+    {
+      "key": "open-source",
+      "status": "not-applicable",
+      "reason": "Open-source model providers are the SUBJECT of the question, not a candidate implementation of it. Enumerating open-source tooling here would answer a question nobody asked.",
+      "date": "2026-04-17"
+    },
+    {
+      "key": "mcp-registries",
+      "status": "not-applicable",
+      "reason": "No MCP server, present or absent, changes what Articles 53-55 require. A registry sweep would produce findings with no bearing on any claim in the report.",
+      "date": "2026-04-17"
+    },
+    {
+      "key": "commercial-vendors",
+      "status": "not-applicable",
+      "reason": "No vendor sells access to the answer. The primary sources (Official Journal text, the Code of Practice, AI Office guidance) are public and free; a compliance consultancy would be a second opinion, not a retrieval channel.",
+      "date": "2026-04-17"
+    },
+    {
+      "key": "substitution-channels",
+      "status": "not-applicable",
+      "reason": "There is no blocked surface to route around: the question was never gated on access. Substitution only exists as a category when a direct channel is refused.",
+      "date": "2026-04-17"
+    }
+  ],
+  "declared_incompleteness": [],
+  "critic": {
+    "ran": true,
+    "model": "sonnet",
+    "findings": [
+      {
+        "finding": "not-applicable across all six categories is exactly the shape a skipped sweep would take. Challenged: is any part of this question actually toolchain-shaped — for instance 'which service tracks national transposition of the AI Act', which would make commercial-vendors live?",
+        "resolution": "rejected",
+        "note": "The question as scoped asks what the obligations are and how providers responded, not how to monitor them on an ongoing basis. A monitoring question would be a different question with a real solution space; it is not this one. Geometry re-confirmed rather than assumed."
+      }
+    ]
+  }
+}

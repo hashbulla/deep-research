@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "generated": "2026-08-04",
+  "question": "Which toolchain can retrieve Instagram direct-message history for a consenting client account, and at what account risk?",
+  "question_geometry": {
+    "solution_space_applicable": true,
+    "reason": "The question asks which tool or channel performs a retrieval task on a named platform — a toolchain question with a real solution space to enumerate.",
+    "platforms": [
+      "instagram"
+    ]
+  },
+  "categories": [
+    {
+      "key": "platform-official-api",
+      "status": "swept",
+      "reason": "Meta's own surfaces were enumerated first: they set the ceiling any third party can legally offer.",
+      "date": "2026-08-04",
+      "queries": [
+        "Instagram Messaging API requirements professional account",
+        "Meta Graph API instagram_manage_messages permission scope",
+        "Instagram webhook messages subscription eligibility"
+      ],
+      "findings": [
+        {
+          "name": "Instagram Messaging API (Meta Graph API)",
+          "class": "built-in",
+          "platform": "instagram",
+          "risk_class": "official-api-wrapper",
+          "note": "Professional (Business/Creator) accounts only, linked Page, App Review for instagram_manage_messages. Personal accounts are outside the official surface entirely.",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "own-stack",
+      "status": "swept",
+      "reason": "Stack inventory grepped before any web call (scripts/stack_inventory.py over the configured stack paths).",
+      "date": "2026-08-04",
+      "queries": [
+        "instagram",
+        "messaging",
+        "dm",
+        "unified inbox"
+      ],
+      "findings": [
+        {
+          "name": "Unipile (unified messaging API, already subscribed)",
+          "class": "built-in",
+          "platform": "instagram",
+          "risk_class": "session-delegation",
+          "note": "Flat 1-10 account plan already paid for. Covers Instagram DMs via hosted-auth session delegation, paginated chats/messages history and message.new webhooks — bought for LinkedIn/WhatsApp, unbudgeted for this question.",
+          "source_ids": [
+            "stack-1"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "open-source",
+      "status": "swept",
+      "reason": "Self-hosted clients enumerated to price the build-vs-buy floor.",
+      "date": "2026-08-04",
+      "queries": [
+        "instagram private API python client direct messages",
+        "github instagram dm library maintained 2026"
+      ],
+      "findings": [
+        {
+          "name": "instagrapi",
+          "class": "open-source",
+          "platform": "instagram",
+          "risk_class": "credentialed-self-hosted",
+          "note": "Private-API client: full DM access, and the account carries the entire ban risk. Maintenance is community-paced against a moving private API.",
+          "source_ids": [
+            "s4"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "mcp-registries",
+      "status": "empty",
+      "reason": "Six registries swept by name; no server exposing Instagram DM retrieval surfaced.",
+      "date": "2026-08-04",
+      "queries": [
+        "instagram mcp server",
+        "instagram direct message mcp server",
+        "meta graph api mcp server"
+      ],
+      "registries": [
+        "official MCP Registry",
+        "Smithery",
+        "mcp.so",
+        "Glama",
+        "LobeHub",
+        "mcpservers.org"
+      ],
+      "control": {
+        "query": "youtube mcp server",
+        "expected_hit": "icraft2170/youtube-data-mcp-server",
+        "found": true
+      }
+    },
+    {
+      "key": "commercial-vendors",
+      "status": "swept",
+      "reason": "Vendors enumerated BY RISK CLASS, not by first-priced-option: a gate on one class is a reason to enumerate the others better, never to stop.",
+      "date": "2026-08-04",
+      "queries": [
+        "instagram data API vendor pricing per 1000 requests",
+        "managed instagram scraping API public data pricing",
+        "instagram automation platform session cookie input"
+      ],
+      "findings": [
+        {
+          "name": "Apify Instagram scrapers",
+          "class": "commercial",
+          "platform": "instagram",
+          "risk_class": "managed-public-scraping",
+          "note": "Public surfaces only — no DM access. Priced per compute unit; the first option found, and the most expensive per 1k in its class.",
+          "source_ids": [
+            "s5"
+          ]
+        },
+        {
+          "name": "HikerAPI",
+          "class": "commercial",
+          "platform": "instagram",
+          "risk_class": "managed-public-scraping",
+          "note": "~$0.60/1k requests, materially below the Apify-class option for the same public-data envelope. Still no DM surface.",
+          "source_ids": [
+            "s6"
+          ]
+        },
+        {
+          "name": "Phantombuster",
+          "class": "commercial",
+          "platform": "instagram",
+          "risk_class": "session-delegation",
+          "note": "Takes the operator's Instagram session cookie as an input — reaches private surfaces including DMs, and moves the full account risk onto the client. Named here because a credentialed NO-GO gate is a grading verdict, not a licence to leave the class unenumerated.",
+          "source_ids": [
+            "s7"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "substitution-channels",
+      "status": "waived",
+      "reason": "The consenting client account is the only data surface in scope; moving the conversation to email or a support inbox answers a different question than the one asked. Waiver reviewed in the critic pass.",
+      "date": "2026-08-04"
+    }
+  ],
+  "declared_incompleteness": [
+    {
+      "kind": "non-exhaustive-inventory",
+      "text": "The commercial-vendor roster covers the three risk classes reachable from public pricing pages. The managed-public-scraping class certainly holds vendors not listed here.",
+      "obligation": "Report this as 'the risk classes are complete, the roster is not' — never as 'no other vendor exists'."
+    }
+  ],
+  "critic": {
+    "ran": true,
+    "model": "sonnet",
+    "waivers_reviewed": true,
+    "findings": [
+      {
+        "finding": "Vendor enumeration stopped at the first priced option; no per-1k comparison across the managed-public-scraping class.",
+        "resolution": "swept",
+        "note": "Re-probe by risk class added HikerAPI at roughly a third of the Apify-class price."
+      },
+      {
+        "finding": "The credentialed NO-GO gate had also stopped enumeration of the gated class, collapsing session-delegation and self-hosted-credential into one verdict.",
+        "resolution": "swept",
+        "note": "Classes separated; Phantombuster named as the session-delegation representative."
+      },
+      {
+        "finding": "substitution-channels was waived without naming who bears the cost of substituting the channel.",
+        "resolution": "waived",
+        "note": "Reason rewritten to state the scope argument explicitly. The waiver stands, now legible."
+      }
+    ]
+  }
+}

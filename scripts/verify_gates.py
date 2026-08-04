@@ -14,6 +14,15 @@ Subcommands:
                      pair against the normative cascade
                      (references/methodology.md §4.1) and the quality gates
                      (references/quality-gate.md). Prints a JSON verdict.
+  check-solution-space
+                     Validate a research-solution-space.json manifest: the six
+                     mandatory sweep categories, their per-status evidence
+                     obligations (queries / findings / control probe /
+                     registries), the applicability geometry, the critic pass,
+                     and the declared-incompleteness entries. Re-implements the
+                     structural rules of tests/schema/research-solution-space.
+                     schema.json in stdlib so the gate runs with no ajv, plus
+                     the conditional rules a JSON Schema cannot express.
   check-report-hash  Verify the SHA-256 of a deep-research-report.md found in
                      the invocation CWD against the prefix declared on the
                      'Hash at generation time:' line of SKILL.md (invariant
@@ -61,6 +70,33 @@ SCORELESS_TOOLS = {
 # Applies ONLY to account-based sources (those carrying account_provenance);
 # domain-graded sources keep their registry tier.
 REL_TO_TIER = {"A": 2, "B": 2, "C": 3, "D": 4, "E": 4, "F": 4}
+
+# --- solution-space manifest (references/solution-space.md) ------------------
+# The six categories are a CLOSED set: a sweep that silently drops one is the
+# failure mode the manifest exists to make visible. Order here is the canonical
+# reporting order, not an obligation on the manifest.
+SOLUTION_SPACE_CATEGORIES = (
+    "platform-official-api",
+    "own-stack",
+    "open-source",
+    "mcp-registries",
+    "commercial-vendors",
+    "substitution-channels",
+)
+CATEGORY_STATUSES = {"swept", "empty", "waived", "not-applicable", "degraded"}
+# A status that stops the sweep must justify itself in prose.
+REASON_REQUIRED_STATUSES = {"waived", "not-applicable", "degraded"}
+FINDING_CLASSES = {"custom-build", "built-in", "open-source", "commercial"}
+RISK_CLASSES = {
+    "official-api-wrapper",
+    "managed-public-scraping",
+    "session-delegation",
+    "credentialed-self-hosted",
+    "none",
+}
+CRITIC_RESOLUTIONS = {"swept", "waived", "rejected"}
+INCOMPLETENESS_KINDS = {"refused-universal", "non-exhaustive-inventory"}
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def cascade(s12: int, s1: int, c: int) -> int:
@@ -114,6 +150,21 @@ def load_array(path: Path, what: str) -> list[dict]:
     if not isinstance(data, list):
         sys.exit(f"FAIL: {path} is not a JSON array")
     return data
+
+
+def load_object(path: Path, what: str) -> dict:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        sys.exit(f"FAIL: cannot load {what} from {path}: {exc}")
+    if not isinstance(data, dict):
+        sys.exit(f"FAIL: {path} is not a JSON object")
+    return data
+
+
+def nonempty_text(value) -> bool:
+    """True only for a string carrying at least one non-whitespace character."""
+    return isinstance(value, str) and bool(value.strip())
 
 
 def check_artifacts(args: argparse.Namespace) -> int:
@@ -331,6 +382,267 @@ def check_artifacts(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def check_solution_space(args: argparse.Namespace) -> int:
+    """Verify a research-solution-space.json manifest.
+
+    The structural rules mirror tests/schema/research-solution-space.schema.json
+    so the gate runs anywhere python3 does (no Node, no ajv, no network). The
+    conditional rules are the part a JSON Schema cannot express: status-
+    conditional evidence obligations (a swept category owes queries AND
+    findings; an empty one owes a control probe that actually fired), the
+    applicability geometry (all-or-nothing not-applicable), waiver review, and
+    the commercial risk-class taxonomy.
+    """
+    manifest = load_object(Path(args.manifest), "solution-space manifest")
+    v = []  # type: list[str]
+
+    # --- top level -----------------------------------------------------------
+    if manifest.get("schema_version") != 1:
+        v.append(f"schema_version must be 1, found {manifest.get('schema_version')!r}")
+    generated = manifest.get("generated")
+    if not (isinstance(generated, str) and ISO_DATE.match(generated)):
+        v.append(f"generated must be a YYYY-MM-DD date, found {generated!r}")
+    if not nonempty_text(manifest.get("question")):
+        v.append("question must be a non-empty string")
+    for required in ("question_geometry", "categories", "declared_incompleteness", "critic"):
+        if required not in manifest:
+            v.append(f"missing required top-level key {required!r}")
+
+    # --- question geometry ---------------------------------------------------
+    geometry = manifest.get("question_geometry")
+    applicable = None
+    if geometry is not None and not isinstance(geometry, dict):
+        v.append("question_geometry must be an object")
+    elif isinstance(geometry, dict):
+        applicable = geometry.get("solution_space_applicable")
+        if not isinstance(applicable, bool):
+            v.append(
+                f"question_geometry.solution_space_applicable must be a boolean, "
+                f"found {applicable!r}"
+            )
+            applicable = None
+        if not nonempty_text(geometry.get("reason")):
+            v.append("question_geometry.reason must be a non-empty string")
+
+    # --- categories ----------------------------------------------------------
+    categories = manifest.get("categories")
+    if not isinstance(categories, list):
+        if categories is not None:
+            v.append("categories must be an array")
+        categories = []
+    elif len(categories) != 6:
+        v.append(
+            f"categories must hold exactly 6 entries (the closed sweep set), "
+            f"found {len(categories)}"
+        )
+
+    status_counts = {}  # type: dict
+    findings_total = 0
+    waived_categories = []  # type: list[str]
+    seen_keys = []  # type: list[str]
+
+    for idx, cat in enumerate(categories):
+        if not isinstance(cat, dict):
+            v.append(f"categories[{idx}] must be an object")
+            continue
+        key = cat.get("key")
+        label = key if isinstance(key, str) and key else f"categories[{idx}]"
+        if key not in SOLUTION_SPACE_CATEGORIES:
+            v.append(
+                f"{label}: unknown category key {key!r} (closed set: "
+                f"{', '.join(SOLUTION_SPACE_CATEGORIES)})"
+            )
+        elif key in seen_keys:
+            v.append(f"{label}: duplicate category key")
+        if isinstance(key, str):
+            seen_keys.append(key)
+
+        status = cat.get("status")
+        status_counts[str(status)] = status_counts.get(str(status), 0) + 1
+        if status not in CATEGORY_STATUSES:
+            v.append(
+                f"{label}: status {status!r} not in "
+                f"{{{', '.join(sorted(CATEGORY_STATUSES))}}}"
+            )
+        if status == "waived":
+            waived_categories.append(str(label))
+
+        cat_date = cat.get("date")
+        if not (isinstance(cat_date, str) and ISO_DATE.match(cat_date)):
+            v.append(f"{label}: date must be a YYYY-MM-DD date, found {cat_date!r}")
+
+        if "reason" not in cat:
+            v.append(f"{label}: missing required field 'reason'")
+        # Rule 4 — a status that STOPS the sweep must justify itself in prose.
+        if status in REASON_REQUIRED_STATUSES and not nonempty_text(cat.get("reason")):
+            v.append(
+                f"{label}: status {status!r} requires a non-empty reason "
+                f"(a stopped sweep must justify itself)"
+            )
+
+        queries = cat.get("queries")
+        if queries is not None and not isinstance(queries, list):
+            v.append(f"{label}: queries must be an array")
+            queries = None
+        live_queries = [q for q in (queries or []) if nonempty_text(q)]
+
+        findings = cat.get("findings")
+        if findings is not None and not isinstance(findings, list):
+            v.append(f"{label}: findings must be an array")
+            findings = None
+        findings = findings or []
+        findings_total += len(findings)
+
+        # Rule 5 — swept means the sweep left a trace on both sides.
+        if status == "swept":
+            if not live_queries:
+                v.append(f"{label}: status 'swept' requires >=1 non-empty query")
+            if not findings:
+                v.append(
+                    f"{label}: status 'swept' requires >=1 finding "
+                    f"(a sweep with zero findings is 'empty', and owes a control probe)"
+                )
+
+        # Rule 6 — empty is a claim about the world; it needs a fired instrument.
+        if status == "empty":
+            if not live_queries:
+                v.append(f"{label}: status 'empty' requires >=1 non-empty query")
+            control = cat.get("control")
+            if not isinstance(control, dict):
+                v.append(
+                    f"{label}: status 'empty' requires a control probe "
+                    f"(query, expected_hit, found)"
+                )
+            else:
+                for field in ("query", "expected_hit"):
+                    if not nonempty_text(control.get(field)):
+                        v.append(
+                            f"{label}: control probe requires a non-empty {field}"
+                        )
+                if control.get("found") is not True:
+                    v.append(
+                        f"{label}: control probe did not find its expected hit "
+                        f"(found={control.get('found')!r}) — the empty verdict is "
+                        f"unproven: a silent instrument, not an empty market"
+                    )
+
+        # Rule 7 — an MCP sweep names the registries it walked.
+        if key == "mcp-registries" and status in {"swept", "empty"}:
+            registries = cat.get("registries")
+            if not (isinstance(registries, list) and registries):
+                v.append(
+                    f"{label}: status {status!r} requires a non-empty registries list "
+                    f"(name the registries you walked)"
+                )
+
+        # Rule 8 — applicability is all-or-nothing.
+        if applicable is False and status != "not-applicable":
+            v.append(
+                f"{label}: solution_space_applicable=false requires status "
+                f"'not-applicable', found {status!r}"
+            )
+        if applicable is True and status == "not-applicable":
+            v.append(
+                f"{label}: solution_space_applicable=true forbids status "
+                f"'not-applicable' — sweep it, empty it, or waive it with a reason"
+            )
+
+        # Rule 11 — every finding is named, classed, and (if commercial) risk-classed.
+        for fidx, finding in enumerate(findings):
+            if not isinstance(finding, dict):
+                v.append(f"{label}: findings[{fidx}] must be an object")
+                continue
+            name = finding.get("name")
+            flabel = f"{label}/{name}" if nonempty_text(name) else f"{label}/findings[{fidx}]"
+            if not nonempty_text(name):
+                v.append(f"{flabel}: finding name must be a non-empty string")
+            fclass = finding.get("class")
+            if fclass not in FINDING_CLASSES:
+                v.append(
+                    f"{flabel}: class {fclass!r} not in "
+                    f"{{{', '.join(sorted(FINDING_CLASSES))}}}"
+                )
+            risk = finding.get("risk_class")
+            if fclass == "commercial" and risk is None:
+                v.append(
+                    f"{flabel}: class 'commercial' requires a risk_class "
+                    f"({', '.join(sorted(RISK_CLASSES))}) — the account risk is the "
+                    f"decision, not a footnote"
+                )
+            elif risk is not None and risk not in RISK_CLASSES:
+                v.append(f"{flabel}: risk_class {risk!r} not in the closed risk taxonomy")
+
+    for missing in SOLUTION_SPACE_CATEGORIES:
+        if missing not in seen_keys:
+            v.append(f"missing mandatory category {missing!r} (the six are a closed set)")
+
+    # --- declared incompleteness --------------------------------------------
+    # Rule 12 — a refused universal is only honest if it carries its obligation.
+    incompleteness = manifest.get("declared_incompleteness")
+    if not isinstance(incompleteness, list):
+        if incompleteness is not None:
+            v.append("declared_incompleteness must be an array (empty is allowed, absent is not)")
+        incompleteness = []
+    for i, entry in enumerate(incompleteness):
+        if not isinstance(entry, dict):
+            v.append(f"declared_incompleteness[{i}] must be an object")
+            continue
+        if entry.get("kind") not in INCOMPLETENESS_KINDS:
+            v.append(
+                f"declared_incompleteness[{i}]: kind {entry.get('kind')!r} not in "
+                f"{{{', '.join(sorted(INCOMPLETENESS_KINDS))}}}"
+            )
+        for field in ("text", "obligation"):
+            if not nonempty_text(entry.get(field)):
+                v.append(f"declared_incompleteness[{i}]: {field} must be a non-empty string")
+
+    # --- critic --------------------------------------------------------------
+    critic = manifest.get("critic")
+    if critic is not None and not isinstance(critic, dict):
+        v.append("critic must be an object")
+    elif isinstance(critic, dict):
+        # Rule 9 — the critic pass is not optional.
+        if critic.get("ran") is not True:
+            v.append("critic.ran must be true — the adversarial critic pass is not optional")
+        if "model" not in critic:
+            v.append("critic.model is required (null is allowed, absence is not)")
+        critic_findings = critic.get("findings")
+        if not isinstance(critic_findings, list):
+            v.append("critic.findings must be an array (empty is allowed, absent is not)")
+            critic_findings = []
+        for i, finding in enumerate(critic_findings):
+            if not isinstance(finding, dict):
+                v.append(f"critic.findings[{i}] must be an object")
+                continue
+            if not nonempty_text(finding.get("finding")):
+                v.append(f"critic.findings[{i}]: finding must be a non-empty string")
+            if finding.get("resolution") not in CRITIC_RESOLUTIONS:
+                v.append(
+                    f"critic.findings[{i}]: resolution {finding.get('resolution')!r} not in "
+                    f"{{{', '.join(sorted(CRITIC_RESOLUTIONS))}}}"
+                )
+        # Rule 10 — a waiver nobody reviewed is a hole with a note on it.
+        if waived_categories and critic.get("waivers_reviewed") is not True:
+            v.append(
+                f"critic.waivers_reviewed must be true when a category is waived "
+                f"({', '.join(waived_categories)})"
+            )
+
+    ok = not v
+    print(json.dumps({
+        "verdict": "PASS" if ok else "FAIL",
+        "violations": v,
+        "summary": {
+            "applicable": applicable,
+            "status_counts": dict(sorted(status_counts.items())),
+            "findings": findings_total,
+            "declared_incompleteness": len(incompleteness),
+            "waived": len(waived_categories),
+        },
+    }, indent=2, default=str))
+    return 0 if ok else 1
+
+
 def check_report_hash(args: argparse.Namespace) -> int:
     report = Path(args.report)
     skill = Path(args.skill)
@@ -394,6 +706,13 @@ def main() -> int:
     p_art.add_argument("--amplification-window", type=int, default=72,
                        help="hours within which clustered social posts are amplification-suspect")
     p_art.set_defaults(func=check_artifacts)
+
+    p_space = sub.add_parser(
+        "check-solution-space",
+        help="validate a research-solution-space.json sweep manifest",
+    )
+    p_space.add_argument("--manifest", default="research-solution-space.json")
+    p_space.set_defaults(func=check_solution_space)
 
     p_hash = sub.add_parser("check-report-hash", help="verify CWD report SHA-256 vs SKILL.md line 8")
     p_hash.add_argument("--report", default="deep-research-report.md")

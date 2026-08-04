@@ -65,7 +65,7 @@ When only an abstract is retrievable for a paywalled paper, the `research-eviden
 Two sources that both cite a third source are not "independent". Before counting corroboration, check that supporting sources are not derivative (e.g., three news articles all quoting the same press release count as one source, not three). Derivative chains are logged in `notes` and counted once.
 
 ### B11. Over-eager emit
-Do not write the report or JSON artifacts before Phase 6 completes. No streaming, no intermediate "here's what I have so far" dumps in the chat. `research-plan.md` is the sole exception — it is written in Phase 0 (artifact #1). The user sees the Phase-0 plan (written to disk, no approval step) and the final three artifacts (at the end).
+Do not write the report or JSON artifacts before Phase 6 completes. No streaming, no intermediate "here's what I have so far" dumps in the chat. `research-plan.md` is the sole exception — it is written in Phase 0 (artifact #1). The user sees the Phase-0 plan (written to disk, no approval step) and the final four artifacts (at the end).
 
 ### B12. Out-of-scope sprawl
 The skill answers the user's research question. It does **not**:
@@ -81,6 +81,18 @@ N near-identical posts across accounts clustered in time count as **one** source
 grader must record an `independence-verified` determination or the claim's
 corroboration is rejected. Cheap-to-fabricate social consensus never lifts a
 claim's credibility on volume alone.
+
+### B14. Problem-vocabulary-only sweep
+Querying the solution space with the words of the presumed chain finds only that chain. "YouTube Watch Later export", "Instagram saved posts scraper" retrieve the tools that already named themselves after the problem — and miss every vendor that named itself after the *capability*. Sweep in **capability-class vocabulary**: unified messaging API, social-inbox aggregator, session-delegation provider, managed public-data API, MCP server for <platform>. The problem's own words are one query among many, never the whole sweep (AI-355).
+
+### B15. Gate-stops-enumeration
+A NO-GO access verdict on a class is a verdict about *one path through* the class, never a licence to stop enumerating it. "Cookies are excluded" does not close the credentialed category; "the official API does not expose it" does not close the platform category. The gated class still owes its complete menu, each option graded by risk class, so the reader can see what was ruled out and on what ground. A category recorded `waived` because a gate fired upstream is a hole with a justification stapled to it (AI-355).
+
+### B16. Caveat-without-obligation
+Declaring an inventory non-exhaustive — or having a judge refuse a universal you asserted ("no tool does X", "X is the only option") — and then continuing as if the claim held is laundering. Every such event becomes a `declared_incompleteness` entry in `research-solution-space.json` (`kind`: `non-exhaustive-inventory` or `refused-universal`) carrying an explicit `obligation`, and that obligation is quoted at the **top** of `research-report.md`. A caveat that lives only in the manifest, a footnote, or the Methodology note has not been surfaced (AI-355).
+
+### B17. Empty-without-control
+Recording a category as `empty` on the strength of queries that returned nothing proves nothing: a broken instrument and an empty universe return the same result. A category is `empty` only with a **control query** whose expected hit is a known-present item and which actually found it (`control.found: true`). Without that proof the honest status is `degraded` — the sweep is unverified, and the gate enforces the distinction (AI-355).
 
 ## C. Chat-output anti-patterns
 

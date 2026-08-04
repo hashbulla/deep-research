@@ -90,6 +90,29 @@ else (only Tier 3/4 support, or zero supporting):               → 6 UNVERIFIED
 
 **Routing:** claims with labels 4, 5, 6 **must** be in the "Needs Verification" section. Claims with labels 1, 2, 3 may appear in the main body; labels 2 and 3 carry their Admiralty tag inline and never appear in the executive summary (CONFIRMED only).
 
+## Solution-space gates
+
+Applied at Phase 6 to `research-solution-space.json`, on top of the JSON-Schema validation (`tests/schema/research-solution-space.schema.json`). The schema fixes the shape; these rules fix the *discipline* — a shape-valid manifest that skipped the work still fails. Doctrine (category taxonomy, status semantics, critic contract) is authoritative in `references/solution-space.md`; the "Enforced by" column below mirrors its §"Deterministic gate" split — **write to the gate, not to the schema**, which is permissive where the gate is strict.
+
+Command: `python3 scripts/verify_gates.py check-solution-space --manifest research-solution-space.json`.
+
+| Rule | Condition | Enforced by | Action on failure |
+|---|---|---|---|
+| Reason on every non-swept status | `status` ∈ {`waived`, `not-applicable`, `degraded`} ⇒ non-empty `reason` | gate | FAIL — a bare status is an unexplained hole |
+| Swept means evidence | `status` = `swept` ⇒ non-empty `queries` **and** non-empty `findings` (own-stack grep terms count as queries) | gate | FAIL — "swept, found nothing" is `empty`, not `swept` |
+| Empty means proven-empty | `status` = `empty` ⇒ non-empty `queries` **and** `control.found` = `true` | gate | FAIL — an unproven instrument yields `degraded`, not `empty` (anti-pattern B17) |
+| Geometry consistency (NA) | `solution_space_applicable` = `false` ⇒ **all 6** categories `not-applicable` | gate | FAIL — a partial NA is a silently skipped category |
+| Geometry consistency (applicable) | `solution_space_applicable` = `true` ⇒ **no** category `not-applicable` (an unswept category is `waived` with a reason) | gate | FAIL |
+| Critic ran | `critic.ran` = `true` on every run | gate | FAIL — the completeness critic is not optional; an unavailable `Agent` tool records `ran: false` + `skip_reason` and FAILs by design |
+| Waivers countersigned | Any category `waived` ⇒ `critic.waivers_reviewed` = `true` | gate | FAIL — a self-granted waiver is not a waiver |
+| Registries named | `mcp-registries` with `status` = `swept` ⇒ non-empty `registries` | doctrine (emitter self-check) | Fix before write — "I searched for MCP servers" is not a registry sweep |
+| Commercial findings risk-graded | Every finding with `class` = `commercial` ⇒ non-null `risk_class` | doctrine (emitter self-check) | Fix before write — an ungraded vendor cannot be compared |
+| Closed-set coverage | The 6 category keys each appear **exactly once** | `check-solution-space` (duplicate-key violation) AND the schema (six `contains` clauses + `maxItems: 6`) | Violation — duplicate or missing category key |
+
+**Iteration bound.** Bounded to **one critic re-sweep and one waiver re-waive per run** (`references/anti-patterns.md` B15 forbids stopping the enumeration early, not re-sweeping forever). After that, a still-failing manifest is a **persistent FAIL**: the run still delivers all five artifacts and the Artifact page, the FAIL verdict becomes line 1 of `research-report.md` and of the Artifact, and the report may not claim SOTA, "complete", or "no alternative exists".
+
+**Cost bound.** The sweep adds roughly **+15–25 %** to a mapped run's retrieval budget (4–6 / 6–12 / 12–20 additional Tavily calls by `--length`, plus one zero-network stack grep). The completeness critic costs about **60k tokens on every run**, applicable geometry or not — it is a fixed, non-optional line item, not a conditional one.
+
 ## Stop conditions (successful completion)
 
 All of:

@@ -25,7 +25,7 @@ jobs:
         run: bash tests/check-provenance.sh
 
       - name: Check JSON artifact schemas
-        run: bash tests/check-schema.sh tests/fixtures/research-sources.json tests/fixtures/research-evidence.json tests/fixtures/osint/socmint-source.json
+        run: bash tests/check-schema.sh tests/fixtures/research-sources.json tests/fixtures/research-evidence.json tests/fixtures/osint/socmint-source.json tests/fixtures/solution-space/valid.json examples/eu-ai-act-2026/research-solution-space.json
 
       - name: Check example cross-file invariants (cascade, routing, counts)
         run: bash tests/check-example-invariants.sh
@@ -42,8 +42,14 @@ jobs:
       - name: Run deterministic gates on the example (harness layer 1)
         run: python3 scripts/verify_gates.py check-artifacts --sources examples/eu-ai-act-2026/research-sources.json --evidence examples/eu-ai-act-2026/research-evidence.json --length short
 
+      - name: Run the solution-space gate on the example manifest (harness layer 1)
+        run: python3 scripts/verify_gates.py check-solution-space --manifest examples/eu-ai-act-2026/research-solution-space.json
+
       - name: OSINT/SOCMINT gates
         run: bash tests/check-osint-gates.sh
+
+      - name: Solution-space gates
+        run: bash tests/check-solution-space.sh
 
       - name: Run LLM judge layers (harness layers 2+, maintainer secret only — skips gracefully)
         env:

@@ -22,6 +22,14 @@
       "type": "array",
       "minItems": 6,
       "maxItems": 6,
+      "allOf": [
+        { "contains": { "type": "object", "required": ["key"], "properties": { "key": { "const": "platform-official-api" } } } },
+        { "contains": { "type": "object", "required": ["key"], "properties": { "key": { "const": "own-stack" } } } },
+        { "contains": { "type": "object", "required": ["key"], "properties": { "key": { "const": "open-source" } } } },
+        { "contains": { "type": "object", "required": ["key"], "properties": { "key": { "const": "mcp-registries" } } } },
+        { "contains": { "type": "object", "required": ["key"], "properties": { "key": { "const": "commercial-vendors" } } } },
+        { "contains": { "type": "object", "required": ["key"], "properties": { "key": { "const": "substitution-channels" } } } }
+      ],
       "items": {
         "type": "object",
         "required": ["key", "status", "reason", "date"],
