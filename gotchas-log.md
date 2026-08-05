@@ -14,6 +14,15 @@
 
 ---
 
+## 2026-08-05 — A hardened gate leaks into every sibling fixture's unmutated substrate, and presence-only grep cannot see it
+
+- **Trigger:** harness run #4 (PASS 7.61) measured with adversarial probes that Rule 7b enforced ≥1 GitHub-native query where its own doctrine mandates ≥3 topic combinations (a star-band-only manifest PASSed). Implementing the fix exposed a second, older defect: the eleven pre-existing mutation fixtures all carried the **pre-commit prose queries** in their `open-source` substrate, so Rule 7b had been firing a **parasite violation** on every one of them since `11a0439` — invisibly, because `check-solution-space.sh` greps for the expected needle only and never asserts the absence of others.
+- **Gotcha:** two traps, one mechanism. (1) A gate that verifies a *shape* regresses to what its regex matches, not what its doctrine states — each mechanization step (doctrine → rule → regex → fixture) loses constraint, and only a probe against the gate itself measures the loss. (2) Mutation fixtures inherit the golden's substrate at creation time; when the gate hardens later, the substrate of every older fixture becomes retroactively non-conformant, and the "fires ITS OWN violation" claim silently voids. A presence-only assertion cannot distinguish "fires its violation" from "fires its violation *plus* a parasite".
+- **Resolution (2026-08-05, post-run-#4 fix session, W1-W3 adjudicated fix-now):** Rule 7b gains a second tier — ≥3 **distinct** `topic:` combinations (distinct facet-sets across queries) when ≥1 native query exists; new `GITHUB_TOPIC_FACET` parses **both** runnable syntaxes (`topic:slug` and `--topic slug` — the CLI form was invisible to the original regex). Golden `valid.json` now carries 3 distinct combinations. The eleven fixtures' `open-source` substrate realigned to the corrected golden (an edit of *unmutated* substrate: it removes parasite failures, makes nothing pass that should fail — the eval-laundering rule protects prompts and expectations, not stale shared scaffolding). References aligned: `solution-space.md` query-vocabulary row + Instrument cell, `anti-patterns.md` B14.
+- **Guard:** new fixture #13 `probe-starband-only.json` (GitHub-native but zero topic facets — must fire the tier-2 violation and nothing else), plus a **purity guard** loop in `check-solution-space.sh`: the Rule 7b violation strings must appear in no fixture other than the two that target them. This turns `e2e-15` mechanical check 2 (≥3 distinct topic combinations) into an *executed* CI assertion instead of an aspirational one. Residual, still open: Rule 7b validates query *shape*, not that GitHub was actually queried (`e2e-15` check 3, live-run only — see CHANGELOG Known limitations).
+
+---
+
 ## 2026-08-05 — "OSS swept" was checkable only as a word, so it was true only as a word
 
 - **Trigger:** Victor pointed at `Panniantong/Agent-Reach` (66,684 ★, tagged `claude-code`) after a hand-run web-interaction benchmark whose coverage manifest read `open-source: swept`. The repo was absent from the benchmark entirely.

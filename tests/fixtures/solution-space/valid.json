@@ -65,6 +65,7 @@
       "queries": [
         "gh search repos --topic instagram-api --topic python --sort stars",
         "api.github.com/search/repositories?q=topic:instagram+stars:>200&sort=stars",
+        "gh search repos --topic instagram --topic messaging --sort stars",
         "instagram private API python client direct messages"
       ],
       "findings": [

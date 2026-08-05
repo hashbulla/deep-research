@@ -63,8 +63,10 @@
       "reason": "Self-hosted clients enumerated to price the build-vs-buy floor.",
       "date": "2026-08-04",
       "queries": [
-        "instagram private API python client direct messages",
-        "github instagram dm library maintained 2026"
+        "gh search repos --topic instagram-api --topic python --sort stars",
+        "api.github.com/search/repositories?q=topic:instagram+stars:>200&sort=stars",
+        "gh search repos --topic instagram --topic messaging --sort stars",
+        "instagram private API python client direct messages"
       ],
       "findings": [
         {

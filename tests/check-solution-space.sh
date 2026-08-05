@@ -3,9 +3,14 @@
 # Drives the solution-space layer of the deterministic gates:
 #
 #   1. verify_gates.py check-solution-space over tests/fixtures/solution-space/
-#      — one golden manifest plus twelve single-mutation violation fixtures,
+#      — one golden manifest plus thirteen single-mutation violation fixtures,
 #      each asserted to fire ITS OWN violation (not merely "some" failure: a
 #      gate that fails everything is worth as little as one that fails nothing).
+#      Purity guard: the Rule 7b violation strings must appear ONLY in the two
+#      fixtures that target them — a hardened gate must not leak into the other
+#      fixtures' unmutated substrate (measured 2026-08-05: eleven fixtures
+#      carried a parasite Rule 7b violation invisibly, because this loop greps
+#      for the expected needle only).
 #   2. stack_inventory.py over the frozen SOTA-recall corpus
 #      (evals/fixtures/sota-recall/) — the deterministic half of the recall
 #      regression: the own-stack sweep must surface the unified-messaging
@@ -78,7 +83,24 @@ waived-unreviewed|critic.waivers_reviewed must be true when a category is waived
 commercial-no-riskclass|commercial-vendors/HikerAPI: class 'commercial' requires a risk_class
 registries-missing|mcp-registries: status 'empty' requires a non-empty registries list
 oss-prose-only|open-source: status 'swept' requires >=1 GitHub-native query
+probe-starband-only|open-source: status 'swept' requires >=3 distinct 'topic:' combinations
 EOF
+
+# 2b. Purity guard — Rule 7b strings leak into no other fixture ----------------
+# A mutation fixture proves one violation; a parasite violation from the shared
+# unmutated substrate silently voids the "fires ITS OWN violation" claim.
+for j in "$F"/*.json; do
+  name="$(basename "$j" .json)"
+  case "$name" in valid|oss-prose-only|probe-starband-only) continue;; esac
+  set +e
+  out="$("${GATE[@]}" "$j")"
+  set -e
+  if grep -qE "GitHub-native query|distinct 'topic:' combinations" <<<"$out"; then
+    echo "MISS [purity/$name]: Rule 7b violation leaked into a fixture that does not target it"; fail=1
+  else
+    echo "ok: purity $name (no Rule 7b leak)"
+  fi
+done
 
 # 3. Own-stack sweep over the frozen SOTA-recall corpus -------------------------
 # Recall property (ground-truth.json, case `ig`, item `unipile`): the sweep must

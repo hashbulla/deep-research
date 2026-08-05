@@ -105,6 +105,13 @@ GITHUB_NATIVE_QUERY = re.compile(
     r"(topic:[\w.\-]+|stars:[\s]*[<>=]?[\d.]+|api\.github\.com/search|gh\s+api\b|gh\s+search\b)"
 )
 
+# A topic facet, in either runnable form: the search-qualifier syntax
+# (`topic:slug`, as in api.github.com/search or the web UI) or the gh-CLI
+# flag syntax (`--topic slug` / `--topic=slug`). A "combination" is the sorted
+# set of facet slugs one query carries; the doctrine (github-research.md §2)
+# mandates >=3 distinct combinations, so three copies of one query count once.
+GITHUB_TOPIC_FACET = re.compile(r"(?:\btopic:|--topic[= ])([\w.\-]+)")
+
 
 def cascade(s12: int, s1: int, c: int) -> int:
     """Normative credibility cascade — verbatim from methodology §4.1."""
@@ -558,6 +565,24 @@ def check_solution_space(args: argparse.Namespace) -> int:
                     f"(a 'topic:' facet, a 'stars:' band, or an api.github.com/search "
                     f"call) — prose search is market watch, never an OSS sweep"
                 )
+            else:
+                # Rule 7b, second tier — native is necessary, the topic facet is
+                # the point. A stars: band on a keyword query is keyword search
+                # with a threshold; it keeps the language-dependence the facet
+                # exists to remove (harness run #4, probes A and C: both PASSed
+                # the first tier while carrying zero and one combination).
+                combos = {
+                    tuple(sorted(GITHUB_TOPIC_FACET.findall(q)))
+                    for q in live_queries
+                    if GITHUB_TOPIC_FACET.search(q)
+                }
+                if len(combos) < 3:
+                    v.append(
+                        f"{label}: status {status!r} requires >=3 distinct 'topic:' "
+                        f"combinations across queries ({len(combos)} found) — star "
+                        f"bands alone are keyword search with a threshold, never a "
+                        f"taxonomy sweep"
+                    )
 
         # Rule 8 — applicability is all-or-nothing.
         if applicable is False and status != "not-applicable":

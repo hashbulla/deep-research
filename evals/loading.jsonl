@@ -3,7 +3,7 @@
 {"id": "pos-03", "prompt": "recherche approfondie sur les architectures multi-agents en production", "expect": "load", "boundary": "FR trigger phrase"}
 {"id": "pos-04", "prompt": "analyse multi-sources : RAG vs long-context pour les gros corpus documentaires", "expect": "load", "boundary": "FR multi-source analysis"}
 {"id": "pos-05", "prompt": "comparative analysis of LangGraph vs CrewAI vs AutoGen with sources", "expect": "load", "boundary": "comparative with sources"}
-{"id": "pos-06", "prompt": "benchmark Postgres vs DuckDB for analytics workloads with citations", "expect": "load", "boundary": "benchmark with citations"}
+{"id": "pos-06", "prompt": "benchmark Postgres vs DuckDB for analytics workloads with citations", "expect": "load", "boundary": "rides on the description's 'comparative analysis with sources' semantics — the body-only phrase 'benchmark X against Y with citations' (SKILL.md Trigger list) is NOT a routing surface (SKILL.md:19); harness run #4 measured this row as the single sonnet miss, which is a description-semantics distance, not a fixture defect (boundary amended 2026-08-05, W4 adjudicated; prompt and expectation untouched)"}
 {"id": "pos-07", "prompt": "I need a fully sourced report on EU medical-device AI regulation", "expect": "load", "boundary": "sourced report intent"}
 {"id": "pos-08", "prompt": "deep research: what is the state of the art for entity resolution at scale?", "expect": "load", "boundary": "SOTA survey intent"}
 {"id": "pos-09", "prompt": "fais une recherche approfondie sur l'état de l'art du fine-tuning LoRA", "expect": "load", "boundary": "FR imperative trigger"}
