@@ -32,7 +32,7 @@ Trace which files the skill reads at each pipeline moment. A fixture passes when
 
 Run each invocation live (Tavily MCP required; results vary — only the **mechanical checks** are scored, never the prose quality). Every mechanical check is a deterministic command or transcript predicate.
 
-**Pass bar:** every mechanical check in every fixture. The plan-precedes-retrieval check in `e2e-01` / its successor `e2e-13` (no Tavily call before `research-plan.md` exists) and the `e2e-10` companion (no Tavily call before a triggered AskUserQuestion refinement resolves) are the skill's first non-negotiable (anti-pattern A1); their failure invalidates the entire run regardless of artifact quality. The five-artifact + `check-solution-space` PASS contract is carried by `e2e-11`; the top-of-report obligations header by `e2e-12`.
+**Pass bar:** every mechanical check in every fixture. The plan-precedes-retrieval check in `e2e-01` / its successor `e2e-13` (no Tavily call before `research-plan.md` exists) and the `e2e-10` companion (no Tavily call before a triggered AskUserQuestion refinement resolves) are the skill's first non-negotiable (anti-pattern A1); their failure invalidates the entire run regardless of artifact quality. The five-artifact + `check-solution-space` PASS contract is carried by `e2e-11`; the top-of-report obligations header by `e2e-12`; the GitHub-native OSS sweep (topic facet before star bands, gate Rule 7b firing on its own mutation) by `e2e-15`.
 
 ## Adding fixtures
 

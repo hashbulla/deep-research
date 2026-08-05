@@ -9,11 +9,22 @@ Activates when a sub-question's intent is *tooling discovery* — "best/SOTA imp
 ## Retrieval pipeline
 
 1. **Preflight.** `gh api /rate_limit` — check `search.remaining` (30 req/min) and `graphql.remaining` (5,000 pts/hr). Under 20% headroom: shrink the shard plan or degrade to Tavily.
-2. **Shard by star bands.** GitHub search silently caps at 1,000 results per query (REST and GraphQL). Shard: `stars:>5000`, `stars:1000..5000`, `stars:200..1000` (+ date windows `created:>YYYY-MM-DD` if a band still saturates), then merge and dedupe by `full_name`.
-3. **Enrich via GraphQL in one round-trip per shard** — `gh api graphql` with a search query returning `stargazerCount`, `pushedAt`, `createdAt`, `forkCount`, `issues(states:OPEN){totalCount}`, `releases{totalCount}`, `primaryLanguage`, `mentionableUsers{totalCount}` (contributors proxy). `gh` handles auth and pagination.
-4. **Dependents via ecosyste.ms** (free, outside the GitHub quota): `curl -s -A "deep-research-skill (<maintainer email>)" "https://repos.ecosyste.ms/api/v1/repositories/lookup?url=https://github.com/<owner>/<repo>"` → `dependents_count`. Polite tier = 15k req/hr WITH the email in the User-Agent — never omit it. Service down → `dependents: null`, weight renormalized (script handles it).
-5. **Expert-starred signal** (best gaming-resistant prior). A curated `experts.yaml` (per-domain expert GitHub handles) lives **user-scope, outside this public repo** (`~/.claude/deep-research/experts.yaml` — PII/opinions; an anonymous template ships as `experts.yaml.example`). Build the inverted index per domain, cached (expert stars change slowly — refresh quarterly per gotchas-log cadence): `gh api "users/<handle>/starred" --paginate --jq '.[].full_name'` → `{repo: [experts...]}` JSON. Absent file → signal skipped, weights renormalized.
-6. **Write the candidate JSON** (one row per repo: `full_name, stars, pushed_at, created_at, forks, open_issues, releases_count, contributors_count, dependents_count, expert_stars, star_history_flags`) and score it:
+2. **Sweep the `topic:` facet FIRST, before any keyword query.** Your keywords encode your hypothesis; topics do not. They are an author-assigned, language-independent controlled vocabulary — the one axis that surfaces a repo whose README is in a language you did not search in. Derive **≥3 topic combinations from the capability classes** (not from the problem's own words), each sorted by stars:
+
+   ```bash
+   gh search repos --topic claude-code --topic web-scraper --sort stars --limit 20
+   gh api "search/repositories?q=topic:mcp+topic:browser-automation&sort=stars&order=desc"
+   ```
+
+   Record the exact queries in `research-solution-space.json` → `categories[key=open-source].queries`. **The gate rejects a `swept` open-source category with no GitHub-native query** (`verify_gates.py` Rule 7b) — `site:github.com` through a web search engine does not count: that is prose retrieval wearing a GitHub costume.
+
+   > Measured 2026-08-05 — a hand-run benchmark declared open-source *swept* on Tavily prose alone and missed 8 repos worth ~200k stars. The top one, `Panniantong/Agent-Reach` (66,684 ★, Chinese-first README, tagged `claude-code`), is the **first hit of 11** on `topic:claude-code+topic:web-scraper&sort=stars`. Prose surfaces comparison blogs — written by vendors comparing vendors — and is blind to a category whose vendors do not blog. Fixture: `evals/fixtures/sota-recall/` case `wi`.
+
+3. **Shard by star bands.** GitHub search silently caps at 1,000 results per query (REST and GraphQL). Shard: `stars:>5000`, `stars:1000..5000`, `stars:200..1000` (+ date windows `created:>YYYY-MM-DD` if a band still saturates), then merge and dedupe by `full_name`.
+4. **Enrich via GraphQL in one round-trip per shard** — `gh api graphql` with a search query returning `stargazerCount`, `pushedAt`, `createdAt`, `forkCount`, `issues(states:OPEN){totalCount}`, `releases{totalCount}`, `primaryLanguage`, `mentionableUsers{totalCount}` (contributors proxy). `gh` handles auth and pagination.
+5. **Dependents via ecosyste.ms** (free, outside the GitHub quota): `curl -s -A "deep-research-skill (<maintainer email>)" "https://repos.ecosyste.ms/api/v1/repositories/lookup?url=https://github.com/<owner>/<repo>"` → `dependents_count`. Polite tier = 15k req/hr WITH the email in the User-Agent — never omit it. Service down → `dependents: null`, weight renormalized (script handles it).
+6. **Expert-starred signal** (best gaming-resistant prior). A curated `experts.yaml` (per-domain expert GitHub handles) lives **user-scope, outside this public repo** (`~/.claude/deep-research/experts.yaml` — PII/opinions; an anonymous template ships as `experts.yaml.example`). Build the inverted index per domain, cached (expert stars change slowly — refresh quarterly per gotchas-log cadence): `gh api "users/<handle>/starred" --paginate --jq '.[].full_name'` → `{repo: [experts...]}` JSON. Absent file → signal skipped, weights renormalized.
+7. **Write the candidate JSON** (one row per repo: `full_name, stars, pushed_at, created_at, forks, open_issues, releases_count, contributors_count, dependents_count, expert_stars, star_history_flags`) and score it:
 
    ```bash
    python3 <skill-dir>/scripts/github_rank.py candidates.json --experts-index experts-index.json

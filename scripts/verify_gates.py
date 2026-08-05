@@ -98,6 +98,13 @@ CRITIC_RESOLUTIONS = {"swept", "waived", "rejected"}
 INCOMPLETENESS_KINDS = {"refused-universal", "non-exhaustive-inventory"}
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
+# A GitHub-native query: a topic facet, a star band, or a direct search call.
+# Deliberately narrow — `site:github.com` through a web search engine does NOT
+# match, because that is prose retrieval wearing a GitHub costume (Rule 7b).
+GITHUB_NATIVE_QUERY = re.compile(
+    r"(topic:[\w.\-]+|stars:[\s]*[<>=]?[\d.]+|api\.github\.com/search|gh\s+api\b|gh\s+search\b)"
+)
+
 
 def cascade(s12: int, s1: int, c: int) -> int:
     """Normative credibility cascade — verbatim from methodology §4.1."""
@@ -533,6 +540,23 @@ def check_solution_space(args: argparse.Namespace) -> int:
                 v.append(
                     f"{label}: status {status!r} requires a non-empty registries list "
                     f"(name the registries you walked)"
+                )
+
+        # Rule 7b — an OSS sweep ran on GitHub, not on prose about GitHub.
+        # Measured 2026-08-05: a hand-run benchmark declared open-source 'swept'
+        # on the strength of Tavily prose queries alone and missed 8 repos worth
+        # ~200k stars, the top one at 66,684 (Agent-Reach) — first hit of the
+        # topic query that was never run. Prose surfaces comparison blogs, which
+        # vendors write about vendors; it cannot see a repo whose README is in
+        # another language. Topics are an author-assigned, language-independent
+        # controlled vocabulary — the one axis immune to "my words encode my
+        # hypothesis". So: at least one query must be GitHub-native.
+        if key == "open-source" and status in {"swept", "empty"}:
+            if not any(GITHUB_NATIVE_QUERY.search(q) for q in live_queries):
+                v.append(
+                    f"{label}: status {status!r} requires >=1 GitHub-native query "
+                    f"(a 'topic:' facet, a 'stars:' band, or an api.github.com/search "
+                    f"call) — prose search is market watch, never an OSS sweep"
                 )
 
         # Rule 8 — applicability is all-or-nothing.

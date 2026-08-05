@@ -1,5 +1,5 @@
 {
-  "frozen": "2026-08-04",
+  "frozen": "2026-08-05",
   "perishability": "SOTA ground truth decays. Re-validate each item's `validated` date before treating a miss as a pipeline failure when replaying >6 months after `frozen`.",
   "cases": [
     {
@@ -47,6 +47,30 @@
           "accept_when": "the commercial-vendors category enumerates a session-delegation class with at least one named representative, graded by account risk — even under a credentialed NO-GO gate (a gate is a reason to enumerate better, never to stop enumerating)",
           "validated": "2026-08-01",
           "miss_root_cause": "a credentialed NO-GO gate stopped enumeration of the gated class; sub-classes with very different risk profiles were never separated"
+        }
+      ]
+    },
+    {
+      "id": "wi",
+      "brief": "wi-brief.md",
+      "items": [
+        {
+          "id": "agent-reach",
+          "name": "Panniantong/Agent-Reach (agent internet-capability layer)",
+          "expected_category": "open-source",
+          "expected_mechanism": "GitHub-native topic-facet sweep sorted by stars (gh search repos --topic / api.github.com/search?q=topic:...&sort=stars), NOT prose search",
+          "accept_when": "the open-source sweep surfaces a capability layer that routes per platform through an ordered preferred-then-fallback backend list with real probing — reached via a topic query, and the manifest's open-source queries carry at least one GitHub-native query",
+          "validated": "2026-08-05",
+          "miss_root_cause": "open-source declared 'swept' on prose queries alone; no GitHub-native query ever ran. Amplified by language (Chinese-first README, invisible to EN/FR prose) and by category vocabulary ('capability layer', 'internet reach' were not the searcher's words)"
+        },
+        {
+          "id": "opencli",
+          "name": "jackwener/OpenCLI (logged-in-browser control surface)",
+          "expected_category": "open-source",
+          "expected_mechanism": "GitHub-native topic-facet sweep sorted by stars (topic:browser-use and neighbours)",
+          "accept_when": "the open-source sweep surfaces a tool that drives the user's already-logged-in Chrome (navigate, click, type, extract) and ships an agent-side skill — the leading implementation of the session-reuse class",
+          "validated": "2026-08-05",
+          "miss_root_cause": "the run named the session-reuse class as strongest for authenticated portals, then populated it from market-comparison blogs — a class absent from those blogs by construction, since its vendors do not blog"
         }
       ]
     }

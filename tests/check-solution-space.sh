@@ -3,7 +3,7 @@
 # Drives the solution-space layer of the deterministic gates:
 #
 #   1. verify_gates.py check-solution-space over tests/fixtures/solution-space/
-#      — one golden manifest plus eleven single-mutation violation fixtures,
+#      — one golden manifest plus twelve single-mutation violation fixtures,
 #      each asserted to fire ITS OWN violation (not merely "some" failure: a
 #      gate that fails everything is worth as little as one that fails nothing).
 #   2. stack_inventory.py over the frozen SOTA-recall corpus
@@ -77,6 +77,7 @@ no-critic|critic.ran must be true
 waived-unreviewed|critic.waivers_reviewed must be true when a category is waived
 commercial-no-riskclass|commercial-vendors/HikerAPI: class 'commercial' requires a risk_class
 registries-missing|mcp-registries: status 'empty' requires a non-empty registries list
+oss-prose-only|open-source: status 'swept' requires >=1 GitHub-native query
 EOF
 
 # 3. Own-stack sweep over the frozen SOTA-recall corpus -------------------------
