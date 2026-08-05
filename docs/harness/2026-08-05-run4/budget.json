@@ -1,0 +1,199 @@
+{
+  "skill": "/home/ouroz/.cache/dr-worktrees/github-topic-facet",
+  "name": "deep-research",
+  "tiers": {
+    "index": {
+      "tokens": 171,
+      "soft": 100,
+      "hard": 320
+    },
+    "load": {
+      "tokens": 7199,
+      "soft": 5000,
+      "hard": 7500
+    },
+    "files": {
+      "total_tokens": 85934,
+      "files": [
+        {
+          "path": "scripts/__pycache__/verify_gates.cpython-38.pyc",
+          "tokens": 15129
+        },
+        {
+          "path": "scripts/verify_gates.py",
+          "tokens": 7709
+        },
+        {
+          "path": "references/methodology.md",
+          "tokens": 7440
+        },
+        {
+          "path": "scripts/__pycache__/github_rank.cpython-38.pyc",
+          "tokens": 4786
+        },
+        {
+          "path": "references/solution-space.md",
+          "tokens": 4434
+        },
+        {
+          "path": "references/report-structure.md",
+          "tokens": 3406
+        },
+        {
+          "path": "evals/e2e.jsonl",
+          "tokens": 3335
+        },
+        {
+          "path": "references/quality-gate.md",
+          "tokens": 3134
+        },
+        {
+          "path": "references/anti-patterns.md",
+          "tokens": 2818
+        },
+        {
+          "path": "scripts/newsletter_search.py",
+          "tokens": 2626
+        },
+        {
+          "path": "references/research-plan-template.md",
+          "tokens": 2060
+        },
+        {
+          "path": "scripts/academic_graph.py",
+          "tokens": 2003
+        },
+        {
+          "path": "references/tool-routing.md",
+          "tokens": 1818
+        },
+        {
+          "path": "references/github-research.md",
+          "tokens": 1808
+        },
+        {
+          "path": "scripts/github_rank.py",
+          "tokens": 1753
+        },
+        {
+          "path": "evals/loading.jsonl",
+          "tokens": 1623
+        },
+        {
+          "path": "scripts/stack_inventory.py",
+          "tokens": 1509
+        },
+        {
+          "path": "references/newsletter-signal.md",
+          "tokens": 1492
+        },
+        {
+          "path": "references/examples.md",
+          "tokens": 1481
+        },
+        {
+          "path": "references/academic-research.md",
+          "tokens": 1231
+        },
+        {
+          "path": "evals/fixtures/sota-recall/ground-truth.json",
+          "tokens": 1195
+        },
+        {
+          "path": "references/model-tiers.md",
+          "tokens": 1192
+        },
+        {
+          "path": "references/flags.md",
+          "tokens": 1168
+        },
+        {
+          "path": "references/provenance.md",
+          "tokens": 1162
+        },
+        {
+          "path": "evals/progressive.jsonl",
+          "tokens": 1089
+        },
+        {
+          "path": "evals/rubric.md",
+          "tokens": 1087
+        },
+        {
+          "path": "scripts/eval_harness/run_ci_judges.sh",
+          "tokens": 1042
+        },
+        {
+          "path": "references/edge-cases.md",
+          "tokens": 1007
+        },
+        {
+          "path": "scripts/eval_harness/README.md",
+          "tokens": 831
+        },
+        {
+          "path": "references/osint-retrieval.md",
+          "tokens": 741
+        },
+        {
+          "path": "evals/fixtures/sota-recall/README.md",
+          "tokens": 649
+        },
+        {
+          "path": "evals/sycophancy-probes.jsonl",
+          "tokens": 472
+        },
+        {
+          "path": "evals/fixtures/sota-recall/wi-brief.md",
+          "tokens": 419
+        },
+        {
+          "path": "evals/fixtures/sota-recall/ig-brief.md",
+          "tokens": 397
+        },
+        {
+          "path": "evals/benchmark-testset.jsonl",
+          "tokens": 393
+        },
+        {
+          "path": "scripts/eval_harness/judge_prompts/entailment.md",
+          "tokens": 298
+        },
+        {
+          "path": "evals/fixtures/sota-recall/yt-brief.md",
+          "tokens": 292
+        },
+        {
+          "path": "scripts/eval_harness/judge_prompts/adversarial.md",
+          "tokens": 281
+        },
+        {
+          "path": "scripts/eval_harness/judge_prompts/completeness.md",
+          "tokens": 220
+        },
+        {
+          "path": "evals/fixtures/sota-recall/stack-corpus/unipile-playbook.md",
+          "tokens": 190
+        },
+        {
+          "path": "evals/fixtures/sota-recall/stack-corpus/scrapling-note.md",
+          "tokens": 138
+        },
+        {
+          "path": "evals/fixtures/sota-recall/stack-paths.fixture.json",
+          "tokens": 76
+        }
+      ]
+    }
+  },
+  "verdicts": [
+    {
+      "level": "WARNING",
+      "msg": "index tier 171 > 100 (target)"
+    },
+    {
+      "level": "WARNING",
+      "msg": "load tier 7199 > 5000 (target)"
+    }
+  ]
+}

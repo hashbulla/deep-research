@@ -1,0 +1,29 @@
+[
+  {
+    "level": "WARNING",
+    "check": 16,
+    "rule": "examples concreteness",
+    "file": "/home/ouroz/.cache/dr-worktrees/github-topic-facet/SKILL.md",
+    "line": 185,
+    "finding": "found 0 **Input:** and 0 **Output:** blocks (need \u22652 of each)",
+    "remediation": "Add concrete Input/Output examples (\u22652)."
+  },
+  {
+    "level": "WARNING",
+    "check": 17,
+    "rule": "forbidden_names.txt",
+    "file": "/home/ouroz/.cache/dr-worktrees/github-topic-facet/SKILL.md",
+    "line": 2,
+    "finding": "name 'deep-research' matches forbidden substring(s): ['deep-research']",
+    "remediation": "Choose a different name OR remove the entry from scripts/forbidden_names.txt."
+  },
+  {
+    "level": "WARNING",
+    "check": 18,
+    "rule": "cross-platform compliance",
+    "file": "/home/ouroz/.cache/dr-worktrees/github-topic-facet/SKILL.md",
+    "line": 53,
+    "finding": "~/.claude/ path is Claude Code-specific (no compatibility: declaration)",
+    "remediation": "Add 'compatibility: Targets Claude Code...' OR rewrite to be cross-platform."
+  }
+]

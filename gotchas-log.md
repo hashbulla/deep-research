@@ -14,6 +14,15 @@
 
 ---
 
+## 2026-08-05 — W5 ablation: the FR trigger is not what carries the FR positives — and removing it correlated with release-blocker negative leaks
+
+- **Trigger:** harness run #4 DIM-7-01 (WARNING, contested): `"deep research on X"` / `"recherche approfondie sur X"` graded as an FR/EN duplication slip; the Grounder surfaced contradicting evidence both ways; adjudication = measure before editing.
+- **Gotcha:** both prior camps argued about the wrong cell. Ablation run (variant description without the FR form, full loading suite, opus/sonnet/haiku, 90 cells, cache-cold): **pos-03/09/15 held 9/9** — the semantic router resolves FR phrasing without the FR trigger, so "a francophone operator needs it" is unsupported *for the positives*. But the variant flipped **3 negative cells to leaks**: `neg-08`≡`neg-15` (the rubric's release-blocker boundary!) leaked on sonnet (`none`→`deep-research`) and haiku (NO_VERDICT→leak), `neg-12` leaked on haiku. At **n=1 per cell** this does not separate causation from router variance (the same boundary prompt was already unstable in baseline: haiku NO_VERDICT ×2) — but a variant that measures below the target's own negative bar cannot be read as "holds".
+- **Resolution:** FR form **kept**, decision made on data per the adjudication ("casse → conservation consignée"). Run results: baseline 44/45 + 2 NOV; ablation 42/45 + 0 NOV (all three new failures are negative leaks). Evidence: `docs/harness/2026-08-05-run4/ablation_matrix.json`.
+- **Guard:** none — accepted risk, with a named condition: re-open only with an n≥3-per-cell ablation (single-run routing measurements lie; cf. the open n≥3 harness debt). DIM-7-01 is closed as a **measured non-edit**, not as a validated slip.
+
+---
+
 ## 2026-08-05 — A hardened gate leaks into every sibling fixture's unmutated substrate, and presence-only grep cannot see it
 
 - **Trigger:** harness run #4 (PASS 7.61) measured with adversarial probes that Rule 7b enforced ≥1 GitHub-native query where its own doctrine mandates ≥3 topic combinations (a star-band-only manifest PASSed). Implementing the fix exposed a second, older defect: the eleven pre-existing mutation fixtures all carried the **pre-commit prose queries** in their `open-source` substrate, so Rule 7b had been firing a **parasite violation** on every one of them since `11a0439` — invisibly, because `check-solution-space.sh` greps for the expected needle only and never asserts the absence of others.

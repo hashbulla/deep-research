@@ -1,0 +1,162 @@
+{
+  "target": "deep-research",
+  "threshold": 0.4,
+  "critical": [],
+  "all_findings": [
+    {
+      "peer_name": "skill-generator",
+      "peer_path": "/home/ouroz/.claude/skills/skill-generator/SKILL.md",
+      "jaccard": 0.019,
+      "overlap_trigrams": [
+        "do not load",
+        "load when the",
+        "not load for",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "prototype",
+      "peer_path": "/home/ouroz/.claude/skills/prototype/SKILL.md",
+      "jaccard": 0.015,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "codebase-design",
+      "peer_path": "/home/ouroz/.claude/skills/codebase-design/SKILL.md",
+      "jaccard": 0.014,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "domain-modeling",
+      "peer_path": "/home/ouroz/.claude/skills/domain-modeling/SKILL.md",
+      "jaccard": 0.012,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "skill-harness",
+      "peer_path": "/home/ouroz/.claude/skills/skill-harness/SKILL.md",
+      "jaccard": 0.011,
+      "overlap_trigrams": [
+        "load when the",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "tdd",
+      "peer_path": "/home/ouroz/.claude/skills/tdd/SKILL.md",
+      "jaccard": 0.011,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "grilling",
+      "peer_path": "/home/ouroz/.claude/skills/grilling/SKILL.md",
+      "jaccard": 0.01,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "impeccable",
+      "peer_path": "/home/ouroz/.claude/skills/impeccable/SKILL.md",
+      "jaccard": 0.009,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "wayfinder",
+      "peer_path": "/home/ouroz/.claude/skills/wayfinder/SKILL.md",
+      "jaccard": 0.008,
+      "overlap_trigrams": [
+        "the user wants",
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "diagnosing-bugs",
+      "peer_path": "/home/ouroz/.claude/skills/diagnosing-bugs/SKILL.md",
+      "jaccard": 0.005,
+      "overlap_trigrams": [
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "qualify-leads",
+      "peer_path": "/home/ouroz/.claude/skills/qualify-leads/SKILL.md",
+      "jaccard": 0.005,
+      "overlap_trigrams": [
+        "research deep research"
+      ]
+    },
+    {
+      "peer_name": "critical-harness",
+      "peer_path": "/home/ouroz/.claude/skills/critical-harness/SKILL.md",
+      "jaccard": 0.004,
+      "overlap_trigrams": [
+        "when the user"
+      ]
+    },
+    {
+      "peer_name": "bootstrap-project",
+      "peer_path": "/home/ouroz/.claude/skills/claude-init/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "completion-gate",
+      "peer_path": "/home/ouroz/.claude/skills/completion-gate/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "grill-me",
+      "peer_path": "/home/ouroz/.claude/skills/grill-me/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "grill-with-docs",
+      "peer_path": "/home/ouroz/.claude/skills/grill-with-docs/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "humanize-fr",
+      "peer_path": "/home/ouroz/.claude/skills/humanize-fr/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "linkedin-post",
+      "peer_path": "/home/ouroz/.claude/skills/linkedin-post/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "no-loss",
+      "peer_path": "/home/ouroz/.claude/skills/no-loss/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    },
+    {
+      "peer_name": "proposition-commerciale",
+      "peer_path": "/home/ouroz/.claude/skills/proposition-commerciale/SKILL.md",
+      "jaccard": 0.0,
+      "overlap_trigrams": []
+    }
+  ]
+}
