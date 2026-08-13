@@ -263,6 +263,26 @@ reddit.com, twitter.com, x.com, linkedin.com, medium.com
 
 → Admiralty reliability **D–F**. Never cite as primary. Only admissible as social-signal pointers toward Tier 1/2 sources, in a clearly-labeled "Signals" subsection.
 
+### Software-capability sources — code is primary evidence (2026-08-13)
+
+The Tier 1–4 registry above encodes an **academic / journalistic** epistemology: Tier 1 is peer-reviewed or governmental. Applied unchanged to a *software-capability* question ("what does this tool do, and which tool should I use?"), it inverts the evidence hierarchy — the most primary source that exists for what a program does is **the program**, and the registry has no row for it. A paper *about* a library is more secondary than the library. Measured failure (Excalidraw toolchain run, 2026-08-13): every third-party repository collapsed to Tier 3 regardless of adoption, `source_quality` was suppressed to 0.667, and — the real damage — tools were ranked on README plausibility with **no adoption signal measured at all**, promoting a 97-download/week CLI to "recommended core" while a 477,801-download/week official library sat unremarked.
+
+This path applies **only** when the sub-question is software-capability discovery. It never applies to factual, historical, regulatory, or scientific claims, where the registry above governs unchanged.
+
+**Grade the artifact class, not the domain.** One repository yields sources of three different reliabilities:
+
+| Artifact class | Tier | Rule |
+|---|---|---|
+| **Behaviour you executed, or source you read** | **1** | Primary evidence. You observed it; you are not taking anyone's word. Record `retrieval_tool: "direct_observation"` and describe the verification in `notes`. **Independent of popularity** — a 3-star tool you ran outranks a 40k-star tool you only read about. |
+| Official-org repo metadata and documentation | 2 | Unchanged from the registry above. |
+| Third-party README claim about **its own observable interface**, with adoption **corroborated** | 2 | Corroboration means downloads, dependents, or a healthy fork-to-star ratio — see the adoption rule below. |
+| Third-party README claim, adoption uncorroborated or low | 3 | Self-description, untrusted per A6. |
+| Any README claim about a **third party** (comparison tables, competitor capabilities) | 3, never higher | A vendor comparing vendors. Adoption never lifts this: being widely used makes a project's claims about *itself* more credible, never its claims about *rivals*. |
+
+**The adoption rule — stars alone lift nothing.** Stars measure attention and are gameable; the anti-fake-star divergence gate in `github-research.md` exists for precisely this reason. Corroborated adoption means at least one of: package-registry downloads (`api.npmjs.org/downloads/point/last-week/<pkg>`, PyPI equivalents), `dependents_count` via ecosyste.ms, or a fork-to-star ratio consistent with real use (~5 % or better) rather than a star-farm signature. **A tooling-discovery sub-question that ranks tools without citing an adoption signal is incomplete**, regardless of the tier arithmetic it produces.
+
+**Verification is the cheap upgrade.** When a claim rests on a Tier 3 README and the code is runnable, running it is usually cheaper than finding a second source — and it converts the claim to Tier 1 rather than merely corroborating it to Tier 2. Prefer it.
+
 **Newsletter-signal corpus** (conditional source, `references/newsletter-signal.md`): a private curated digest of the maintainer's work domains. It is a discovery channel that **yields no source record of its own** and carries no Admiralty grade — it surfaces candidate URLs, and each pointed-to URL enters the normal Phase-2 battery and is graded by *its own* domain tier (recorded as `notes: "surfaced via newsletter-signal corpus <date>"`). The agent's curation note is untrusted data (A6): it can seed a query but never upgrade a claim. Optional per §7 — an absent corpus skips the source.
 
 ### Automatic blocklist
