@@ -26,7 +26,7 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `references/edge-cases.md` | Full handling of the 13 edge cases (moved out of SKILL.md 2026-08-04, D3) — SKILL.md keeps the trigger→verdict index | Edge-case reasoning |
 | `references/provenance.md` | Scaffold deviations + interim defaults (moved out of SKILL.md 2026-08-04, D3). The hash-check and report-wins rules stay in SKILL.md — they are runtime defenses | Maintainer audit trail |
 | `scripts/stack_inventory.py` | Own-stack grep over the paths in `~/.claude/deep-research/stack-paths.json` (stdlib, zero network); absent config → `degraded`, never silent `empty` | Phase-1b own-stack category |
-| `tests/check-solution-space.sh` | Drives `verify_gates.py check-solution-space` over `tests/fixtures/solution-space/` (valid + 11 single-mutation violations) and replays `stack_inventory.py` against a synthetic corpus | Solution-space gate conformance (CI) |
+| `tests/check-solution-space.sh` | Drives `verify_gates.py check-solution-space` over `tests/fixtures/solution-space/` (valid + 14 single-mutation violations + 1 positive control for Rule 7c) and replays `stack_inventory.py` against a synthetic corpus | Solution-space gate conformance (CI) |
 | `evals/` | Loading (≥12+12 incl. territorial negatives), progressive (bar = the fixture count, currently 13/13), e2e (≥3) fixtures + `rubric.md` | Activation + disclosure + mechanical e2e checks |
 | `CHANGELOG.md` | Semver release history, append-only | Release notes, waivers |
 | `gotchas-log.md` | Maintainer traps (trigger/gotcha/resolution/guard) + perishable-asset maintenance cadences | Operational memory |

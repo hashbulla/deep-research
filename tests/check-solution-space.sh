@@ -3,12 +3,13 @@
 # Drives the solution-space layer of the deterministic gates:
 #
 #   1. verify_gates.py check-solution-space over tests/fixtures/solution-space/
-#      — one golden manifest plus thirteen single-mutation violation fixtures,
+#      — one golden manifest plus fourteen single-mutation violation fixtures,
 #      each asserted to fire ITS OWN violation (not merely "some" failure: a
-#      gate that fails everything is worth as little as one that fails nothing).
-#      Purity guard: the Rule 7b violation strings must appear ONLY in the two
-#      fixtures that target them — a hardened gate must not leak into the other
-#      fixtures' unmutated substrate (measured 2026-08-05: eleven fixtures
+#      gate that fails everything is worth as little as one that fails nothing),
+#      plus one agentic POSITIVE control proving Rule 7c can also go green.
+#      Purity guard: the Rule 7b and Rule 7c violation strings must appear ONLY
+#      in the fixtures that target them — a hardened gate must not leak into the
+#      other fixtures' unmutated substrate (measured 2026-08-05: eleven fixtures
 #      carried a parasite Rule 7b violation invisibly, because this loop greps
 #      for the expected needle only).
 #   2. stack_inventory.py over the frozen SOTA-recall corpus
@@ -84,23 +85,61 @@ commercial-no-riskclass|commercial-vendors/HikerAPI: class 'commercial' requires
 registries-missing|mcp-registries: status 'empty' requires a non-empty registries list
 oss-prose-only|open-source: status 'swept' requires >=1 GitHub-native query
 probe-starband-only|open-source: status 'swept' requires >=3 distinct 'topic:' combinations
+agentic-no-skill-query|requires >=1 agent-skill-class query
 EOF
 
-# 2b. Purity guard — Rule 7b strings leak into no other fixture ----------------
+# 2b. Purity guard — hardened-rule strings leak into no other fixture ----------
 # A mutation fixture proves one violation; a parasite violation from the shared
 # unmutated substrate silently voids the "fires ITS OWN violation" claim.
 for j in "$F"/*.json; do
   name="$(basename "$j" .json)"
-  case "$name" in valid|oss-prose-only|probe-starband-only) continue;; esac
   set +e
   out="$("${GATE[@]}" "$j")"
   set -e
-  if grep -qE "GitHub-native query|distinct 'topic:' combinations" <<<"$out"; then
-    echo "MISS [purity/$name]: Rule 7b violation leaked into a fixture that does not target it"; fail=1
-  else
-    echo "ok: purity $name (no Rule 7b leak)"
-  fi
+
+  # Rule 7b — owned by oss-prose-only and probe-starband-only.
+  case "$name" in
+    valid|oss-prose-only|probe-starband-only) ;;
+    *)
+      if grep -qE "GitHub-native query|distinct 'topic:' combinations" <<<"$out"; then
+        echo "MISS [purity-7b/$name]: Rule 7b violation leaked into a fixture that does not target it"; fail=1
+      else
+        echo "ok: purity-7b $name"
+      fi
+      ;;
+  esac
+
+  # Rule 7c — owned by agentic-no-skill-query alone. The golden manifest is a
+  # standing NEGATIVE control here (non-agentic question, no skill query, must
+  # never trip 7c), and agentic-with-skill-query is the positive control.
+  case "$name" in
+    agentic-no-skill-query) ;;
+    *)
+      if grep -qF "agent-skill-class query" <<<"$out"; then
+        echo "MISS [purity-7c/$name]: Rule 7c violation leaked into a fixture that does not target it"; fail=1
+      else
+        echo "ok: purity-7c $name"
+      fi
+      ;;
+  esac
 done
+
+# 2c. Rule 7c positive control — the rule must be able to go GREEN -------------
+# agentic-with-skill-query is byte-identical to agentic-no-skill-query outside
+# open-source.queries — the one field Rule 7c reads. If this fixture failed, the
+# gate would be rejecting every agentic question rather than enforcing the sweep,
+# and the violation fixture above would prove nothing.
+# The added queries carry all FOUR shapes github-research.md step 2b mandates
+# (capability topic pair, agent-skills topic, filename:SKILL.md code search, and
+# the anthropics/skills official check) rather than the single query that would
+# merely clear the gate — run #4's DIM-4-02 caught exactly that gap between
+# gate-conformant and doctrine-conformant, on this fixture set.
+set +e
+out="$("${GATE[@]}" "$F/agentic-with-skill-query.json")"; rc=$?
+set -e
+eq "7c control exits 0"       "$rc" "0"
+eq "7c control verdict"       "$(jq -r '.verdict' <<<"$out")" "PASS"
+eq "7c control has 0 violations" "$(jq -r '.violations | length' <<<"$out")" "0"
 
 # 3. Own-stack sweep over the frozen SOTA-recall corpus -------------------------
 # Recall property (ground-truth.json, case `ig`, item `unipile`): the sweep must
