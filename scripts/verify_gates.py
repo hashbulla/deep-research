@@ -118,6 +118,61 @@ GITHUB_NATIVE_QUERY = re.compile(
 # mandates >=3 distinct combinations, so three copies of one query count once.
 GITHUB_TOPIC_FACET = re.compile(r"(?:\btopic:|--topic[= ])([\w.\-]+)")
 
+# --- Rule 7c: the agent-skill class (2026-08-13) -----------------------------
+# A packaged agent skill is a DELIVERY FORM, not a tool category. Tool-vocabulary
+# topics (`excalidraw`, `diagram-as-code`, `mcp-server`) cannot reach it, however
+# many combinations you run. Where the capability under study is consumed BY an
+# agent, this class is where the state of the art lives — so on such a question
+# the open-source sweep must name it explicitly.
+SKILL_TOPICS = {
+    "agent-skill",
+    "agent-skills",
+    "claude-skill",
+    "claude-skills",
+    "claude-code",
+    "claude-code-skill",
+    "claude-code-skills",
+    "skill-md",
+    "openclaw-skills",
+    "codex-skills",
+}
+# Either a skill-class topic facet, or the code search that finds skills whose
+# repo never carried a topic at all (measured: 8,192 SKILL.md hits vs 42 repos
+# under the richest topic pair — the code search reaches an order of magnitude
+# more of the class).
+SKILL_CLASS_QUERY = re.compile(
+    r"(?:\btopic:|--topic[= ])(?:" + "|".join(sorted(SKILL_TOPICS)) + r")\b"
+    r"|filename:\s*SKILL\.md"
+    r"|\bpath:\s*\S*skills?/",
+    re.IGNORECASE,
+)
+
+# Tokens that make a question a Claude / agentic-integration question. Matched
+# against the manifest's own question text and declared platforms — never
+# inferred from the findings, which would let a thin sweep exempt itself.
+AGENTIC_TOKENS = re.compile(
+    r"\b(claude|claude[- ]code|anthropic|agent|agentic|subagent|mcp|"
+    r"model context protocol|cowork|codex|cursor|copilot|openclaw|llm|skill)\w*",
+    re.IGNORECASE,
+)
+
+
+def _is_agentic_question(manifest: dict) -> bool:
+    """True when the question is about Claude / agentic integration (Rule 7c).
+
+    Reads the question text and the declared platforms only. A manifest that
+    never mentions an agent surface is exempt; one that does cannot opt out by
+    omitting skill queries.
+    """
+    haystack = [manifest.get("question") or ""]
+    geometry = manifest.get("question_geometry")
+    if isinstance(geometry, dict):
+        haystack.append(geometry.get("reason") or "")
+        platforms = geometry.get("platforms")
+        if isinstance(platforms, list):
+            haystack.extend(p for p in platforms if isinstance(p, str))
+    return bool(AGENTIC_TOKENS.search(" ".join(haystack)))
+
 
 def cascade(s12: int, s1: int, c: int) -> int:
     """Normative credibility cascade — verbatim from methodology §4.1."""
@@ -588,6 +643,27 @@ def check_solution_space(args: argparse.Namespace) -> int:
                         f"combinations across queries ({len(combos)} found) — star "
                         f"bands alone are keyword search with a threshold, never a "
                         f"taxonomy sweep"
+                    )
+
+            # Rule 7c — on a Claude / agentic-integration question, sweep the
+            # AGENT-SKILL class explicitly. Measured 2026-08-13 (Excalidraw run):
+            # ten topic combinations ran — excalidraw, mcp, diagram-as-code,
+            # c4-model, tldraw — all TOOL vocabulary, and the skill ecosystem was
+            # missed entirely. A skill is a DELIVERY FORM, not a tool category, so
+            # no amount of tool-topic sweeping reaches it: the corrected sweep found
+            # 42 repos under topic:claude-code+topic:excalidraw and 8,192 SKILL.md
+            # files, including the 4,411-star skill that carries the design
+            # methodology the report was missing. Where the capability is consumed
+            # BY an agent, the packaged-skill class is not an adjacent nicety — it
+            # is where the state of the art actually lives.
+            if _is_agentic_question(manifest):
+                if not any(SKILL_CLASS_QUERY.search(q) for q in live_queries):
+                    v.append(
+                        f"{label}: this is a Claude/agentic-integration question, so "
+                        f"status {status!r} requires >=1 agent-skill-class query "
+                        f"(a 'topic:' facet among {sorted(SKILL_TOPICS)!r}, or a "
+                        f"'filename:SKILL.md' code search) — tool vocabulary alone "
+                        f"cannot see a delivery form"
                     )
 
         # Rule 8 — applicability is all-or-nothing.

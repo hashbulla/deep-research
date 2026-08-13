@@ -20,6 +20,19 @@ Activates when a sub-question's intent is *tooling discovery* — "best/SOTA imp
 
    > Measured 2026-08-05 — a hand-run benchmark declared open-source *swept* on Tavily prose alone and missed 8 repos worth ~200k stars. The top one, `Panniantong/Agent-Reach` (66,684 ★, Chinese-first README, tagged `claude-code`), is the **first hit of 11** on `topic:claude-code+topic:web-scraper&sort=stars`. Prose surfaces comparison blogs — written by vendors comparing vendors — and is blind to a category whose vendors do not blog. Fixture: `evals/fixtures/sota-recall/` case `wi`.
 
+2b. **On a Claude / agentic-integration question, sweep the AGENT-SKILL class explicitly — Rule 7c.** A packaged skill is a **delivery form, not a tool category**. Tool-vocabulary topics cannot reach it however many combinations you run, because the skill's topics describe *how it is consumed by an agent*, not *what it does*. Where the capability is consumed BY an agent, this class is where the state of the art actually lives.
+
+   ```bash
+   gh api "search/repositories?q=topic:claude-code+topic:<capability>&sort=stars&order=desc"
+   gh api "search/repositories?q=topic:agent-skills&sort=stars&order=desc"
+   gh api "search/code?q=<capability>+filename:SKILL.md"          # reaches untagged repos
+   gh api "repos/anthropics/skills/contents/skills"                # is it already official?
+   ```
+
+   Always check `anthropics/skills` — an official skill outranks every third-party one, and its *absence* is itself a finding. Curated aggregators (`ComposioHQ/awesome-claude-skills`, `VoltAgent/awesome-agent-skills`, `VoltAgent/awesome-openclaw-skills`) index thousands of skills the topic facets miss.
+
+   > Measured 2026-08-13 — an Excalidraw toolchain run swept **ten** topic combinations (`excalidraw`, `mcp`, `diagram-as-code`, `c4-model`, `tldraw`) and missed the skill ecosystem entirely: skills surfaced only incidentally, as by-products of MCP sweeps. The corrected sweep returned **42 repos** under `topic:claude-code+topic:excalidraw` and **8,192 `SKILL.md` files**, including a **4,411-star** skill carrying the *design methodology* the report was missing — concept-mirroring patterns, a semantic palette, and a render-and-verify loop. The report had answered "which tool renders it" and never "what makes the output good", because the class that answers the second question was never queried. `verify_gates.py` enforces this as **Rule 7c**: an `open-source` category marked `swept`/`empty` on an agentic question requires ≥1 skill-class query.
+
 3. **Shard by star bands.** GitHub search silently caps at 1,000 results per query (REST and GraphQL). Shard: `stars:>5000`, `stars:1000..5000`, `stars:200..1000` (+ date windows `created:>YYYY-MM-DD` if a band still saturates), then merge and dedupe by `full_name`.
 4. **Enrich via GraphQL in one round-trip per shard** — `gh api graphql` with a search query returning `stargazerCount`, `pushedAt`, `createdAt`, `forkCount`, `issues(states:OPEN){totalCount}`, `releases{totalCount}`, `primaryLanguage`, `mentionableUsers{totalCount}` (contributors proxy). `gh` handles auth and pagination.
 5. **Dependents via ecosyste.ms** (free, outside the GitHub quota): `curl -s -A "deep-research-skill (<maintainer email>)" "https://repos.ecosyste.ms/api/v1/repositories/lookup?url=https://github.com/<owner>/<repo>"` → `dependents_count`. Polite tier = 15k req/hr WITH the email in the User-Agent — never omit it. Service down → `dependents: null`, weight renormalized (script handles it).
