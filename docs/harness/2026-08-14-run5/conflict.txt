@@ -1,0 +1,12 @@
+Target: deep-research
+Corpus: /tmp/claude-1000/-home-ouroz-second-brain/fa2566d3-f808-46d1-9c27-e89269ddb28c/scratchpad/corpus-run5 (31 peers checked)
+Threshold: 0.4
+
+✓ No critical conflicts (max jaccard = 0.019)
+
+Top 5 closest peers (informational):
+  doc-render                     jaccard=0.019
+  skill-generator                jaccard=0.019
+  prototype                      jaccard=0.015
+  codebase-design                jaccard=0.014
+  domain-modeling                jaccard=0.012

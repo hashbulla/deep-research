@@ -1,0 +1,4 @@
+
+0 errors, 2 warnings, 0 infos
+[WARNING] check#16 (examples concreteness): /home/ouroz/second-brain/20-engineering/skills/deep-research/SKILL.md:185 — found 0 **Input:** and 0 **Output:** blocks (need ≥2 of each) — Add concrete Input/Output examples (≥2).
+[WARNING] check#18 (cross-platform compliance): /home/ouroz/second-brain/20-engineering/skills/deep-research/SKILL.md:53 — ~/.claude/ path is Claude Code-specific (no compatibility: declaration) — Add 'compatibility: Targets Claude Code...' OR rewrite to be cross-platform.

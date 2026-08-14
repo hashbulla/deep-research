@@ -1,0 +1,24 @@
+Skill: deep-research (/home/ouroz/second-brain/20-engineering/skills/deep-research)
+
+INDEX TIER (paid every session):
+  name + description = 171 tokens (target ≤100, hard ≤320)
+
+LOAD TIER (paid when skill loads):
+  SKILL.md body = 7199 tokens (target ≤5000, hard ≤7500)
+
+FILES TIER (paid only on read):
+  Total across references/, scripts/, assets/, evals/: 106524 tokens
+  Top 10 by size:
+     16464 tokens  scripts/__pycache__/verify_gates.cpython-38.pyc
+      9051 tokens  scripts/verify_gates.py
+      8156 tokens  references/methodology.md
+      6752 tokens  scripts/__pycache__/newsletter_search.cpython-38.pyc
+      6205 tokens  scripts/__pycache__/academic_graph.cpython-38.pyc
+      4785 tokens  scripts/__pycache__/github_rank.cpython-38.pyc
+      4634 tokens  references/solution-space.md
+      3406 tokens  references/report-structure.md
+      3382 tokens  scripts/__pycache__/stack_inventory.cpython-38.pyc
+      3335 tokens  evals/e2e.jsonl
+
+  [WARNING] index tier 171 > 100 (target)
+  [WARNING] load tier 7199 > 5000 (target)
