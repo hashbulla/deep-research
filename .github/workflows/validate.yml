@@ -27,6 +27,9 @@ jobs:
       - name: Check the pre-commit provenance hook keeps the chain fresh
         run: bash tests/check-precommit-hook.sh
 
+      - name: Check SKILL.md stays within its 150-line prompt budget
+        run: bash tests/check-skill-length.sh
+
       - name: Check JSON artifact schemas
         run: bash tests/check-schema.sh tests/fixtures/research-sources.json tests/fixtures/research-evidence.json tests/fixtures/osint/socmint-source.json tests/fixtures/solution-space/valid.json examples/eu-ai-act-2026/research-solution-space.json
 

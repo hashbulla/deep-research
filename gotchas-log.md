@@ -14,6 +14,15 @@
 
 ---
 
+## 2026-08-17 — SKILL.md brought to 150 lines: the one debt of the three that cannot be proven paid
+
+- **Trigger:** AI-372 / PRD-refonte R6 + R8 lever 3 — `SKILL.md` at 209 lines against the house ≤150 rule.
+- **Gotcha:** the other two debts of the batch have a mechanical oracle (a red-green test; a grep returning zero). This one edits the **prompt actually served to the router**, and its only instrument is the loading-eval suite — which needs real multi-model runs. So "209 → 150" is verifiable; "routing still holds" is **not**, not from inside the repo. Second trap, hit in passing: compressing the file **rotted a line pointer** — `pos-06`'s boundary cited `SKILL.md:19` for the "canonical routing surface" note, which moved to L18. Nothing failed; the citation just quietly started pointing at a blank line.
+- **Resolution:** compressed by **densifying, never deleting** — every rule of the original survives, verified by a 32-marker presence sweep (all 7 grading steps, all 13 edge cases, all 16 reference files, `eu-ai-act-2026`). Phase 2's 7 grading rules went from a numbered list to one ordered inline sequence (they duplicate `methodology.md`, which the file itself declares authoritative); the `References` table, `Output Format`, `Trigger` and `Edge Cases` were densified; the `Examples` section folded into `References` with its content intact. `pos-06`'s pointer re-anchored on the marker text, prompt and expectation untouched (same precedent as the 2026-08-05 W4 boundary amendment). All 8 local gates PASS.
+- **Guard:** **none for the behavioral half — recorded as instrumentation debt.** `wc -l SKILL.md ≤ 150` is not yet a CI check (worth adding), and the loading suite (31 fixtures) plus `/skill-harness` are **owed** on this change before any release tag. Do not read "gates PASS" as "routing unaffected": no gate in this repo measures activation.
+
+---
+
 ## 2026-08-17 — The release-blocker boundary was graded against an owner that does not exist
 
 - **Trigger:** AI-372 / PRD-refonte R6 ("dead routing" debt) — the `description` deferred quick-gist research to "`/research` **or the plugin-namespaced deep-research sibling**". Run #4 had already proved that sibling absent mechanically (`grep -rl "^name: deep-research" ~/.claude/plugins/` over 133 installed `SKILL.md` files, zero hits) and the fact sat in the archive without reaching the routing surface.
