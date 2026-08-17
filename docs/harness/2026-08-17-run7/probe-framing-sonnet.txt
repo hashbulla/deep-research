@@ -1,0 +1,22 @@
+corpus held CONSTANT at 30 skills (owner present=False)
+only rule 3 varies; prompts differ by 59 chars
+
+  DEFAULT sonnet rep1: none
+  DEFAULT sonnet rep2: none
+  DEFAULT sonnet rep3: none
+  DEFAULT sonnet rep4: deep-research
+  DEFAULT sonnet rep5: none
+  STRICT  sonnet rep1: deep-research
+  STRICT  sonnet rep2: deep-research
+  STRICT  sonnet rep3: deep-research
+  STRICT  sonnet rep4: deep-research
+  STRICT  sonnet rep5: deep-research
+
+=== neg-16 / sonnet / n=5 per arm, cache bypassed, corpus constant ===
+  DEFAULT framing (pick most specific)
+     {'none': 4, 'deep-research': 1}  -> LEAK 1/5
+  STRICT framing (only if clearly in scope)
+     {'deep-research': 5}  -> LEAK 5/5
+
+VERDICT: FRAMING-INSENSITIVE — the leak survives a strict framing, so it is not
+         an artifact of rule 3. A description defect is genuinely likely.

@@ -2,7 +2,9 @@
 
 > Measured 2026-08-17, graded against `SCORING-POLICY.md` (pre-registered before the data existed).
 > **Verdict: DO NOT PUSH.** `neg-16`, a fixture this repo's own rubric designates a release blocker,
-> leaks to `deep-research` on sonnet in roughly half of live calls. The n=1 matrix reported 16/16
+> leaks to `deep-research` on sonnet in **7 of 18 live calls (~39 %)** under the harness's default
+> router framing — and in **5 of 5** under a strict "only if clearly in scope" framing, which is what
+> makes this a description defect rather than an instrument artifact. The n=1 matrix reported 16/16
 > because it drew the favorable side of a coin. Victor's conditional go was conditional on this
 > measurement; the condition failed, so pushing now needs a fresh decision from him.
 
@@ -41,31 +43,58 @@ Had those repetitions gone through `run_evals.py` instead of around its cache, t
 replayed the single stored reply three times and printed "stable". The cache key is
 sha256(prompt + system + model); 31/31 opus keys were verified present before the run.
 
-## 3. The decisive A/B: artifact or defect?
+## 3. Two probes, two hypotheses, both refuted — and the second one inverted
 
-The checkpoint warned that this chantier has twice mis-read a leak, and that a negative leak here can
-be a **framing artifact of the proxy** rather than a routing defect. There was a concrete mechanism to
-suspect: `run_evals.py` builds its index from `DEFAULT_CORPUS = ~/.claude/skills` only, and the owner
-`neg-16` names — `dispatching-parallel-agents` — is a **plugin** skill living outside that tree. With
-the legitimate owner withheld, `deep-research` is arguably the nearest match, so the "leak" could
-have been an artifact of an incomplete corpus.
+The checkpoint warned that a negative leak here can be an artifact of the proxy rather than a routing
+defect. **There are two distinct artifact mechanisms, and conflating them is easy** — the first draft
+of this document did exactly that. They were tested separately, one variable each.
 
-`probe_owner.py 5 sonnet` tested it with one variable changed — arm B is arm A plus a symlink to the
-installed `superpowers/6.3.0/skills/dispatching-parallel-agents`:
+### 3a. Corpus hypothesis — refuted
 
-| Arm | Corpus | Owner in index? | neg-16 / sonnet, n=5, cache bypassed | Leak rate |
-|---|---|---|---|---|
-| A | 30 skills | **No** | `none`, `none`, `none`, **`deep-research`**, **`deep-research`** | **2/5** |
-| B | 31 skills | **Yes** | **`deep-research`**, `none`, **`deep-research`**, `none`, `none` | **2/5** |
+`run_evals.py` indexes `DEFAULT_CORPUS = ~/.claude/skills` only, and the owner `neg-16` names,
+`dispatching-parallel-agents`, is a **plugin** skill outside that tree. With the legitimate owner
+withheld, `deep-research` is arguably the nearest match. `probe_owner.py 5 sonnet` — arm B is arm A
+plus a symlink to the installed `superpowers/6.3.0/skills/dispatching-parallel-agents`:
 
-**Identical rate. The hypothesis is refuted by measurement.** Handing sonnet the legitimate owner
-does not stop it routing the fan-out prompt to `deep-research`. The leak is a property of the
-description against this prompt, not of the corpus the harness shows.
+| Arm | Owner in index? | neg-16 / sonnet, n=5, cache bypassed | Leaks |
+|---|---|---|---|
+| A | **No** | `none`, `none`, `none`, **`deep-research`**, **`deep-research`** | 2/5 |
+| B | **Yes** | **`deep-research`**, `none`, **`deep-research`**, `none`, `none` | 2/5 |
 
-Pooled sonnet evidence on `neg-16`, all cache-bypassed:
+**The leak occurs with the legitimate owner present.** That is the refutation, and it is solid. The
+rate equality (2/5 vs 2/5) is noise at n=5 and is not the argument.
 
-- owner absent: 2/3 (repeats) + 2/5 (arm A) = **4/8 = 50 %**
-- owner present: **2/5 = 40 %**
+### 3b. Framing hypothesis — refuted, and it points the opposite way
+
+This is a **different** mechanism, and §3a says nothing about it. Finding #6 of
+`harness-loading-eval-via-subagents` concerns the router prompt's **framing**: `build_skill_index`
+rule 3 says "if multiple skills could match, pick the most specific one", and for `synthese` that
+framing was the *only* lever — hardening the description closed no leaks, while a strict framing
+dropped them 5→2 with the description unchanged. `probe_owner.py` held the framing constant in both
+arms, so it left this untested.
+
+`probe_framing.py 5 sonnet` varies **only rule 3**, corpus held constant at 30 skills:
+
+| Arm | Rule 3 | neg-16 / sonnet, n=5, cache bypassed | Leaks |
+|---|---|---|---|
+| DEFAULT | "pick the most specific one" | `none`, `none`, `none`, **`deep-research`**, `none` | 1/5 |
+| **STRICT** | "only if clearly within its stated scope; if uncertain or merely grazing, answer none" | **`deep-research`** ×5 | **5/5** |
+
+**A strict framing does not close this leak — it amplifies it, 1/5 → 5/5.** That is the inverse of
+`synthese`'s signature, and it is the strongest evidence in this document. Asked point-blank "is this
+prompt *clearly within* `deep-research`'s stated scope?", sonnet answers **yes, five times out of
+five**. The description asserts territory over the fan-out/gist intent; a framing that makes the
+model consult that scope claim more literally therefore increases firing rather than suppressing it.
+
+**Generalisation worth keeping:** the strict-framing arm is a **diagnostic for description
+overclaim**, not a leak-suppressor. Strict framing *reduces* firing when the description does not
+claim the territory (`synthese`: 5→2) and *increases* it when the description does
+(`deep-research`: 1→5). Direction of movement identifies which layer owns the defect.
+
+### 3c. Pooled evidence
+
+Sonnet on `neg-16`, all cache-bypassed, default framing: 2/3 (repeats) + 2/5 (owner absent) + 2/5
+(owner present) + 1/5 (framing arm) = **7/18 ≈ 39 %**. Under strict framing: **5/5**.
 
 The defect is **sonnet-specific**: opus returned `none` 3/3, haiku `research` 3/3 and
 `superpowers:dispatching-parallel-agents` in the matrix — that last one being the exact owner
@@ -137,10 +166,15 @@ matrix run (finished ~19:07, 29 skills) and the A/B probe (started ~19:16, 30 sk
 
 ## 7. What is owed next (design decisions — Victor's call, not applied here)
 
-1. **The `neg-16` leak is a description defect to fix, then re-measure at n≥5 per model.** The
-   fan-out/gist boundary is not sharp enough for sonnet. This is a wording change to a description
-   that is already at zero margin on both the line gate and the token gate — so it is a design
-   decision, not a mechanical patch.
+1. **The `neg-16` leak is a description defect to fix, then re-measure at n≥5 per model — and this
+   recommendation now rests on evidence, not on elimination.** Both artifact hypotheses were tested
+   and refuted (§3a, §3b), and the strict-framing arm returns `deep-research` **5/5** when asked
+   whether the prompt is clearly in scope. The description claims the fan-out/gist territory it is
+   supposed to defer. Caveat that makes this a design decision rather than a patch: the description
+   sits at **zero margin on both gates** (lines and tokens), so sharpening the boundary means
+   relocating or trading budget, not appending a clause. Note also that finding #6 measured
+   description hardening to be powerless for `synthese` — that prior does **not** transfer here,
+   precisely because the framing arms move in opposite directions.
 2. **Corpus union for the harness** (`--corpus` already exists): `~/.claude/skills` + plugin skill
    trees + a stub per user-scope command, still excluding the target's own installed copy or the
    shadowing hazard returns. Commands and MCP tools are different surfaces from skills; stubs
@@ -158,5 +192,6 @@ matrix run (finished ~19:07, 29 skills) and the A/B probe (started ~19:16, 30 sk
 | `loading_matrix_3models.json` | the n=1 matrix, 3 models × 31 fixtures |
 | `GRADE.txt` | the matrix graded against the policy (all-PASS — the misleading result) |
 | `repeat-blockers-n3.txt` | n≥3 on the blockers, cache bypassed — where the leak appeared |
-| `probe-neg16-sonnet.txt` | the A/B that refuted the artifact hypothesis |
-| `grade.py`, `repeat_blockers.py`, `probe_owner.py` | the three instruments, kept runnable |
+| `probe-neg16-sonnet.txt` | the corpus A/B (§3a) — leak persists with the owner present |
+| `probe-framing-sonnet.txt` | the framing A/B (§3b) — strict framing amplifies the leak 1/5 -> 5/5 |
+| `grade.py`, `repeat_blockers.py`, `probe_owner.py`, `probe_framing.py` | the four instruments, kept runnable |
