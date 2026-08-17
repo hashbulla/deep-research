@@ -53,6 +53,8 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `examples/eu-ai-act-2026/` | End-to-end mock run of the README example query | Illustrative reference |
 | `.github/workflows/validate.yml` | GitHub Actions — runs every check script on push + PR | CI |
 | `.githooks/pre-commit` | Refreshes the SHA-256 provenance prefix in `SKILL.md` from the **staged** report; blocks rather than stage unreviewed edits. Inert until `git config core.hooksPath .githooks` | Invariant I1, author-side |
+| `scripts/run_accounting.py` | Emits `research-run-accounting.json` at Phase 6 — engine/contract step and call counts under the rule ported verbatim from the eval's pre-registered instrument. **Reports no token or dollar figure**, and declares them non-measurable in-run (they live on the session `result` event) | Run metadata (R6). NOT a sixth artifact: no gate, no contract surface |
+| `tests/check-run-accounting.sh` | Drives it over 5 cases: classification incl. the mixed-step convention, the ban on cost/token keys, rule provenance, empty-run degradation to `null` shares, loud failure on malformed input | Accounting conformance (CI) |
 | `tests/check-precommit-hook.sh` | Drives the hook over a throwaway repo (4 cases: no-op, repair+restage, blocked-on-dirty, missing marker) | Hook conformance (CI) |
 | `README.md` | External-facing entry point | Install / Quick Start / Roadmap |
 
@@ -69,7 +71,7 @@ sha256sum deep-research-report.md
 
 Guarded by `tests/check-provenance.sh`. A failing provenance check blocks the CI workflow.
 
-**Install the hook once per clone — it does the update for you:**
+**Install the hook once — it does the update for you.** Note `core.hooksPath` is **shared repo config**, not per-worktree: setting it in one worktree sets it for the main checkout and every other worktree too. That is the desired end state here, and it stays inert wherever `.githooks/` does not exist on the checked-out branch (git no-ops on a missing hook directory).
 
 ```bash
 git config core.hooksPath .githooks
