@@ -1,0 +1,30 @@
+index assertion OK: 1 entry for 'deep-research', 30 skills
+
+  neg-07   opus    rep1: research
+  neg-07   opus    rep2: none
+  neg-07   opus    rep3: none
+  neg-07   sonnet  rep1: research
+  neg-07   sonnet  rep2: research
+  neg-07   sonnet  rep3: research
+  neg-07   haiku   rep1: research
+  neg-07   haiku   rep2: research
+  neg-07   haiku   rep3: research
+  neg-16   opus    rep1: none
+  neg-16   opus    rep2: none
+  neg-16   opus    rep3: none
+  neg-16   sonnet  rep1: deep-research
+  neg-16   sonnet  rep2: none
+  neg-16   sonnet  rep3: deep-research
+  neg-16   haiku   rep1: research
+  neg-16   haiku   rep2: research
+  neg-16   haiku   rep3: research
+
+=== stability ===
+  neg-07/opus            {'research': 1, 'none': 2}  -> UNSTABLE
+  neg-07/sonnet          {'research': 3}  -> STABLE
+  neg-07/haiku           {'research': 3}  -> STABLE
+  neg-16/opus            {'none': 3}  -> STABLE
+  neg-16/sonnet          {'deep-research': 2, 'none': 1}  -> UNSTABLE +LEAK
+  neg-16/haiku           {'research': 3}  -> STABLE
+
+OVERALL: review: neg-07/opus, neg-16/sonnet

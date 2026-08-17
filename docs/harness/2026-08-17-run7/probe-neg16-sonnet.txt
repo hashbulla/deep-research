@@ -1,0 +1,23 @@
+A: owner ABSENT (run #6/#7 corpus)
+   skills=30  deep-research entries=1  owner present=False
+B: owner PRESENT (+dispatching-parallel-agents)
+   skills=31  deep-research entries=1  owner present=True
+
+  A sonnet rep1: none
+  A sonnet rep2: none
+  A sonnet rep3: none
+  A sonnet rep4: deep-research
+  A sonnet rep5: deep-research
+  B sonnet rep1: deep-research
+  B sonnet rep2: none
+  B sonnet rep3: deep-research
+  B sonnet rep4: none
+  B sonnet rep5: none
+
+=== neg-16 / sonnet / n=5 per arm, cache bypassed ===
+  A: owner ABSENT (run #6/#7 corpus)
+     {'none': 3, 'deep-research': 2}  -> LEAK 2/5
+  B: owner PRESENT (+dispatching-parallel-agents)
+     {'deep-research': 2, 'none': 3}  -> LEAK 2/5
+
+VERDICT: REAL DEFECT — the leak survives with the legitimate owner present.
