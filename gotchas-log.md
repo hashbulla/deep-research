@@ -14,6 +14,15 @@
 
 ---
 
+## 2026-08-17 — The release-blocker boundary was graded against an owner that does not exist
+
+- **Trigger:** AI-372 / PRD-refonte R6 ("dead routing" debt) — the `description` deferred quick-gist research to "`/research` **or the plugin-namespaced deep-research sibling**". Run #4 had already proved that sibling absent mechanically (`grep -rl "^name: deep-research" ~/.claude/plugins/` over 133 installed `SKILL.md` files, zero hits) and the fact sat in the archive without reaching the routing surface.
+- **Gotcha:** the dead pointer was not confined to one description clause — it had propagated into the **test contract**. `rubric.md` instructed the grader to make the sibling "available" as a territorial neighbor (an unsatisfiable setup), and `neg-08`→`neg-15`, the rubric's own **release blockers**, asserted that boundary. The *verdicts* were right (`expect: skip` holds — this skill always writes a plan + five graded artifacts), but the *owner* was unreachable, so the sharpest declared boundary in the artifact was measured against nothing. A dead routing target costs nothing at runtime and quietly corrupts the eval that guards it.
+- **Resolution:** clause removed from the `description`; `neg-16` appended, superseding `neg-15` with a reachable owner (`superpowers:dispatching-parallel-agents` — which is in fact what the router answered on `neg-08`/`neg-15` in runs #4 and #5 — or the user-scope `/research`); `rubric.md` neighbor list, pass bar (negatives 15/15 → 15/16) and blocker list corrected. `neg-08` and `neg-15` stay **unedited**: their owner was wrong, their verdict was not.
+- **Guard:** `neg-16` in `evals/loading.jsonl`, graded as the last link of the three-link succession per `rubric.md`. No CI check can catch this class — a router target's existence is not verifiable from inside the repo; the guard is the rubric's new rule that a non-existent neighbor cannot be a test condition.
+
+---
+
 ## 2026-08-05 — W5 ablation: the FR trigger is not what carries the FR positives — and removing it correlated with release-blocker negative leaks
 
 - **Trigger:** harness run #4 DIM-7-01 (WARNING, contested): `"deep research on X"` / `"recherche approfondie sur X"` graded as an FR/EN duplication slip; the Grounder surfaced contradicting evidence both ways; adjudication = measure before editing.

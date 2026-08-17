@@ -4,7 +4,9 @@
 
 ## 1. Loading evals (`loading.jsonl`)
 
-For each fixture, present the prompt in a fresh session with this skill (and its territorial neighbors — the Tavily MCP tools, the user-scope `/research` command, the plugin-namespaced `deep-research` sibling) available, and observe whether the skill activates.
+For each fixture, present the prompt in a fresh session with this skill (and its territorial neighbors — the Tavily MCP tools, the user-scope `/research` command, and `superpowers:dispatching-parallel-agents` for fan-out probes) available, and observe whether the skill activates.
+
+**A neighbor that does not exist cannot be a test condition.** Until 2026-08-17 this line named a "plugin-namespaced `deep-research` sibling" as a neighbor to make available — an unsatisfiable setup: run #4 proved the sibling absent by grep over 133 installed `SKILL.md` files, zero hits. Every negative graded against that boundary was therefore graded against an unreachable owner. Corrected with `neg-16`; `neg-08`/`neg-15` stay unedited as the record of the contract at their date.
 
 | Outcome | Score |
 |---|---|
@@ -12,7 +14,7 @@ For each fixture, present the prompt in a fresh session with this skill (and its
 | `expect: skip` and the skill stays silent | pass |
 | Anything else | fail — record fixture id + observed routing |
 
-**Pass bar:** ≥ 14/15 positives AND ≥ 14/15 negatives (count realigned to the fixture file 2026-08-04; appended fixtures raise the bar with them, tolerance stays at one miss per side). A single negative failure on `neg-07`, `neg-08` or its successor `neg-15` (territorial neighbors) is a release blocker regardless of the aggregate — those boundaries are the documented conflict surface.
+**Pass bar:** ≥ 14/15 positives AND ≥ 15/16 negatives (counts realigned to the fixture file — positives 2026-08-04, negatives 2026-08-17 with `neg-16`; appended fixtures raise the bar with them, tolerance stays at one miss per side). A single negative failure on `neg-07`, or on the `neg-08`→`neg-15`→`neg-16` succession (territorial neighbors) is a release blocker regardless of the aggregate — those boundaries are the documented conflict surface. **Grade the succession on `neg-16`**: it carries the only reachable owner.
 
 **Failure-mode mapping** (the five activation failure modes):
 
@@ -44,4 +46,4 @@ Every new feature (flag, retrieval source, gate) adds:
 
 Append-only — existing fixtures are never edited to make a failing run pass; that is eval laundering. Fix the skill or document the waiver in `../gotchas-log.md`.
 
-**Superseding a fixture whose contract changed.** When a deliberate contract change makes an existing fixture assert a superseded rule, do NOT edit it. Append a **successor** with the same probe intent and the corrected assertion, state `SUPERSEDES <id> (<date>)` in the successor's own rationale field (`boundary` for loading, `note` for progressive, the first `mechanical_checks` string for e2e — never a new key), and log the supersession in `../gotchas-log.md`. The superseded fixture stays in the file unedited: it is an accurate record of the contract at its date. Pairs currently live: `neg-08`→`neg-15`, `prog-09`→`prog-13`, `e2e-01`→`e2e-13`, `e2e-08`→`e2e-14` (all 2026-08-04, four→five artifacts).
+**Superseding a fixture whose contract changed.** When a deliberate contract change makes an existing fixture assert a superseded rule, do NOT edit it. Append a **successor** with the same probe intent and the corrected assertion, state `SUPERSEDES <id> (<date>)` in the successor's own rationale field (`boundary` for loading, `note` for progressive, the first `mechanical_checks` string for e2e — never a new key), and log the supersession in `../gotchas-log.md`. The superseded fixture stays in the file unedited: it is an accurate record of the contract at its date. Pairs currently live: `neg-08`→`neg-15`, `prog-09`→`prog-13`, `e2e-01`→`e2e-13`, `e2e-08`→`e2e-14` (all 2026-08-04, four→five artifacts) · `neg-15`→`neg-16` (2026-08-17, dead owner replaced by a reachable one — a **three-link chain**: grade the last link).
