@@ -1,0 +1,108 @@
+########## A. BLOCKERS n=8, 3 models ##########
+index OK: 1 entry for 'deep-research' among 31 skills
+description chars: 795 | reps=8 models=['opus', 'sonnet', 'haiku'] ids=['neg-07', 'neg-16']
+
+  neg-07   opus    rep1: research
+  neg-07   opus    rep2: research
+  neg-07   opus    rep3: research
+  neg-07   opus    rep4: research
+  neg-07   opus    rep5: research
+  neg-07   opus    rep6: research
+  neg-07   opus    rep7: research
+  neg-07   opus    rep8: research
+  neg-07   sonnet  rep1: research
+  neg-07   sonnet  rep2: research
+  neg-07   sonnet  rep3: research
+  neg-07   sonnet  rep4: research
+  neg-07   sonnet  rep5: research
+  neg-07   sonnet  rep6: research
+  neg-07   sonnet  rep7: research
+  neg-07   sonnet  rep8: research
+  neg-07   haiku   rep1: research
+  neg-07   haiku   rep2: research
+  neg-07   haiku   rep3: research
+  neg-07   haiku   rep4: research
+  neg-07   haiku   rep5: research
+  neg-07   haiku   rep6: research
+  neg-07   haiku   rep7: research
+  neg-07   haiku   rep8: research
+  neg-16   opus    rep1: none
+  neg-16   opus    rep2: none
+  neg-16   opus    rep3: none
+  neg-16   opus    rep4: none
+  neg-16   opus    rep5: none
+  neg-16   opus    rep6: none
+  neg-16   opus    rep7: none
+  neg-16   opus    rep8: none
+  neg-16   sonnet  rep1: none
+  neg-16   sonnet  rep2: deep-research
+  neg-16   sonnet  rep3: none
+  neg-16   sonnet  rep4: deep-research
+  neg-16   sonnet  rep5: none
+  neg-16   sonnet  rep6: none
+  neg-16   sonnet  rep7: deep-research
+  neg-16   sonnet  rep8: deep-research
+  neg-16   haiku   rep1: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep2: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep3: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep4: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep5: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep6: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep7: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep8: superpowers:dispatching-parallel-agents
+
+=== stability, n=8 per pair, cache bypassed ===
+  neg-07   opus    must skip  {'research': 8}  -> LEAK 0/8
+  neg-07   sonnet  must skip  {'research': 8}  -> LEAK 0/8
+  neg-07   haiku   must skip  {'research': 8}  -> LEAK 0/8
+  neg-16   opus    must skip  {'none': 8}  -> LEAK 0/8
+  neg-16   sonnet  must skip  {'none': 4, 'deep-research': 4}  -> LEAK 4/8  <-- BLOCKER LEAK
+  neg-16   haiku   must skip  {'superpowers:dispatching-parallel-agents': 8}  -> LEAK 0/8
+
+OVERALL: REVIEW: neg-16/sonnet
+
+########## B. AT-RISK POSITIVES n=5, sonnet ##########
+index OK: 1 entry for 'deep-research' among 31 skills
+description chars: 795 | reps=5 models=['sonnet'] ids=['pos-03', 'pos-14']
+
+  pos-03   sonnet  rep1: deep-research
+  pos-03   sonnet  rep2: deep-research
+  pos-03   sonnet  rep3: deep-research
+  pos-03   sonnet  rep4: deep-research
+  pos-03   sonnet  rep5: deep-research
+  pos-14   sonnet  rep1: deep-research
+  pos-14   sonnet  rep2: deep-research
+  pos-14   sonnet  rep3: deep-research
+  pos-14   sonnet  rep4: deep-research
+  pos-14   sonnet  rep5: deep-research
+
+=== stability, n=5 per pair, cache bypassed ===
+  pos-03   sonnet  must fire  {'deep-research': 5}  -> FIRES 5/5
+  pos-14   sonnet  must fire  {'deep-research': 5}  -> FIRES 5/5
+
+OVERALL: all pairs clean
+
+########## C. FRAMING DIAGNOSTIC RE-RUN (was 1/5 default, 5/5 strict) ##########
+corpus held CONSTANT at 30 skills (owner present=False)
+only rule 3 varies; prompts differ by 59 chars
+
+  DEFAULT sonnet rep1: deep-research
+  DEFAULT sonnet rep2: deep-research
+  DEFAULT sonnet rep3: deep-research
+  DEFAULT sonnet rep4: deep-research
+  DEFAULT sonnet rep5: none
+  STRICT  sonnet rep1: none
+  STRICT  sonnet rep2: none
+  STRICT  sonnet rep3: none
+  STRICT  sonnet rep4: none
+  STRICT  sonnet rep5: none
+
+=== neg-16 / sonnet / n=5 per arm, cache bypassed, corpus constant ===
+  DEFAULT framing (pick most specific)
+     {'deep-research': 4, 'none': 1}  -> LEAK 4/5
+  STRICT framing (only if clearly in scope)
+     {'none': 5}  -> LEAK 0/5
+
+VERDICT: FRAMING-SENSITIVE — strict framing closes the leak with the description
+         unchanged. Same signature as finding #6 (synthese). Calibrate the proxy
+         BEFORE editing a description at zero gate margin.
