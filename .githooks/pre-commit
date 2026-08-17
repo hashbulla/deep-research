@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# pre-commit — keeps the SHA-256 provenance chain (invariant I1) from going stale.
+#
+# Why this exists: the chain was maintained by hand, so any edit to
+# deep-research-report.md that forgot to update the 'Hash at generation time:'
+# line of SKILL.md broke CI one push later. This hook closes that gap at the
+# only moment where the fix is still cheap.
+#
+# It reasons about the INDEX, never the working tree: the commit ships what is
+# staged, so validating anything else would check a different file than the one
+# being committed.
+#
+# Outcomes:
+#   - hash already correct                  -> silent pass
+#   - stale, SKILL.md has no unstaged edits -> rewritten + re-staged, commit proceeds
+#   - stale, SKILL.md has unstaged edits    -> rewritten but NOT staged, commit blocked
+#     (staging it would silently sweep in work the author never reviewed)
+#
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+REPORT="deep-research-report.md"
+SKILL="SKILL.md"
+MARKER="Hash at generation time:"
+
+# Nothing to defend if either side of the chain is absent from the commit.
+git ls-files --error-unmatch "$REPORT" >/dev/null 2>&1 || exit 0
+git ls-files --error-unmatch "$SKILL"  >/dev/null 2>&1 || exit 0
+
+sha256_of_stdin() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 | awk '{print $1}'
+  else
+    echo "pre-commit: neither sha256sum nor shasum available" >&2
+    exit 1
+  fi
+}
+
+# Hash the STAGED report, not the working-tree one.
+ACTUAL_FULL="$(git show ":$REPORT" | sha256_of_stdin)"
+
+# Read the declared prefix from the STAGED SKILL.md, for the same reason.
+DECLARED_PREFIX="$(git show ":$SKILL" | grep -m1 "$MARKER" | grep -oE '`[0-9a-f]{8,}' | head -n1 | tr -d '`' || true)"
+
+if [ -z "$DECLARED_PREFIX" ]; then
+  echo "pre-commit: no SHA-256 prefix found on the '$MARKER' line of $SKILL." >&2
+  echo "  The provenance chain (invariant I1) cannot be verified. Commit blocked." >&2
+  exit 1
+fi
+
+# Already consistent: the common case, and it stays silent.
+case "$ACTUAL_FULL" in
+  "$DECLARED_PREFIX"*) exit 0 ;;
+esac
+
+# Preserve the declared prefix length so the file's own convention survives.
+NEW_PREFIX="${ACTUAL_FULL:0:${#DECLARED_PREFIX}}"
+
+# Does SKILL.md carry unstaged edits? Decided BEFORE we touch it.
+SKILL_WAS_CLEAN=0
+git diff --quiet -- "$SKILL" && SKILL_WAS_CLEAN=1
+
+# Rewrite the prefix on the marker line only — never the rest of the line.
+python3 - "$SKILL" "$MARKER" "$DECLARED_PREFIX" "$NEW_PREFIX" <<'PY'
+import sys
+
+path, marker, old, new = sys.argv[1:5]
+with open(path, encoding="utf-8") as fh:
+    lines = fh.readlines()
+
+for i, line in enumerate(lines):
+    if marker in line:
+        lines[i] = line.replace(old, new, 1)
+        break
+
+with open(path, "w", encoding="utf-8") as fh:
+    fh.writelines(lines)
+PY
+
+if [ "$SKILL_WAS_CLEAN" -eq 1 ]; then
+  git add "$SKILL"
+  echo "pre-commit: $REPORT changed; refreshed the provenance prefix in $SKILL"
+  echo "  $DECLARED_PREFIX -> $NEW_PREFIX (re-staged, commit proceeds)"
+  exit 0
+fi
+
+echo "pre-commit: $REPORT changed and the provenance prefix in $SKILL was stale." >&2
+echo "  Updated it in your working tree: $DECLARED_PREFIX -> $NEW_PREFIX" >&2
+echo "  NOT staged — $SKILL has unstaged edits, and staging it would sweep in" >&2
+echo "  changes you have not reviewed. Stage $SKILL yourself, then commit again." >&2
+exit 1

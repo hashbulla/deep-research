@@ -24,6 +24,9 @@ jobs:
       - name: Check provenance (SHA-256 of deep-research-report.md)
         run: bash tests/check-provenance.sh
 
+      - name: Check the pre-commit provenance hook keeps the chain fresh
+        run: bash tests/check-precommit-hook.sh
+
       - name: Check JSON artifact schemas
         run: bash tests/check-schema.sh tests/fixtures/research-sources.json tests/fixtures/research-evidence.json tests/fixtures/osint/socmint-source.json tests/fixtures/solution-space/valid.json examples/eu-ai-act-2026/research-solution-space.json
 

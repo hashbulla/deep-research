@@ -47,8 +47,10 @@ case "$ACTUAL_FULL" in
     echo "  declared prefix in $SKILL: $DECLARED_PREFIX" >&2
     echo "  actual SHA-256:                    $ACTUAL_FULL" >&2
     echo "" >&2
-    echo "Remediation: update $SKILL line 8 to reference the new hash:" >&2
+    echo "Remediation: update the 'Hash at generation time:' line of $SKILL" >&2
+    echo "to reference the new hash:" >&2
     echo "  '\`${ACTUAL_FULL:0:16}…\`'" >&2
+    echo "Or install the hook that does it for you: git config core.hooksPath .githooks" >&2
     exit 1
     ;;
 esac

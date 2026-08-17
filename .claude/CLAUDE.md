@@ -51,7 +51,9 @@ The skill-surface (`SKILL.md`, `references/`) is markdown-only. Deterministic he
 | `tests/schema/newsletter-corpus-record.schema.json` + `tests/check-newsletter-search.sh` + `tests/fixtures/newsletter-corpus/` | Corpus-record contract (`additionalProperties:false` enforces redaction) + helper check (ranking, `--since`, `--bucket`, degradation, fallback, per-line schema validation via direct `ajv -s`) + fixture corpus | Newsletter-signal conformance |
 | `tests/fixtures/` | Symlinks to `examples/eu-ai-act-2026/*.json` consumed by check-schema | CI inputs |
 | `examples/eu-ai-act-2026/` | End-to-end mock run of the README example query | Illustrative reference |
-| `.github/workflows/validate.yml` | GitHub Actions — runs all three check scripts on push + PR | CI |
+| `.github/workflows/validate.yml` | GitHub Actions — runs every check script on push + PR | CI |
+| `.githooks/pre-commit` | Refreshes the SHA-256 provenance prefix in `SKILL.md` from the **staged** report; blocks rather than stage unreviewed edits. Inert until `git config core.hooksPath .githooks` | Invariant I1, author-side |
+| `tests/check-precommit-hook.sh` | Drives the hook over a throwaway repo (4 cases: no-op, repair+restage, blocked-on-dirty, missing marker) | Hook conformance (CI) |
 | `README.md` | External-facing entry point | Install / Quick Start / Roadmap |
 
 ## Maintainer gotchas (invariants — do not violate)
@@ -66,6 +68,14 @@ sha256sum deep-research-report.md
 ```
 
 Guarded by `tests/check-provenance.sh`. A failing provenance check blocks the CI workflow.
+
+**Install the hook once per clone — it does the update for you:**
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`.githooks/pre-commit` hashes the **staged** report, and when the declared prefix is stale it rewrites the marker line and re-stages `SKILL.md`. If `SKILL.md` carries unstaged edits it repairs the working tree but **blocks the commit** rather than sweeping unreviewed work into it. A hook stays inert until `core.hooksPath` is set, so an uninstalled clone silently loses this defense — `tests/check-provenance.sh` remains the backstop, and `tests/check-precommit-hook.sh` proves the hook itself still works (4 cases, CI).
 
 ### I2. `[R§n]` back-reference integrity
 
