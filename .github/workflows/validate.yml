@@ -30,6 +30,9 @@ jobs:
       - name: Check SKILL.md stays within its 150-line prompt budget
         run: bash tests/check-skill-length.sh
 
+      - name: Check the SKILL.md load tier in tokens (the unit the model pays)
+        run: bash tests/check-skill-token-budget.sh
+
       - name: Check run accounting holds the rule and refuses cost claims
         run: bash tests/check-run-accounting.sh
 
