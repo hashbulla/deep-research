@@ -27,7 +27,9 @@ All notable changes to the deep-research skill. Format follows [Keep a Changelog
   **lines** (150/150) and the description is a single physical YAML line, so extending it adds none. The
   token gate is unaffected for a second reason worth recording: its "load tier" counts the **body**
   (29,527 chars, byte-identical before and after), not the frontmatter. Description 678 → 795 of the
-  1,024 lint cap. All 12 CI gates PASS, enumerated from `.github/workflows/validate.yml` rather than a
+  1,024 lint cap. **Load tier re-measured after this change: 7,241 tok — 259 tok under the 7,500
+  local hard cap** (was 7,199 pre-branch, 7,099 post-compression, 7,240 at run #6's HEAD); this pays
+  DIM-3-01, whose defect was that no token figure was re-measured beside a line-count claim. All 12 CI gates PASS, enumerated from `.github/workflows/validate.yml` rather than a
   glob (`tests/*.sh` mis-invokes `check-schema.sh`, which requires explicit arguments).
 - **Still failing, and knowingly so:** `neg-16`/sonnet under the harness's *default* framing with the
   owner **absent** from the corpus went 38% → ~52%. The two conditions move in opposite directions
@@ -37,6 +39,35 @@ All notable changes to the deep-research skill. Format follows [Keep a Changelog
   either** — a `Do NOT … use X` clause is worth only what the router can reach of `X`, and naming an
   unreachable owner can be worse than saying nothing, because it supplies the vocabulary without the
   alternative. Full evidence: `docs/harness/2026-08-17-run7/` (`FINDINGS.md`, `RUN8-POSTFIX.md`).
+
+### Human review of harness run #6 (Victor, 2026-08-18) — the grade is STALE more than it is severe
+
+**Verdict: the 8.58 understates the current HEAD, and the dominant cause is measurable rather than
+a matter of taste.** The Critic graded `3e715fa`; the branch is now five commits further on. Two of
+its three score-suppressing findings target gaps that were closed *after* the graded snapshot, and
+the third is now an accepted deviation:
+
+| Dim | Weight | Score | What suppressed it | State at review time |
+|---|---|---|---|---|
+| D1 routing | **2.0×** | 8.5 | *"tier 10 is unreachable by construction (it presupposes Opus/Sonnet/Haiku); 8.5 interpolates clean on 1 of 3 routers"* | The 3 routers **are** measured (runs #7-#8) |
+| D2 tax-test | 1.5× | 7.5 | DIM-2-01 — no `## Examples` | Accepted deviation, logged above with its rationale |
+| D3 budget | 1.5× | 7.0 | DIM-3-02 — *"no gate anywhere counts tokens"* | Closed by `d41e669`, which post-dates the graded HEAD |
+
+**Precision that the verdict must carry, because it changes the remedy.** Runs #4 and #5 recorded
+"evaluator too severe" (D3/D4, then D2/D7), and the temptation was to call this the third in a row.
+On the evidence it is a *different* defect: each of the three findings was **correct at `3e715fa`** —
+DIM-3-02 was true, DIM-2-01 was a genuine deviation from this workspace's generator contract, and
+D1's ceiling was the rubric's own construction, where the Critic in fact interpolated **upward**
+(tier 8 describes "1-2 misses or 1 leak", worse than what was measured). So the finding quality was
+sound and the **score is what went stale**. "Too severe" would prescribe a rubric change; the
+accurate reading prescribes a **process** change: *grade a current HEAD, never a mid-branch
+snapshot, and never carry a mid-branch score forward as the branch's grade.* Recorded so the
+calibration signal is not diluted by a mislabelled third data point — the runs #4/#5 pattern
+("reads risk location well, over-weights risk magnitude") stands on its own two observations.
+
+**Agreement:** findings 3/3 confirmed as real at their date. Verdict PASS confirmed. Tier placement
+not disputed for `3e715fa`. **This entry increments no calibration counter** — it records a staleness
+defect in how the harness was scheduled, not a severity bias in how it scored.
 
 ### Deferred — accepted deviations, dated
 
