@@ -4,6 +4,59 @@ All notable changes to the deep-research skill. Format follows [Keep a Changelog
 
 ## [Unreleased]
 
+### Changed — the description now defers the fan-out/gist intent (AI-372, runs #7-#8, 2026-08-17)
+
+- **`description` gains one clause inside the existing `Do NOT` list:** *"fanning out parallel research
+  subagents for a quick gist with no plan (use `superpowers:dispatching-parallel-agents`)"*. Not a
+  cosmetic tightening — it closes a **measured release-blocker leak**. Run #7 put `neg-16` on sonnet at
+  7/18 (~39%) under the harness's default router framing, and **5/5 under a strict "only if clearly
+  within its stated scope" framing**. That second figure is the diagnosis: asked point-blank whether
+  *"fan out a bunch of research agents on this topic and just give me the gist, no plan needed"* was
+  clearly in scope, sonnet said yes every time — correctly, because the description opened on "Agentic
+  multi-source deep research" and its `Do NOT` list never mentioned fan-out, parallel subagents, or the
+  absence of a plan. Both artifact hypotheses were tested and refuted before the edit (corpus: the leak
+  persists with `dispatching-parallel-agents` symlinked into the index; framing: strict framing
+  *amplifies* rather than suppresses).
+- **Confirmed on two independent axes after the edit:** the strict-framing arm goes **5/5 leaks → 0/5**
+  with the corpus constant and the owner absent, and haiku moves from `research` 3/3 to
+  `superpowers:dispatching-parallel-agents` **8/8** — the exact owner the clause names. **No
+  silent-skill regression:** positives 15/15 across opus/sonnet/haiku, and the two most exposed to a
+  clause about "parallel research subagents" — `pos-03` ("architectures multi-agents") and `pos-14`
+  ("agent-observability") — fire **5/5 each** on sonnet.
+- **Budget note, because "zero margin" was the reason this fix looked impossible.** The binding gate is
+  **lines** (150/150) and the description is a single physical YAML line, so extending it adds none. The
+  token gate is unaffected for a second reason worth recording: its "load tier" counts the **body**
+  (29,527 chars, byte-identical before and after), not the frontmatter. Description 678 → 795 of the
+  1,024 lint cap. All 12 CI gates PASS, enumerated from `.github/workflows/validate.yml` rather than a
+  glob (`tests/*.sh` mis-invokes `check-schema.sh`, which requires explicit arguments).
+- **Still failing, and knowingly so:** `neg-16`/sonnet under the harness's *default* framing with the
+  owner **absent** from the corpus went 38% → ~52%. The two conditions move in opposite directions
+  because `run_evals.py` indexes only `~/.claude/skills`, while the owner the clause names lives under
+  `~/.claude/plugins/`. **Generalisation, extending `evals/rubric.md:9` ("a neighbour that does not
+  exist cannot be a test condition"): a neighbour that does not exist cannot be a DEFERRAL TARGET
+  either** — a `Do NOT … use X` clause is worth only what the router can reach of `X`, and naming an
+  unreachable owner can be worse than saying nothing, because it supplies the vocabulary without the
+  alternative. Full evidence: `docs/harness/2026-08-17-run7/` (`FINDINGS.md`, `RUN8-POSTFIX.md`).
+
+### Deferred — accepted deviations, dated
+
+- **`## Examples` stays absent from `SKILL.md` (decision Victor, 2026-08-18).** The section was folded
+  into References during the 209→150 compression. The public Agent Skills spec **recommends** it but
+  does not require it ("there are no format restrictions"); the requirement is this workspace's own
+  generator contract. Restoring it costs +3/+4 lines against a line gate at **zero margin**, so it is a
+  relocation decision (move a body section to `references/`), not a patch — and the Critic's paired fix
+  is unusable because it assumes deleting a sentence frees a line, whereas the line it targets is a
+  single 1,027-character paragraph. Revisit when the line budget is deliberately reopened.
+- **Fixture debt owed by the description change, deliberately not paid mid-measurement.** `rubric.md`
+  §"Adding fixtures" scopes its requirement to *new features*; this change sharpens an existing declared
+  boundary already covered by `neg-16`, and the over-correction risk is covered by `pos-03`/`pos-14`
+  (both re-measured 5/5). The one genuine gap is a positive that is explicitly **fan-out-adjacent yet
+  legitimate** (e.g. graded multi-source research *about* multi-agent systems, phrased with "fan out"),
+  guarding against over-deferral. It is **not** appended here because a measurement was in flight and
+  changing the fixture count under a running matrix would corrupt the comparison. Owed on the next
+  package.
+
+
 ### Added
 
 - **Rule 7c — the agent-skill class, and a gate that enforces it.** Where the capability under study is consumed BY an agent, the packaged-skill class is where the state of the art actually lives — and tool vocabulary cannot reach it, however many topic combinations run, because a skill's topics describe *how an agent consumes it*, not *what it does*. A skill is a **delivery form, not a tool category**. Measured 2026-08-13 (Excalidraw toolchain run): **ten** topic combinations swept — `excalidraw`, `mcp`, `diagram-as-code`, `c4-model`, `tldraw`, all tool vocabulary — and the skill ecosystem was missed entirely; skills surfaced only incidentally, as by-products of the MCP sweeps. The corrected sweep returned **42 repos** under `topic:claude-code+topic:excalidraw` and **8,192 `SKILL.md` files**, including a **4,411-star** skill carrying the *design methodology* the report was missing (concept-mirroring patterns, a semantic palette, a render-and-verify loop). The report had answered "which tool renders the file" and never "what makes the output good", because the class that answers the second question was never queried. New pipeline step `references/github-research.md` §2b — four mandated query shapes, with `anthropics/skills` **always** checked (an official skill outranks every third-party one, and its *absence* is itself a finding) and the curated aggregators named. New gate **Rule 7c** (`verify_gates.py`): an `open-source` category marked `swept`/`empty` on a Claude/agentic question requires ≥1 skill-class query (a `topic:` facet among `SKILL_TOPICS`, or a `filename:SKILL.md` code search). `_is_agentic_question()` reads the manifest's question text and declared platforms **only — never its findings**, since reading findings would let a thin sweep exempt itself by omitting the very queries the rule demands. New fixture pair `agentic-no-skill-query.json` (violation) and `agentic-with-skill-query.json` (positive control), taking the solution-space set to **16**; the pair is byte-identical outside `open-source.queries`, the single field the rule reads. The control carries all four step-2b shapes rather than the one query that would merely clear the gate — run #4's DIM-4-02 caught exactly that gate-conformant-but-not-doctrine-conformant gap on this fixture set. `check-solution-space.sh` gains the 7c assertion, a 7c purity guard, and the positive-control block; the golden `valid.json` now doubles as a standing negative control (non-agentic question, no skill query, must never trip 7c). **Red-ability verified by ablation**: disabling the rule turns `check-solution-space` FAIL on the new fixture. Signalled by Victor after the Excalidraw delivery — "a SOTA method on Claude or agentic integration should ALWAYS look for the SOTA skills".
