@@ -1,0 +1,27 @@
+fixtures graded: 31 | models: opus, sonnet, haiku
+
+### opus
+  positives : 15/15 pass, 0 silent, 0 NO_VERDICT   (bar >=14: OK)
+  negatives : 16/16 pass, 0 LEAK,   0 NO_VERDICT   (bar >=15: OK)
+  blockers  : neg-07=clean(research), neg-16=clean(dispatching-parallel-agents)
+  => PASS
+
+### sonnet
+  positives : 15/15 pass, 0 silent, 0 NO_VERDICT   (bar >=14: OK)
+  negatives : 16/16 pass, 0 LEAK,   0 NO_VERDICT   (bar >=15: OK)
+  blockers  : neg-07=clean(research), neg-16=clean(dispatching-parallel-agents)
+  => PASS
+
+### haiku
+  positives : 15/15 pass, 0 silent, 0 NO_VERDICT   (bar >=14: OK)
+  negatives : 16/16 pass, 0 LEAK,   0 NO_VERDICT   (bar >=15: OK)
+  blockers  : neg-07=clean(research), neg-16=clean(superpowers:dispatching-parallel-agents)
+  => PASS
+
+no_verdict_counts (runner tally): {"loading": {"opus": 0, "sonnet": 0, "haiku": 0}}
+
+### corpus-drift check (opus column must be a cache replay)
+  opus NO_VERDICT rows: 0 
+  (run #6 recorded 0 NO_VERDICT, 15/15 + 16/16 — any change here voids the baseline)
+
+OVERALL: PASS on every model

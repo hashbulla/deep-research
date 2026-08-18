@@ -9,7 +9,7 @@ Cache is bypassed on purpose (router_query, not cached_router_query): re-invokin
 replays sha256(prompt+system+model) from disk and would print a fabricated "stable". The backend
 flock is still held — concurrent `claude -p` calls corrupt each other's replies.
 
-Usage: repeat_fixtures.py <skill_path> <reps> <model[,model...]> <id[,id...]>
+Usage: repeat_fixtures.py <skill_path> <reps> <model[,model...]> <id[,id...]> [corpus]
 """
 from __future__ import annotations  # python3 here is 3.8.0
 
@@ -32,7 +32,8 @@ def main() -> int:
     models = sys.argv[3].split(",")
     ids = sys.argv[4].split(",")
 
-    corpus = m.DEFAULT_CORPUS.expanduser().resolve()
+    # optional 5th arg: corpus root (defaults to the runner's own DEFAULT_CORPUS)
+    corpus = (Path(sys.argv[5]) if len(sys.argv) > 5 else m.DEFAULT_CORPUS).expanduser().resolve()
     system = m.build_skill_index(corpus, target)
 
     fm, _ = m.split_frontmatter((target / "SKILL.md").read_text())

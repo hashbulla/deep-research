@@ -1,0 +1,61 @@
+index OK: 1 entry for 'deep-research' among 61 skills
+description chars: 795 | reps=8 models=['opus', 'sonnet', 'haiku'] ids=['neg-07', 'neg-16']
+
+  neg-07   opus    rep1: research
+  neg-07   opus    rep2: research
+  neg-07   opus    rep3: research
+  neg-07   opus    rep4: none
+  neg-07   opus    rep5: research
+  neg-07   opus    rep6: research
+  neg-07   opus    rep7: research
+  neg-07   opus    rep8: none
+  neg-07   sonnet  rep1: research
+  neg-07   sonnet  rep2: research
+  neg-07   sonnet  rep3: research
+  neg-07   sonnet  rep4: research
+  neg-07   sonnet  rep5: research
+  neg-07   sonnet  rep6: research
+  neg-07   sonnet  rep7: research
+  neg-07   sonnet  rep8: research
+  neg-07   haiku   rep1: research
+  neg-07   haiku   rep2: research
+  neg-07   haiku   rep3: research
+  neg-07   haiku   rep4: research
+  neg-07   haiku   rep5: research
+  neg-07   haiku   rep6: research
+  neg-07   haiku   rep7: research
+  neg-07   haiku   rep8: research
+  neg-16   opus    rep1: dispatching-parallel-agents
+  neg-16   opus    rep2: dispatching-parallel-agents
+  neg-16   opus    rep3: dispatching-parallel-agents
+  neg-16   opus    rep4: dispatching-parallel-agents
+  neg-16   opus    rep5: dispatching-parallel-agents
+  neg-16   opus    rep6: dispatching-parallel-agents
+  neg-16   opus    rep7: dispatching-parallel-agents
+  neg-16   opus    rep8: dispatching-parallel-agents
+  neg-16   sonnet  rep1: dispatching-parallel-agents
+  neg-16   sonnet  rep2: none
+  neg-16   sonnet  rep3: none
+  neg-16   sonnet  rep4: dispatching-parallel-agents
+  neg-16   sonnet  rep5: none
+  neg-16   sonnet  rep6: none
+  neg-16   sonnet  rep7: none
+  neg-16   sonnet  rep8: none
+  neg-16   haiku   rep1: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep2: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep3: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep4: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep5: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep6: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep7: superpowers:dispatching-parallel-agents
+  neg-16   haiku   rep8: superpowers:dispatching-parallel-agents
+
+=== stability, n=8 per pair, cache bypassed ===
+  neg-07   opus    must skip  {'research': 6, 'none': 2}  -> LEAK 0/8
+  neg-07   sonnet  must skip  {'research': 8}  -> LEAK 0/8
+  neg-07   haiku   must skip  {'research': 8}  -> LEAK 0/8
+  neg-16   opus    must skip  {'dispatching-parallel-agents': 8}  -> LEAK 0/8
+  neg-16   sonnet  must skip  {'dispatching-parallel-agents': 2, 'none': 6}  -> LEAK 0/8
+  neg-16   haiku   must skip  {'superpowers:dispatching-parallel-agents': 8}  -> LEAK 0/8
+
+OVERALL: all pairs clean

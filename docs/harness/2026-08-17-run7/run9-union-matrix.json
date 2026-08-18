@@ -1,0 +1,618 @@
+{
+  "skill": "AI-372-v1x-dettes",
+  "skill_canonical_name": "deep-research",
+  "models": [
+    "opus",
+    "sonnet",
+    "haiku"
+  ],
+  "backend": "cli",
+  "legend": {
+    "responses": "raw one-line reply from each model (preserved for debugging)",
+    "verdicts": "classified routing decision: a kebab-case skill name, 'none' (explicit no-route), or NO_VERDICT (empty/prose/non-conforming \u2014 a harness coverage gap, NOT a routing miss)",
+    "no_verdict_counts": "per-suite, per-model tally of NO_VERDICT rows",
+    "expected_fire": "the oracle: True = this skill must fire, False = it must not (another skill legitimately may), None = no oracle in the fixture",
+    "expected_skill": "the skill name that must fire, when the fixture names one. NULL ON A 'skip' ROW IS NOT AN ASSERTION \u2014 it means 'not specified'; read expected_fire, and check oracle_source before scoring anything",
+    "oracle_source": "where the oracle came from: fixture:expected_skill, fixture:expect=<v>, or MISSING (no convention matched \u2014 score nothing from this row)"
+  },
+  "suites": {
+    "loading": [
+      {
+        "prompt": "/deep-research impact of EU AI Act on open-source model providers in 2026",
+        "id": "pos-01",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "deep research on the current state of solid-state battery manufacturing",
+        "id": "pos-02",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "recherche approfondie sur les architectures multi-agents en production",
+        "id": "pos-03",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "analyse multi-sources : RAG vs long-context pour les gros corpus documentaires",
+        "id": "pos-04",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "comparative analysis of LangGraph vs CrewAI vs AutoGen with sources",
+        "id": "pos-05",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "benchmark Postgres vs DuckDB for analytics workloads with citations",
+        "id": "pos-06",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "I need a fully sourced report on EU medical-device AI regulation",
+        "id": "pos-07",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "deep research: what is the state of the art for entity resolution at scale?",
+        "id": "pos-08",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "fais une recherche approfondie sur l'\u00e9tat de l'art du fine-tuning LoRA",
+        "id": "pos-09",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "/deep-research --length exhaustive --lang fr comparaison des vector stores manag\u00e9s",
+        "id": "pos-10",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "research the competitive landscape of GPU cloud providers \u2014 I want graded, citable sources",
+        "id": "pos-11",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "multi-source analysis of zero-trust adoption in European banks, with confidence labels per claim",
+        "id": "pos-12",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "before we architect this ingestion pipeline, run a deep research pass on current best practices",
+        "id": "pos-13",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "what year was the EU AI Act adopted?",
+        "id": "neg-01",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "extract the content of https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+        "id": "neg-02",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "scrape"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "scrape"
+        }
+      },
+      {
+        "prompt": "how do I configure Next.js 15 middleware?",
+        "id": "neg-03",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "map the URL structure of docs.tavily.com",
+        "id": "neg-04",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "research",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "research",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "scrape the product prices from this e-commerce site",
+        "id": "neg-05",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "scrape",
+          "haiku": "scrape"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "scrape",
+          "haiku": "scrape"
+        }
+      },
+      {
+        "prompt": "quick search: what did Anthropic release this week?",
+        "id": "neg-06",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "research"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "research"
+        }
+      },
+      {
+        "prompt": "/research koyeb custom domain peering",
+        "id": "neg-07",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "research",
+          "sonnet": "research",
+          "haiku": "research"
+        },
+        "verdicts": {
+          "opus": "research",
+          "sonnet": "research",
+          "haiku": "research"
+        }
+      },
+      {
+        "prompt": "fan out a bunch of research agents on this topic and just give me the gist, no plan needed",
+        "id": "neg-08",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "dispatching-parallel-agents",
+          "sonnet": "dispatching-parallel-agents",
+          "haiku": "superpowers:dispatching-parallel-agents"
+        },
+        "verdicts": {
+          "opus": "dispatching-parallel-agents",
+          "sonnet": "dispatching-parallel-agents",
+          "haiku": "superpowers:dispatching-parallel-agents"
+        }
+      },
+      {
+        "prompt": "summarize this PDF I just downloaded",
+        "id": "neg-09",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "write a LinkedIn post about deep research best practices",
+        "id": "neg-10",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "debug why my Tavily MCP returns 429 on every call",
+        "id": "neg-11",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "diagnosing-bugs",
+          "sonnet": "none",
+          "haiku": "superpowers:systematic-debugging"
+        },
+        "verdicts": {
+          "opus": "diagnosing-bugs",
+          "sonnet": "none",
+          "haiku": "superpowers:systematic-debugging"
+        }
+      },
+      {
+        "prompt": "g\u00e9n\u00e8re un deck sur l'\u00e9tat de l'art du RAG",
+        "id": "neg-12",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "brainstorming"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "brainstorming"
+        }
+      },
+      {
+        "prompt": "what's trending on HuggingFace papers today?",
+        "id": "neg-13",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "Run a deep research on agent-observability tooling for LLM systems \u2014 graded sources plus the solution-space benchmark (build vs buy, what already exists on the market)",
+        "id": "pos-14",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "Recherche approfondie multi-sources sur les connecteurs de donn\u00e9es sociales, avec carte de l'espace de solutions et manifeste de couverture",
+        "id": "pos-15",
+        "expected_skill": "deep-research",
+        "expected_fire": true,
+        "oracle_source": "fixture:expect=load",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        },
+        "verdicts": {
+          "opus": "deep-research",
+          "sonnet": "deep-research",
+          "haiku": "deep-research"
+        }
+      },
+      {
+        "prompt": "Quel est le vendeur de scraping le moins cher pour Instagram ? R\u00e9ponse rapide, pas de rapport",
+        "id": "neg-14",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        },
+        "verdicts": {
+          "opus": "none",
+          "sonnet": "none",
+          "haiku": "none"
+        }
+      },
+      {
+        "prompt": "fan out a bunch of research agents on this topic and just give me the gist, no plan needed",
+        "id": "neg-15",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "dispatching-parallel-agents",
+          "sonnet": "dispatching-parallel-agents",
+          "haiku": "superpowers:dispatching-parallel-agents"
+        },
+        "verdicts": {
+          "opus": "dispatching-parallel-agents",
+          "sonnet": "dispatching-parallel-agents",
+          "haiku": "superpowers:dispatching-parallel-agents"
+        }
+      },
+      {
+        "prompt": "fan out a bunch of research agents on this topic and just give me the gist, no plan needed",
+        "id": "neg-16",
+        "expected_skill": null,
+        "expected_fire": false,
+        "oracle_source": "fixture:expect=skip",
+        "expected_reference": null,
+        "category": null,
+        "responses": {
+          "opus": "dispatching-parallel-agents",
+          "sonnet": "dispatching-parallel-agents",
+          "haiku": "superpowers:dispatching-parallel-agents"
+        },
+        "verdicts": {
+          "opus": "dispatching-parallel-agents",
+          "sonnet": "dispatching-parallel-agents",
+          "haiku": "superpowers:dispatching-parallel-agents"
+        }
+      }
+    ]
+  },
+  "no_verdict_counts": {
+    "loading": {
+      "opus": 0,
+      "sonnet": 0,
+      "haiku": 0
+    }
+  }
+}

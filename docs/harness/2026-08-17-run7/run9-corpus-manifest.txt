@@ -1,0 +1,74 @@
+# Union corpus used by run #9 — reproducible manifest
+#
+# Built from REAL installed skills only; no stub was fabricated. Sources:
+#   1. ~/.claude/skills/*/           (user scope)
+#   2. installPath + /skills/* for every entry in ~/.claude/plugins/installed_plugins.json
+#      (the AUTHORITATIVE record of ACTIVE versions — the cache also holds stale ones,
+#       and picking by sort order or mtime would be a guess)
+#
+# NOT represented: user-scope COMMANDS (/research, /scrape). They are a different
+# surface from skills; fabricating SKILL.md stubs would inject invented descriptions
+# into the measurement. Residual gap, stated rather than papered over.
+
+access	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/telegram/0.0.7/skills/access
+brainstorming	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/brainstorming
+claude-init	-> /home/ouroz/second-brain/20-engineering/skills/claude-init-skill/skills/claude-init
+claude-md-improver	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/claude-md-management/1.0.0/skills/claude-md-improver
+codebase-design	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/codebase-design
+completion-gate	-> /home/ouroz/second-brain/20-engineering/skills/completion-gate
+configure	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/telegram/0.0.7/skills/configure
+critical-harness	-> /home/ouroz/second-brain/20-engineering/skills/critical-harness
+deep-research	-> /home/ouroz/second-brain/20-engineering/skills/deep-research
+diagnosing-bugs	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/diagnosing-bugs
+dispatching-parallel-agents	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/dispatching-parallel-agents
+domain-modeling	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/domain-modeling
+excalidraw-models	-> /home/ouroz/second-brain/20-engineering/skills/excalidraw-models
+executing-plans	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/executing-plans
+figma-code-connect	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-code-connect
+figma-create-new-file	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-create-new-file
+figma-design-to-code	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-design-to-code
+figma-generate-design	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-generate-design
+figma-generate-diagram	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-generate-diagram
+figma-generate-library	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-generate-library
+figma-implement-motion	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-implement-motion
+figma-swiftui	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-swiftui
+figma-use	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-use
+figma-use-figjam	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-use-figjam
+figma-use-motion	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-use-motion
+figma-use-slides	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/figma/2.2.95/skills/figma-use-slides
+finishing-a-development-branch	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/finishing-a-development-branch
+frontend-design	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/frontend-design/bb289834290a/skills/frontend-design
+grill-me	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/grill-me
+grill-with-docs	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/grill-with-docs
+grilling	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/grilling
+humanize-fr	-> /home/ouroz/second-brain/20-engineering/skills/humanize-fr
+impeccable	-> /home/ouroz/second-brain/20-engineering/skills/impeccable/impeccable
+linkedin-post	-> /home/ouroz/second-brain/20-engineering/skills/linkedin-post
+no-loss	-> /home/ouroz/claude-session-skills/skills/no-loss
+proposition-commerciale	-> /home/ouroz/second-brain/20-engineering/skills/proposition-commerciale
+prototype	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/prototype
+qualify-leads	-> /home/ouroz/second-brain/20-engineering/skills/qualify-leads
+receiving-code-review	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/receiving-code-review
+requesting-code-review	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/requesting-code-review
+resolving-merge-conflicts	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/resolving-merge-conflicts
+resurrect	-> /home/ouroz/claude-session-skills/skills/resurrect
+skill-generator	-> /home/ouroz/second-brain/20-engineering/skills/skill-generator
+skill-harness	-> /home/ouroz/second-brain/20-engineering/skills/skill-harness
+subagent-driven-development	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/subagent-driven-development
+synthese	-> /home/ouroz/.claude/skills/synthese
+systematic-debugging	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/systematic-debugging
+tdd	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/tdd
+teach	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/teach
+test-driven-development	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/test-driven-development
+to-questionnaire	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/to-questionnaire
+to-tickets	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/to-tickets
+using-git-worktrees	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/using-git-worktrees
+using-superpowers	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/using-superpowers
+verification-before-completion	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/verification-before-completion
+voice-check	-> /home/ouroz/second-brain/20-engineering/skills/voice-check
+wayfinder	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/wayfinder
+writing-great-skills	-> /home/ouroz/second-brain/20-engineering/skills/mattpocock-skills/writing-great-skills
+writing-plans	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/writing-plans
+writing-skills	-> /home/ouroz/.claude/plugins/cache/claude-plugins-official/superpowers/6.3.0/skills/writing-skills
+
+TOTAL entries: 60
