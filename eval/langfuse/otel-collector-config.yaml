@@ -1,0 +1,156 @@
+# OpenTelemetry Collector — AI-182 egress gate: /deep-research telemetry -> Langfuse Cloud.
+#
+# Topology:  Claude Code OTEL  ->  THIS Collector (redaction)  ->  Langfuse Cloud OTLP.
+# The Collector is the SINGLE control point where PII/secrets are scrubbed BEFORE egress.
+#
+# Requires the *contrib* distribution: the `redaction`, `transform`, and `filter`
+# processors are not in the core collector. Run via otel/opentelemetry-collector-contrib.
+#
+# Env vars injected by run-collector.sh (never hard-coded here):
+#   LANGFUSE_OTLP_ENDPOINT   e.g. https://cloud.langfuse.com/api/public/otel
+#   LANGFUSE_OTLP_AUTH       "Basic <base64(public_key:secret_key)>"
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # 1. Guard the Collector itself from OOM under burst load.
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+  # 2. EGRESS GATE (span attributes) — mask secret/PII VALUES.
+  #    allow_all_keys:true keeps content-bearing keys (prompts/completions) for
+  #    observability, but blocked_values regexes mask sensitive substrings inside them.
+  #    Hardening path (Milestone 2): flip to allow_all_keys:false + an enumerated
+  #    allowed_keys list once a real Claude Code run reveals the exact attribute keys —
+  #    that makes the posture fail-closed for attributes (unknown key -> dropped).
+  redaction:
+    allow_all_keys: true
+    blocked_values:
+      - "(?i)sk-ant-[a-z0-9-]{20,}"                      # Anthropic API key
+      - "(?i)sk-lf-[a-z0-9-]{8,}"                        # Langfuse secret key
+      - "(?i)pk-lf-[a-z0-9-]{8,}"                        # Langfuse public key
+      - "(?i)sk-[a-z0-9]{20,}"                           # generic OpenAI-style key
+      - "AKIA[0-9A-Z]{16}"                               # AWS access key id
+      - "(?i)gh[pousr]_[a-z0-9]{20,}"                    # GitHub tokens
+      - "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"  # email
+      - "\\+33[.\\s-]?[0-9](?:[.\\s-]?[0-9]){8}"         # FR phone (E.164-ish)
+      - "(?i)CANARY-[A-Z0-9-]+"                          # redaction-proof canary token (case-insensitive: no tail leak)
+    summary: debug
+
+  # 3. EGRESS GATE (span events + log bodies) — the redaction processor is
+  #    attribute-centric; Claude Code emits prompt/completion content as log-event
+  #    bodies, which attribute redaction does NOT reach. OTTL scrubs the same patterns
+  #    in span-event attributes and in log record bodies. error_mode:ignore so a
+  #    non-string body logs-and-skips rather than crashing the pipeline.
+  transform/scrub_content:
+    error_mode: ignore
+    trace_statements:
+      - context: spanevent
+        statements:
+          - replace_all_patterns(spanevent.attributes, "value", "(?i)sk-ant-[a-z0-9-]{20,}", "****REDACTED-SECRET****")
+          - replace_all_patterns(spanevent.attributes, "value", "(?i)CANARY-[A-Z0-9-]+", "****REDACTED-SECRET****")
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(log.body, "(?i)sk-ant-[a-z0-9-]{20,}", "****REDACTED-SECRET****")
+          - replace_pattern(log.body, "(?i)sk-lf-[a-z0-9-]{8,}", "****REDACTED-SECRET****")
+          - replace_pattern(log.body, "(?i)CANARY-[A-Z0-9-]+", "****REDACTED-SECRET****")
+
+  # 3b. SEMCONV USAGE REMAP — Claude Code emits BARE token counts (input_tokens,
+  #     output_tokens, cache_read_tokens, cache_creation_tokens) on the
+  #     claude_code.llm_request span. Langfuse keys generation usage AND cost off the OTel
+  #     GenAI semconv `gen_ai.usage.*` (langfuse.com OTEL attribute mapping, retrieved
+  #     2026-06-25). Copy the four counts onto the semconv keys so Langfuse renders tokens
+  #     and computes cost — Anthropic cache_read/cache_creation are distinct, separately
+  #     priced categories, so all four are mapped (not just input/output) or cache spend
+  #     is silently uncharged. `where ... != nil` scopes each set to the llm_request span;
+  #     the root claude_code.interaction span has no token attrs and is left untouched.
+  transform/usage_semconv:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(span.attributes["gen_ai.usage.input_tokens"], span.attributes["input_tokens"]) where span.attributes["input_tokens"] != nil
+          - set(span.attributes["gen_ai.usage.output_tokens"], span.attributes["output_tokens"]) where span.attributes["output_tokens"] != nil
+          - set(span.attributes["gen_ai.usage.cache_read_input_tokens"], span.attributes["cache_read_tokens"]) where span.attributes["cache_read_tokens"] != nil
+          - set(span.attributes["gen_ai.usage.cache_creation_input_tokens"], span.attributes["cache_creation_tokens"]) where span.attributes["cache_creation_tokens"] != nil
+
+  # 4. FAIL-CLOSED backstop — if a high-severity secret SURVIVED scrubbing, DROP the
+  #    whole record rather than leak it to Cloud. Runs AFTER transform, so a sanitized
+  #    record (no longer matching) is kept; only leftovers that slipped through are
+  #    dropped. This is what "fail-closed" means in a declarative pipeline: scrub, then
+  #    drop the residue. Log bodies are the content path; spans carry content in events.
+  filter/failclosed:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'IsMatch(log.body, "(?i).*(sk-ant-[a-z0-9-]{20}|sk-lf-[a-z0-9-]{8}|CANARY-[a-z0-9-]+).*")'
+
+  batch:
+    timeout: 2s
+
+exporters:
+  # Langfuse OTLP ingests the TRACES signal only, over HTTP, with Basic auth.
+  # encoding:proto avoids the OTLP/JSON int64 usage-drop bug (gen_ai.usage.* -> 0 cost).
+  otlp_http/langfuse:
+    endpoint: ${env:LANGFUSE_OTLP_ENDPOINT}
+    encoding: proto
+    headers:
+      Authorization: ${env:LANGFUSE_OTLP_AUTH}
+  # M3: raw logs to a LOCAL gitignored file for the post-run enricher. Never egresses.
+  # NOTE: the file exporter receives the SAME records as `debug` — no processor upstream
+  # of it in the `logs` pipeline scrubs log *attributes*. `transform/scrub_content` and
+  # `filter/failclosed` act only on the log *body* (event name string); content attributes
+  # (e.g. prompt/completion text on individual events) reach this file UN-redacted.
+  # That is intentional: the downstream Python enricher is the single redaction gate for
+  # attribute-level content. Do NOT add processors here that would silently drop attributes
+  # the enricher relies on.
+  file/m3logs:
+    path: /etc/otelcol-contrib/.logs/claude-logs.jsonl
+  # Local visibility — proves redaction fired and shows what would egress.
+  debug:
+    verbosity: detailed
+
+service:
+  # Collector self-health on :8888 (Prometheus). Watch otelcol_exporter_sent_spans
+  # vs otelcol_exporter_send_failed_spans to confirm egress succeeds — never infer it.
+  telemetry:
+    metrics:
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: "0.0.0.0"
+                port: 8888
+  pipelines:
+    # Native Claude Code spans (claude_code.interaction -> llm_request/tool) -> Langfuse,
+    # redacted, with bare token counts remapped to gen_ai.usage.* so Langfuse renders cost.
+    # Claude Code emits these natively under CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1 (M2);
+    # no log->span synthesis is required.
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, transform/scrub_content, transform/usage_semconv, batch]
+      exporters: [otlp_http/langfuse, debug]
+    # Prompt/completion CONTENT lives in log events (com.anthropic.claude_code.events);
+    # Langfuse OTLP does NOT ingest logs -> debug only. Kept to prove content-body redaction
+    # + fail-closed drop locally. Mapping that content onto Langfuse generation input/output
+    # would require log->span correlation (optional future enrichment, not needed for cost).
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, transform/scrub_content, filter/failclosed, batch]
+      exporters: [debug, file/m3logs]
+    # Per-generation token counts ride on the llm_request span (remapped to gen_ai.usage.*
+    # above); these metrics are the aggregate counters -> debug-only, not sent to Langfuse.
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]

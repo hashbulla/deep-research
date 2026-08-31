@@ -1,0 +1,11 @@
+# Never commit secrets or local scratch from the lab tooling.
+*.env
+.env
+.env.*
+*-resp.json
+
+# M3: Collector file-exporter live log dir — never committed (may contain live PII).
+.logs/
+
+# Raw JSONL captures — the committed test fixture is force-added with git add -f.
+*.jsonl
